@@ -3,10 +3,12 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.core.window import Window
 
 
-class myApp(App):
+Window.size = (400, 600)
+class RuneSaver(App):
     def build(self):
         global sm
-        sm = ScreenManager(transition=FadeTransition)
+        sm = ScreenManager(transition=FadeTransition())
+        sm.add_widget(Library('library'))
 
 
 class ChampSelect(Screen):
@@ -23,5 +25,6 @@ class Library(Screen):
 
 
 
+
 if __name__ == '__main__':
-    myApp().run()
+    RuneSaver().run()
