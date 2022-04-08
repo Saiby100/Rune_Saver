@@ -82,7 +82,7 @@ nautilus
 neeko
 nidalee
 nocturne
-nunu_and_willump
+nunu-and-willump
 olaf
 orianna
 ornn
