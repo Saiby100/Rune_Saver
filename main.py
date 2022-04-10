@@ -6,7 +6,7 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFloatingActionButton, MDIconButton
+from kivymd.uix.button import MDFloatingActionButton, MDIconButton, MDFlatButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.toolbar import MDToolbar
@@ -18,6 +18,7 @@ from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivymd.uix.list import OneLineAvatarListItem, ImageLeftWidget, MDList
 import csv
 from kivymd.font_definitions import theme_font_styles
+from kivymd.uix.dialog import MDDialog
 
 Window.size = (300, 500)
 
@@ -55,7 +56,8 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
                         'Power': ['scorch','waterwalking','gathering-storm']}
          }
 
-
+class FlatButton(MDFlatButton, ButtonBehavior): 
+    pass 
 
 class SwipeToDeleteItem(MDCardSwipe):
     def __init__(self, text, img_source):
@@ -135,6 +137,7 @@ class RuneSaver(MDApp):
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(Library('library'))
         sm.add_widget(ChampSelect('champ_select'))
+        sm.add_widget(RunePage('rune_page'))
 
         return sm
 
@@ -222,8 +225,10 @@ class ChampSelect(Screen):
         sm.current = 'rune_page'
 
     def create_rune(self, champ, event):
-        self.champion = champ
-        sm.add_widget(RunePage('rune_page'))
+        toolbar = sm.get_screen('rune_page').toolbar
+        toolbar.title=champ
+        toolbar.right_action_items[0][0]='icons/'+champ+'.png'
+        
         sm.current = 'rune_page'
 
     def go_back(self, event):
@@ -242,11 +247,12 @@ class RunePage(Screen):
 
         self.primary_panels = []
         self.secondary_panels = []
+        self.dialog_btn = None 
 
-        champ = sm.get_screen('champ_select').champion
-        toolbar = MDToolbar(title=champ.title())
-        toolbar.left_action_items = [['arrow-left', self.go_back]]
-        toolbar.right_action_items = [['icons/'+champ+'.png', partial(self.save, champ)]]
+        self.champion = "quinn"
+        self.toolbar = MDToolbar(title=self.champion)
+        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
+        self.toolbar.right_action_items = [['icons/'+self.champion+'.png', partial(self.show_save_box, self.champion)]]
 
         panel = ExpansionPanel('Main Rune', self.create_content(main_runes))
         self.grid.add_widget(panel)
@@ -257,8 +263,7 @@ class RunePage(Screen):
         self.secondary_panels.append(panel)
         self.grid.add_widget(panel)
         self.get_secondary_runes()
-
-        stack_layout.add_widget(toolbar)
+        stack_layout.add_widget(self.toolbar)
         root.add_widget(self.grid)
 
         self.add_widget(root)
@@ -266,7 +271,7 @@ class RunePage(Screen):
 
     def go_back(self, event):
         sm.current='champ_select'
-        sm.remove_widget(sm.get_screen('rune_page'))
+        # sm.remove_widget(sm.get_screen('rune_page'))
 
     #Adds all panels given a main rune
     def get_runes(self, main='domination'):
@@ -332,7 +337,23 @@ class RunePage(Screen):
             writer = csv.writer(file)
             writer.writerow(info)
 
+    def show_save_box(self, temp, event=None): 
+        self.toolbar.title = "New title"
+        
+        # if not self.dialog_btn:
+        #     save_btn = MDFlatButton(text='SAVE')
+        #     back_btn = FlatButton(text='CANCEL')
+        #     back_btn.bind(on_release=partial(self.show_save_box, 'None'))
 
+        #     self.dialog_btn = MDDialog(title='Rune Name:',
+        #                                 type='custom',
+        #                                 content_cls=MDTextField(),
+        #                                 buttons=[back_btn, save_btn]
+        #                                 )
+        # self.dialog_btn.open()
+
+    def remove_save_box(self, event): 
+        self.dialog_btn.open() 
 
 if __name__ == '__main__':
     RuneSaver().run()
