@@ -189,8 +189,6 @@ class Library(Screen):
 
 
 
-
-
 class ViewRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
