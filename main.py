@@ -57,7 +57,7 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
          }
 
 class FlatButton(MDFlatButton, ButtonBehavior): 
-    pass 
+    pass
 
 class SwipeToDeleteItem(MDCardSwipe):
     def __init__(self, text, img_source):
@@ -196,6 +196,8 @@ class ViewRune(Screen):
 class ChampSelect(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
+        self.champ = None
+
         box = BoxLayout(orientation='vertical', pos_hint={'top':1})
         root = ScrollView(size_hint=(1,None), size=(Window.width, Window.height-64))
         champ_grid = MDStackLayout(size_hint_y=None, spacing=10, padding=5)
@@ -224,9 +226,9 @@ class ChampSelect(Screen):
 
     def create_rune(self, champ, event):
         toolbar = sm.get_screen('rune_page').toolbar
-        toolbar.title=champ
-        toolbar.right_action_items[0][0]='icons/'+champ+'.png'
-        
+        toolbar.title = champ.title()
+        toolbar.right_action_items = [['icons/'+champ+'.png']]
+            
         sm.current = 'rune_page'
 
     def go_back(self, event):
@@ -236,9 +238,10 @@ class ChampSelect(Screen):
 class RunePage(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
-        stack_layout = MDStackLayout(size_hint_y=None, pos_hint={'top':1})
-        stack_layout.size[1] = 64
+        self.stack_layout = MDStackLayout(size_hint_y=None, pos_hint={'top':1})
+        self.stack_layout.size[1] = 64
         root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height - 64))
+        anchor_layout = AnchorLayout(anchor_x='right', anchor_y='bottom', padding=30)
 
         self.grid = MDGridLayout(cols=1, padding=[10,0], size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
@@ -246,12 +249,10 @@ class RunePage(Screen):
         self.primary_panels = []
         self.secondary_panels = []
         self.dialog_btn = None 
-
-        self.champion = "quinn"
-        self.toolbar = MDToolbar(title=self.champion)
+            
+        self.toolbar = MDToolbar(title="Holder Text")
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
-        self.toolbar.right_action_items = [['icons/'+self.champion+'.png', partial(self.show_save_box, self.champion)]]
-
+        
         panel = ExpansionPanel('Main Rune', self.create_content(main_runes))
         self.grid.add_widget(panel)
         self.primary_panels.append(panel)
@@ -261,11 +262,17 @@ class RunePage(Screen):
         self.secondary_panels.append(panel)
         self.grid.add_widget(panel)
         self.get_secondary_runes()
-        stack_layout.add_widget(self.toolbar)
-        root.add_widget(self.grid)
 
+        save_btn = MDFloatingActionButton(icon='fire')
+        save_btn.bind(on_release=self.show_save_box)
+
+        root.add_widget(self.grid)
+        self.stack_layout.add_widget(self.toolbar)
+        anchor_layout.add_widget(save_btn)
+        
         self.add_widget(root)
-        self.add_widget(stack_layout)
+        self.add_widget(self.stack_layout)
+        self.add_widget(anchor_layout)
 
     def go_back(self, event):
         sm.current='champ_select'
@@ -335,23 +342,27 @@ class RunePage(Screen):
             writer = csv.writer(file)
             writer.writerow(info)
 
-    def show_save_box(self, temp, event=None): 
-        self.toolbar.title = "New title"
+    def show_save_box(self, event=None): 
         
-        # if not self.dialog_btn:
-        #     save_btn = MDFlatButton(text='SAVE')
-        #     back_btn = FlatButton(text='CANCEL')
-        #     back_btn.bind(on_release=partial(self.show_save_box, 'None'))
+        
+        save_btn = MDFlatButton(text='SAVE', on_release=self.save_rune)
+        back_btn = FlatButton(text='CANCEL', on_release=self.back)
+        save_btn.on_release = self.save_rune
+        
+        
 
-        #     self.dialog_btn = MDDialog(title='Rune Name:',
-        #                                 type='custom',
-        #                                 content_cls=MDTextField(),
-        #                                 buttons=[back_btn, save_btn]
-        #                                 )
-        # self.dialog_btn.open()
+        self.dialog_btn = MDDialog(title='Rune Name:',
+                                    type='custom',
+                                    content_cls=MDTextField(),
+                                    buttons=[back_btn, save_btn]
+                                    )
+        self.dialog_btn.open()
 
-    def remove_save_box(self, event): 
-        self.dialog_btn.open() 
+    def save_rune(self, event=None): 
+        self.dialog_btn.dismiss()
+
+    def back(self, event): 
+        self.dialog_btn.dismiss()
 
 if __name__ == '__main__':
     RuneSaver().run()
