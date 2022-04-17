@@ -78,10 +78,19 @@ class SwipeToDeleteItem(MDCardSwipe):
 
 class Rune:
     def __init__(self, row):
-        self.champ, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
 
     def widget(self):
-        return SwipeToDeleteItem('New rune', 'icons/'+self.champ+'.png')
+        return SwipeToDeleteItem(self.name, 'icons/'+self.champ+'.png')
+
+class SavedRunes: 
+    def __init__(self, account_name):
+        self.runes = []
+        with open('accounts/{}'.format(account_name+'.csv'), 'r') as file: 
+            reader = csv.reader(file)
+            for line in reader: 
+                self.runes.append(Rune(line))
+        
 
 class ExpansionPanel(MDExpansionPanel):
     def __init__(self, title, content):
@@ -150,7 +159,7 @@ class Library(Screen):
         box = MDBoxLayout(orientation='vertical')
         root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height-60), scroll_timeout=100)
         self.my_runes = MDList(padding=[10, 0])
-        self.saved_runes = []
+        self.saved_runes = SavedRunes('Saiby100')
 
         toolbar = MDToolbar(title='My Runes')
         toolbar.right_action_items = [['magnify', self.search]]
@@ -158,17 +167,9 @@ class Library(Screen):
         add_btn = MDFloatingActionButton(icon='plus')
         add_btn.bind(on_release=self.champ_select)
 
-        with open('accounts/Saiby100.csv', 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                rune = Rune(row)
-                rune.widget().bind(on_release=partial(self.remove, rune.widget()))
-                self.saved_runes.append(rune)
-                self.my_runes.add_widget(rune.widget())
-
-        swipe_card = SwipeToDeleteItem('This is a test', 'icons/quinn.png')
-        swipe_card.icon.bind(on_release=partial(self.remove, swipe_card))
-
+        for rune in self.saved_runes.runes: 
+            rune.widget().bind(on_release=partial(self.remove, rune.widget()))
+            self.my_runes.add_widget(rune.widget())
 
         root.add_widget(self.my_runes)
         box.add_widget(toolbar)
@@ -225,6 +226,7 @@ class ChampSelect(Screen):
         sm.current = 'rune_page'
 
     def create_rune(self, champ, event):
+        self.champion = champ
         toolbar = sm.get_screen('rune_page').toolbar
         toolbar.title = champ.title()
         toolbar.right_action_items = [['icons/'+champ+'.png']]
@@ -331,26 +333,10 @@ class RunePage(Screen):
 
         item.parent.parent.panel_cls.text = text.title()
 
-    def save(self, champion, event):
-        info = [champion]
-        for panel in self.primary_panels:
-            info.append(panel.panel_cls.text)
-        for panel in self.secondary_panels:
-            info.append(panel.panel_cls.text)
-
-        with open('accounts/Saiby100.csv', 'a') as file:
-            writer = csv.writer(file)
-            writer.writerow(info)
-
-    def show_save_box(self, event=None): 
-        
-        
-        save_btn = MDFlatButton(text='SAVE', on_release=self.save_rune)
+    def show_save_box(self, event): 
+        save_btn = MDFlatButton(text='SAVE', on_release=self.save)
         back_btn = FlatButton(text='CANCEL', on_release=self.back)
-        save_btn.on_release = self.save_rune
         
-        
-
         self.dialog_btn = MDDialog(title='Rune Name:',
                                     type='custom',
                                     content_cls=MDTextField(),
@@ -358,8 +344,20 @@ class RunePage(Screen):
                                     )
         self.dialog_btn.open()
 
-    def save_rune(self, event=None): 
+    def save(self, event):
+        info = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
+        for panel in self.primary_panels:
+            info.append(panel.panel_cls.text)
+        for panel in self.secondary_panels:
+            info.append(panel.panel_cls.text)
+ 
+        with open('accounts/Saiby100.csv', 'a', newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(info)
+        
         self.dialog_btn.dismiss()
+        sm.current = 'library'
+
 
     def back(self, event): 
         self.dialog_btn.dismiss()
