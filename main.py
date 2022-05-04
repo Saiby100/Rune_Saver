@@ -1,23 +1,19 @@
-from kivy.uix.button import Button, ButtonBehavior
-from kivy.uix.image import Image
+from Widgets import *
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.core.window import Window
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFloatingActionButton, MDIconButton, MDFlatButton
+from kivymd.uix.button import MDFloatingActionButton, MDFlatButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.toolbar import MDToolbar
-from kivymd.uix.card import MDCard, MDCardSwipe, MDCardSwipeLayerBox, MDCardSwipeFrontBox
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.stacklayout import MDStackLayout
 from functools import partial
-from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
-from kivymd.uix.list import OneLineAvatarListItem, ImageLeftWidget, MDList
+from kivymd.uix.list import MDList
 import csv
-from kivymd.font_definitions import theme_font_styles
 from kivymd.uix.dialog import MDDialog
 
 Window.size = (300, 500)
@@ -56,85 +52,7 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
                         'Power': ['scorch','waterwalking','gathering-storm']}
          }
 
-class FlatButton(MDFlatButton, ButtonBehavior): 
-    pass
 
-class SwipeToDeleteItem(MDCardSwipe):
-    def __init__(self, text, img_source):
-        super().__init__()
-        self.size_hint_y = None
-        self.height = 55
-        self.type_swipe = 'hand'
-        self.icon = MDIconButton(icon='trash-can', pos_hint={'center_y': .5})
-
-        self.front_layer = MDCardSwipeFrontBox()
-        self.front_layer.add_widget(ListItem(text, img_source))
-
-        self.back_layer = MDCardSwipeLayerBox()
-        self.back_layer.add_widget(self.icon)
-
-        self.add_widget(self.back_layer)
-        self.add_widget(self.front_layer)
-
-class Rune:
-    def __init__(self, row):
-        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-
-    def widget(self):
-        return SwipeToDeleteItem(self.name, 'icons/'+self.champ+'.png')
-
-class SavedRunes: 
-    def __init__(self, account_name):
-        self.runes = []
-        with open('accounts/{}'.format(account_name+'.csv'), 'r') as file: 
-            reader = csv.reader(file)
-            for line in reader: 
-                self.runes.append(Rune(line))
-        
-
-class ExpansionPanel(MDExpansionPanel):
-    def __init__(self, title, content):
-
-        self.panel_cls = MDExpansionPanelOneLine(text=title)
-        self.panel_cls.font_style = 'Body2'
-        self.content = content
-        self.main = False
-        super().__init__()
-
-    def change_icon(self, icon):
-        self.icon = icon
-
-class ListItem(OneLineAvatarListItem):
-    def __init__(self, text, image_source):
-        self.text = text
-        img = ImageLeftWidget()
-        img.source = image_source
-        super().__init__()
-        self.add_widget(img)
-
-class Content(MDBoxLayout):
-    def __init__(self, items_array):
-        super().__init__()
-        self.adaptive_height = True
-        self.orientation = 'vertical'
-
-        for item in items_array:
-            self.add_widget(item)
-
-class Card(MDCard, ButtonBehavior):
-    def __init__(self, source):
-        super().__init__()
-        self.orientation = 'vertical'
-        self.size_hint = (None, None)
-        self.size = (90, 90)
-        self.radius = [15]
-
-        self.img = Image(source=source,
-                         # size_hint=(None,None),
-                         allow_stretch=True,
-                         keep_ratio=False)
-
-        self.add_widget(self.img)
 
 
 class RuneSaver(MDApp):
@@ -147,8 +65,15 @@ class RuneSaver(MDApp):
         sm.add_widget(Library('library'))
         sm.add_widget(ChampSelect('champ_select'))
         sm.add_widget(RunePage('rune_page'))
+        # sm.add_widget(ViewRune('view_page'))
+        # sm.add_widget(SearchPage('search_page'))
 
         return sm
+
+class SearchPage(Screen): 
+    pass 
+
+        
 
 class Library(Screen):
     # use list object to save runes
@@ -159,7 +84,7 @@ class Library(Screen):
         box = MDBoxLayout(orientation='vertical')
         root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height-60), scroll_timeout=100)
         self.my_runes = MDList(padding=[10, 0])
-        self.saved_runes = SavedRunes('Saiby100')
+        self.saved_runes = SavedRunes('Saiby100').runes
 
         toolbar = MDToolbar(title='My Runes')
         toolbar.right_action_items = [['magnify', self.search]]
@@ -167,9 +92,10 @@ class Library(Screen):
         add_btn = MDFloatingActionButton(icon='plus')
         add_btn.bind(on_release=self.champ_select)
 
-        for rune in self.saved_runes.runes: 
-            rune.widget().bind(on_release=partial(self.remove, rune.widget()))
-            self.my_runes.add_widget(rune.widget())
+        for rune in self.saved_runes: 
+            rune.icon.bind(on_release=partial(self.remove, rune))
+            rune.list_item.bind(on_release=partial(self.view_rune, rune))
+            self.my_runes.add_widget(rune)
 
         root.add_widget(self.my_runes)
         box.add_widget(toolbar)
@@ -178,6 +104,11 @@ class Library(Screen):
 
         self.add_widget(box)
         self.add_widget(anchor_layout)
+
+    def view_rune(self, rune, event): 
+        self.rune = rune 
+        sm.add_widget(ViewRune('view_page'))
+        sm.current = 'view_page'
 
     def champ_select(self, event):
         sm.current = 'champ_select'
@@ -193,6 +124,36 @@ class Library(Screen):
 class ViewRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
+        box = BoxLayout(orientation='vertical', pos_hint={'top':1})
+        root = ScrollView(size_hint=(1,None), size=(Window.width, Window.height-64))
+        self.grid = MDGridLayout(cols=2, size_hint_y=None)
+        self.grid.bind(minimum_height=self.grid.setter('height'))
+        self.rune = sm.get_screen('library').rune
+        
+        self.toolbar = MDToolbar(title=self.rune.name.title())
+        self.toolbar.right_action_items=[['icons/{}.png'.format(self.rune.champ)]]
+        self.toolbar.left_action_items=[['arrow-left', self.go_back]]
+
+        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.main)))
+        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.key)))
+        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot1)))
+        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot2)))
+        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot3)))
+
+        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.secondary)))
+        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot_1)))
+        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot_2)))
+
+        root.add_widget(self.grid)
+
+        box.add_widget(self.toolbar)
+        box.add_widget(root)
+
+        self.add_widget(box)
+
+    def go_back(self, event): 
+        sm.remove_widget(sm.get_screen('view_page'))
+        sm.current = 'library'
 
 class ChampSelect(Screen):
     def __init__(self, page_name):
@@ -347,15 +308,17 @@ class RunePage(Screen):
     def save(self, event):
         info = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
         for panel in self.primary_panels:
-            info.append(panel.panel_cls.text)
+            info.append(panel.panel_cls.text.lower())
         for panel in self.secondary_panels:
-            info.append(panel.panel_cls.text)
+            info.append(panel.panel_cls.text.lower())
  
         with open('accounts/Saiby100.csv', 'a', newline="") as file:
             writer = csv.writer(file)
             writer.writerow(info)
         
         self.dialog_btn.dismiss()
+        sm.remove_widget(sm.get_screen('library'))
+        sm.add_widget(Library('library'))
         sm.current = 'library'
 
 
