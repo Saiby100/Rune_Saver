@@ -6,6 +6,13 @@ from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem
 from kivymd.uix.label import MDLabel
+from kivy.uix.scrollview import ScrollView
+
+class Scroll(ScrollView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (1, None)
+
 
 class FlatButton(MDFlatButton, ButtonBehavior): 
     pass
@@ -31,6 +38,9 @@ class Rune(SwipeToDeleteItem):
     def __init__(self, row):
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
         super().__init__(self.name, 'icons/{}.png'.format(self.champ))
+
+    def attributes(self):
+        return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]
 
 
 class SavedRunes: 
@@ -71,28 +81,35 @@ class Content(MDBoxLayout):
         for item in items_array:
             self.add_widget(item)
 
-class Card(MDCard, ButtonBehavior):
-    def __init__(self, source):
+class Card(MDCard):
+    def __init__(self, src, txt):
         super().__init__()
         self.orientation = 'vertical'
         self.size_hint = (None, None)
         self.size = (90, 90)
-        self.radius = [15]
+        self.radius = '25dp'
 
-        self.img = Image(source=source,
-                         allow_stretch=True,
-                         keep_ratio=False)
-
-        self.add_widget(self.img)
+        self.add_widget(Image(source=src,
+                              allow_stretch=True,
+                              keep_ratio=False,
+                              size_hint=(None,None),
+                              size=(90,70)))
+        self.add_widget(MDLabel(text=txt, font_style='Caption', halign='center'))
 
 class RuneCard(MDCard): 
-    def __init__(self, src, text="Teemo", subtext="Teemo"): 
+    def __init__(self, src, text=None):
         super().__init__()
         self.orientation = 'vertical'
         self.size_hint_y = None
-        self.padding = '15dp'
+        self.padding = '5dp'
+        self.spacing = '5dp'
         self.radius = '25dp'
 
-        self.add_widget(Image(source=src, size=self.size))
-        self.add_widget(MDLabel(text=text, halign='center', font_style='H6'))
-        self.add_widget(MDLabel(text= subtext, halign='center'))
+        self.add_widget(Image(source=src,
+                              allow_stretch=True,
+                              size_hint_y=None,
+                              height=65))
+
+        if text is not None:
+            self.add_widget(MDLabel(text=text, halign='center', font_style='Caption'))
+

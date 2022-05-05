@@ -1,12 +1,3 @@
-
-main_runes = ['domination','precision','inspiration','resolve','sorcery']
-
-titles = {'domination': ['Keystones','Malice','Tracking','Hunter'],
-          'precision': ['Keystones','Heroism','Legend','Combat'],
-          'inspiration': ['Keystones','Contraptions','Tomorrow','Beyond'],
-          'resolve': ['Keystones','Strength','Resistance','Vitality'],
-          'sorcery': ['Keystones','Artifact','Excellence','Power']}
-
 runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','hail-of-blades'],
                         'Malice': ['cheap-shot','taste-of-blood','sudden-impact'],
                         'Tracking': ['zombie-ward','ghost-poro','eyeball-collection'],
@@ -32,7 +23,14 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
                         'Excellence': ['transcendence','celerity','absolute-focus'],
                         'Power': ['scorch','waterwalking','gathering-storm']}
          }
-list = [3, 2, 1]
-list2 = [0, -1, -2]
-list.extend(list2)
-print(list)
+main = []
+secondary = []
+main.extend(runes['domination'].keys())
+main.reverse()
+secondary.extend(runes['sorcery'].keys())
+secondary.reverse()
+secondary.pop()
+
+
+print(main)
+print(secondary)

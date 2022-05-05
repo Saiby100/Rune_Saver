@@ -51,8 +51,17 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
                         'Excellence': ['transcendence','celerity','absolute-focus'],
                         'Power': ['scorch','waterwalking','gathering-storm']}
          }
-
-
+secondary_runes = {'domination': ['cheap-shot','taste-of-blood','sudden-impact', 'zombie-ward','ghost-poro','eyeball-collection',
+                                  'ravenous-hunter','ingenious-hunter','relentless-hunter','ultimate-hunter'],
+                   'precision': ['overheal','triumph','presence-of-mind','legend-alacrity','legend-tenacity','legend-bloodline',
+                                 'coup-de-grace','cut-down','last-stand'],
+                   'inspiration': ['hextech-flashtraption','magical-footwear','perfect-timing','future\'s-market','minion-dematerializer',
+                                   'biscuit-delivery','cosmic-insight','approach-velocity','time-warp-tonic'],
+                   'resolve': ['demolish','font-of-life','shield-bash','conditioning','second-wind','bone-plating','overgrowth','revitalize',
+                               'unflinching'],
+                   'sorcery': ['nullifying-orb','manaflow-band','nimbus-cloak','transcendence','celerity','absolute-focus','scorch','waterwalking',
+                               'gathering-storm']
+                   }
 
 
 class RuneSaver(MDApp):
@@ -65,7 +74,6 @@ class RuneSaver(MDApp):
         sm.add_widget(Library('library'))
         sm.add_widget(ChampSelect('champ_select'))
         sm.add_widget(RunePage('rune_page'))
-        # sm.add_widget(ViewRune('view_page'))
         # sm.add_widget(SearchPage('search_page'))
 
         return sm
@@ -80,30 +88,38 @@ class Library(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
 
-        anchor_layout = AnchorLayout(anchor_x='right', anchor_y='bottom', padding=30)
-        box = MDBoxLayout(orientation='vertical')
-        root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height-60), scroll_timeout=100)
+        #Initializing Layouts
+        self.box = MDBoxLayout(orientation='vertical')
+        self.anchor_layout = AnchorLayout(anchor_x='right',
+                                          anchor_y='bottom',
+                                          padding=30)
+        self.root = ScrollView(size_hint=(1, None),
+                               size=(Window.width, Window.height-60))
+
+        #Initializing Widgets
+        self.toolbar = MDToolbar(title='My Runes')
+        self.toolbar.right_action_items = [['magnify', self.search]]
+
+        self.add_btn = MDFloatingActionButton(icon='plus')
+        self.add_btn.bind(on_release=self.champ_select)
+
         self.my_runes = MDList(padding=[10, 0])
         self.saved_runes = SavedRunes('Saiby100').runes
 
-        toolbar = MDToolbar(title='My Runes')
-        toolbar.right_action_items = [['magnify', self.search]]
-
-        add_btn = MDFloatingActionButton(icon='plus')
-        add_btn.bind(on_release=self.champ_select)
-
+        #Adding widgets to layouts
         for rune in self.saved_runes: 
             rune.icon.bind(on_release=partial(self.remove, rune))
             rune.list_item.bind(on_release=partial(self.view_rune, rune))
             self.my_runes.add_widget(rune)
 
-        root.add_widget(self.my_runes)
-        box.add_widget(toolbar)
-        box.add_widget(root)
-        anchor_layout.add_widget(add_btn)
+        self.root.add_widget(self.my_runes)
+        self.box.add_widget(self.toolbar)
+        self.box.add_widget(self.root)
+        self.anchor_layout.add_widget(self.add_btn)
 
-        self.add_widget(box)
-        self.add_widget(anchor_layout)
+        #Adding Layouts to Screen
+        self.add_widget(self.box)
+        self.add_widget(self.anchor_layout)
 
     def view_rune(self, rune, event): 
         self.rune = rune 
@@ -124,74 +140,102 @@ class Library(Screen):
 class ViewRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
-        box = BoxLayout(orientation='vertical', pos_hint={'top':1})
-        root = ScrollView(size_hint=(1,None), size=(Window.width, Window.height-64))
-        self.grid = MDGridLayout(cols=2, size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
+
         self.rune = sm.get_screen('library').rune
-        
+
+        #Initializing Layouts
+        self.anchor_layout = AnchorLayout(anchor_x='right',
+                                          anchor_y='bottom',
+                                          padding=30)
+        self.box = BoxLayout(orientation='vertical',
+                             pos_hint={'top':1})
+        self.root = ScrollView(size_hint=(1,None),
+                               size=(Window.width, Window.height-64))
+        self.grid = MDGridLayout(cols=2,
+                                 size_hint_y=None,
+                                 spacing=10,
+                                 padding=10)
+        self.grid.bind(minimum_height=self.grid.setter('height'))
+
+        #Initializing Widgets
         self.toolbar = MDToolbar(title=self.rune.name.title())
         self.toolbar.right_action_items=[['icons/{}.png'.format(self.rune.champ)]]
         self.toolbar.left_action_items=[['arrow-left', self.go_back]]
+        self.edit_btn = MDFloatingActionButton(icon='pencil')
+        self.edit_btn.bind(on_release=partial(self.edit_rune, self.rune))
 
-        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.main)))
-        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.key)))
-        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot1)))
-        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot2)))
-        self.grid.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot3)))
+        for attribute in self.rune.attributes():
+            self.grid.add_widget(RuneCard('Runes/{}.png'.format(attribute), attribute.title()))
 
-        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.secondary)))
-        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot_1)))
-        # self.grid2.add_widget(RuneCard('Runes/{}.png'.format(self.rune.slot_2)))
+        #Adding Widgets to Layouts
+        self.anchor_layout.add_widget(self.edit_btn)
+        self.root.add_widget(self.grid)
+        self.box.add_widget(self.toolbar)
+        self.box.add_widget(self.root)
 
-        root.add_widget(self.grid)
-
-        box.add_widget(self.toolbar)
-        box.add_widget(root)
-
-        self.add_widget(box)
+        #Adding Layout to Screen
+        self.add_widget(self.box)
+        self.add_widget(self.anchor_layout)
 
     def go_back(self, event): 
         sm.remove_widget(sm.get_screen('view_page'))
         sm.current = 'library'
 
+    def edit_rune(self, rune, event):
+        screen = sm.get_screen('rune_page')
+        screen.toolbar.title = rune.champ.title()
+        screen.toolbar.right_action_items = [['icons/{}.png'.format(rune.champ)]]
+        screen.edit(rune)
+        screen.previous = self.name
+        sm.current = 'rune_page'
+
+
 class ChampSelect(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
-        self.champ = None
 
-        box = BoxLayout(orientation='vertical', pos_hint={'top':1})
-        root = ScrollView(size_hint=(1,None), size=(Window.width, Window.height-64))
-        champ_grid = MDStackLayout(size_hint_y=None, spacing=10, padding=5)
-        champ_grid.bind(minimum_height=champ_grid.setter('height'))
+        #Initializing Layouts
+        self.box = BoxLayout(orientation='vertical',
+                             pos_hint={'top':1})
+        self.root = ScrollView(size_hint=(1,None),
+                               size=(Window.width, Window.height-64))
+        self.champ_grid = MDStackLayout(size_hint_y=None,
+                                        spacing=10,
+                                        padding=5)
+        self.champ_grid.bind(minimum_height=self.champ_grid.setter('height'))
 
+        #Initializing Cards
         with open('Resources/champions.txt', 'r') as file:
             for champ in file.readlines():
-                source = 'images/'+champ.strip('\n')+'.jpg'
-                card = Card(source)
-                card.bind(on_release=partial(self.create_rune, champ.strip('\n')))
+                champ = champ.strip('\n')
+                source = 'images/{}.jpg'.format(champ)
+                card = Card(source, champ.title())
+                card.bind(on_release=partial(self.create_rune, champ))
 
-                champ_grid.add_widget(card)
+                self.champ_grid.add_widget(card)
 
-        toolbar = MDToolbar(title='Select Champion')
-        toolbar.right_action_items = [['magnify']]
-        toolbar.left_action_items = [['arrow-left', self.go_back]]
+        #Initializing Widgets
+        self.toolbar = MDToolbar(title='Select Champion')
+        self.toolbar.right_action_items = [['magnify']]
+        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
 
-        root.add_widget(champ_grid)
-        box.add_widget(toolbar)
-        box.add_widget(root)
+        #Adding Widgets to Layouts
+        self.root.add_widget(self.champ_grid)
+        self.box.add_widget(self.toolbar)
+        self.box.add_widget(self.root)
 
-        self.add_widget(box)
-
-    def rune_select(self, event):
-        sm.current = 'rune_page'
+        #Adding Layouts to Screen
+        self.add_widget(self.box)
 
     def create_rune(self, champ, event):
         self.champion = champ
-        toolbar = sm.get_screen('rune_page').toolbar
-        toolbar.title = champ.title()
-        toolbar.right_action_items = [['icons/'+champ+'.png']]
-            
+        screen = sm.get_screen('rune_page')
+
+        screen.toolbar.title = champ.title()
+        screen.toolbar.right_action_items = [['icons/'+champ+'.png']]
+        screen.previous = self.name
+        screen.default_panels('precision', 'resolve')
+
         sm.current = 'rune_page'
 
     def go_back(self, event):
@@ -201,12 +245,19 @@ class ChampSelect(Screen):
 class RunePage(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
-        self.stack_layout = MDStackLayout(size_hint_y=None, pos_hint={'top':1})
+        self.previous = None
+        #Initializing Layouts
+        self.stack_layout = MDStackLayout(size_hint_y=None,
+                                          pos_hint={'top':1})
         self.stack_layout.size[1] = 64
-        root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height - 64))
-        anchor_layout = AnchorLayout(anchor_x='right', anchor_y='bottom', padding=30)
-
-        self.grid = MDGridLayout(cols=1, padding=[10,0], size_hint_y=None)
+        self.root = ScrollView(size_hint=(1, None),
+                               size=(Window.width, Window.height - 64))
+        self.anchor_layout = AnchorLayout(anchor_x='right',
+                                          anchor_y='bottom',
+                                          padding=30)
+        self.grid = MDGridLayout(cols=1,
+                                 padding=[10,0],
+                                 size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
 
         self.primary_panels = []
@@ -216,30 +267,48 @@ class RunePage(Screen):
         self.toolbar = MDToolbar(title="Holder Text")
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
         
-        panel = ExpansionPanel('Main Rune', self.create_content(main_runes))
-        self.grid.add_widget(panel)
-        self.primary_panels.append(panel)
+        self.panel = ExpansionPanel('Main Rune',
+                                    self.create_content(main_runes))
+        self.grid.add_widget(self.panel)
+        self.primary_panels.append(self.panel)
         self.get_runes()
 
-        panel = ExpansionPanel('Secondary Rune', self.create_content(main_runes))
-        self.secondary_panels.append(panel)
-        self.grid.add_widget(panel)
+        self.panel2 = ExpansionPanel('Secondary Rune',
+                                     self.create_content(main_runes))
+        self.secondary_panels.append(self.panel2)
+        self.grid.add_widget(self.panel2)
         self.get_secondary_runes()
 
-        save_btn = MDFloatingActionButton(icon='fire')
-        save_btn.bind(on_release=self.show_save_box)
+        self.save_btn = MDFloatingActionButton(icon='check')
+        self.save_btn.bind(on_release=self.show_save_box)
 
-        root.add_widget(self.grid)
+        self.root.add_widget(self.grid)
         self.stack_layout.add_widget(self.toolbar)
-        anchor_layout.add_widget(save_btn)
+        self.anchor_layout.add_widget(self.save_btn)
         
-        self.add_widget(root)
+        self.add_widget(self.root)
         self.add_widget(self.stack_layout)
-        self.add_widget(anchor_layout)
+        self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
-        sm.current='champ_select'
-        # sm.remove_widget(sm.get_screen('rune_page'))
+        sm.current = self.previous
+
+    def default_panels(self, prim, second):
+        attributes = [prim]
+        attributes.extend(titles[prim])
+        attributes.extend([second, 'slot 1', 'slot 2'])
+        attributes.reverse()
+
+        secondary = secondary_runes[attributes[2]]
+
+        for i in range(len(attributes)):
+            self.grid.children[i].panel_cls.text = attributes[i].title()
+            if i <= 1:
+                # Secondary panels
+                self.grid.children[i].content = self.create_content(secondary)
+            elif i >= 3 and i < 7:
+                # Primary panels
+                self.grid.children[i].content = self.create_content(runes[attributes[7]][attributes[3 : 7][i - 3].title()])
 
     #Adds all panels given a main rune
     def get_runes(self, main='domination'):
@@ -301,11 +370,10 @@ class RunePage(Screen):
         self.dialog_btn = MDDialog(title='Rune Name:',
                                     type='custom',
                                     content_cls=MDTextField(),
-                                    buttons=[back_btn, save_btn]
-                                    )
+                                    buttons=[back_btn, save_btn])
         self.dialog_btn.open()
 
-    def save(self, event):
+    def save(self, event=None):
         info = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
         for panel in self.primary_panels:
             info.append(panel.panel_cls.text.lower())
@@ -316,13 +384,29 @@ class RunePage(Screen):
             writer = csv.writer(file)
             writer.writerow(info)
         
-        self.dialog_btn.dismiss()
+        self.back()
         sm.remove_widget(sm.get_screen('library'))
         sm.add_widget(Library('library'))
         sm.current = 'library'
 
+    def edit(self, rune):
+        attributes = rune.attributes()
+        attributes.reverse()
+        main = []
+        secondary = secondary_runes[rune.secondary]
+        main.extend(runes[rune.main].keys())
+        main.reverse()
 
-    def back(self, event): 
+        for i in range(len(attributes)):
+            self.grid.children[i].panel_cls.text = attributes[i].title()
+            if i <= 1:
+                #Secondary panels
+                self.grid.children[i].content = self.create_content(secondary)
+            elif i >=3 and i < 7:
+                #Primary panels
+                self.grid.children[i].content = self.create_content(runes[rune.main][main[i-3]])
+
+    def back(self, event=None):
         self.dialog_btn.dismiss()
 
 if __name__ == '__main__':
