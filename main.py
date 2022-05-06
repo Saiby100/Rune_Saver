@@ -15,6 +15,7 @@ from functools import partial
 from kivymd.uix.list import MDList
 import csv
 from kivymd.uix.dialog import MDDialog
+from kivy.utils import get_color_from_hex
 
 Window.size = (300, 500)
 
@@ -74,16 +75,47 @@ class RuneSaver(MDApp):
         global sm
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(Library('library'))
-        sm.add_widget(ChampSelect('champ_select'))
-        sm.add_widget(RunePage('rune_page'))
+        # sm.add_widget(ChampSelect('champ_select'))
+        # sm.add_widget(RunePage('rune_page'))
         # sm.add_widget(SearchPage('search_page'))
 
         return sm
 
 class SearchPage(Screen): 
-    pass 
+    def __init__(self, page_name, prev_page):
+        super().__init__(name=page_name)
+        self.previous = prev_page
 
-        
+        #Initializing Layouts
+        self.box = MDBoxLayout(orientation='vertical')
+        self.anchor_layout = AnchorLayout(anchor_x='center',
+                                          anchor_y='top',
+                                          padding=[0, 5])
+        self.root = ScrollView(size_hint=(1, None),
+                               size=(Window.width, Window.height - 60))
+
+        self.text_field = MDTextField(hint_text='search',
+                                      pos_hint={'center_x', .55},
+                                      size_hint_x=.6)
+        self.toolbar = MDToolbar(md_bg_color=get_color_from_hex('212121'))
+        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
+        self.toolbar.right_action_items = [['magnify', partial(self.search, self.text_field.text)]]
+
+        self.anchor_layout.add_widget(self.text_field)
+        self.box.add_widget(self.toolbar)
+        self.box.add_widget(self.root)
+
+        self.add_widget(self.box)
+        self.add_widget(self.anchor_layout)
+
+    def go_back(self, event):
+        sm.current = self.previous
+        sm.remove_widget(self)
+
+    def search(self, text, event):
+        if self.previous == 'library':
+            self.results_box = MDBoxLayout(orientation='vertical')
+            self.runes = MDList(padding=[10, 0])
 
 class Library(Screen):
     # use list object to save runes
@@ -132,11 +164,11 @@ class Library(Screen):
         sm.current = 'champ_select'
 
     def search(self, event):
-        pass
+        sm.add_widget(SearchPage('search', self.name))
+        sm.current = 'search'
 
     def remove(self, item, instance):
         self.my_runes.remove_widget(item)
-
 
 
 class ViewRune(Screen):
