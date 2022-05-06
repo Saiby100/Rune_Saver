@@ -18,57 +18,59 @@ from kivymd.uix.dialog import MDDialog
 
 Window.size = (300, 500)
 
-main_runes = ['domination','precision','inspiration','resolve','sorcery']
+main_runes = ['domination', 'precision', 'inspiration', 'resolve', 'sorcery']
 
-titles = {'domination': ['Keystones','Malice','Tracking','Hunter'],
-          'precision': ['Keystones','Heroism','Legend','Combat'],
-          'inspiration': ['Keystones','Contraptions','Tomorrow','Beyond'],
-          'resolve': ['Keystones','Strength','Resistance','Vitality'],
-          'sorcery': ['Keystones','Artifact','Excellence','Power']}
+titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
+          'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
+          'inspiration': ['Keystones', 'Contraptions', 'Tomorrow', 'Beyond'],
+          'resolve': ['Keystones', 'Strength', 'Resistance', 'Vitality'],
+          'sorcery': ['Keystones', 'Artifact', 'Excellence', 'Power']
+          }
 
-runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','hail-of-blades'],
-                        'Malice': ['cheap-shot','taste-of-blood','sudden-impact'],
-                        'Tracking': ['zombie-ward','ghost-poro','eyeball-collection'],
-                        'Hunter': ['ravenous-hunter','ingenious-hunter','relentless-hunter','ultimate-hunter']},
+runes =  {'domination': {'Keystones': ['electrocute', 'predator', 'dark-harvest', 'hail-of-blades'],
+                        'Malice': ['cheap-shot', 'taste-of-blood', 'sudden-impact'],
+                        'Tracking': ['zombie-ward', 'ghost-poro', 'eyeball-collection'],
+                        'Hunter': ['ravenous-hunter', 'ingenious-hunter', 'relentless-hunter', 'ultimate-hunter']},
 
-         'precision': {'Keystones': ['press-the-attack','lethal-tempo','fleet-footwork','conqueror'],
-                        'Heroism': ['overheal','triumph','presence-of-mind'],
-                        'Legend': ['legend-alacrity','legend-tenacity','legend-bloodline'],
-                        'Combat': ['coup-de-grace','cut-down','last-stand']},
+         'precision': {'Keystones': ['press-the-attack', 'lethal-tempo', 'fleet-footwork', 'conqueror'],
+                        'Heroism': ['overheal', 'triumph', 'presence-of-mind'],
+                        'Legend': ['legend-alacrity', 'legend-tenacity', 'legend-bloodline'],
+                        'Combat': ['coup-de-grace', 'cut-down', 'last-stand']},
 
-         'inspiration': {'Keystones': ['glacial-augment','unsealed-spellbook','first-strike'],
-                        'Contraptions': ['hextech-flashtraption','magical-footwear','perfect-timing'],
-                        'Tomorrow': ['future\'s-market','minion-dematerializer','biscuit-delivery'],
-                        'Beyond': ['cosmic-insight','approach-velocity','time-warp-tonic']},
+         'inspiration': {'Keystones': ['glacial-augment', 'unsealed-spellbook', 'first-strike'],
+                        'Contraptions': ['hextech-flashtraption', 'magical-footwear', 'perfect-timing'],
+                        'Tomorrow': ['future\'s-market', 'minion-dematerializer', 'biscuit-delivery'],
+                        'Beyond': ['cosmic-insight', 'approach-velocity', 'time-warp-tonic']},
 
-         'resolve': {'Keystones': ['grasp-of-the-undying','aftershock','guardian'],
-                        'Strength': ['demolish','font-of-life','shield-bash'],
-                        'Resistance': ['conditioning','second-wind','bone-plating'],
-                        'Vitality': ['overgrowth','revitalize','unflinching']},
+         'resolve': {'Keystones': ['grasp-of-the-undying', 'aftershock', 'guardian'],
+                        'Strength': ['demolish', 'font-of-life', 'shield-bash'],
+                        'Resistance': ['conditioning', 'second-wind', 'bone-plating'],
+                        'Vitality': ['overgrowth', 'revitalize', 'unflinching']},
 
-         'sorcery': {'Keystones': ['summon-aery','arcane-comet','phase-rush'],
-                        'Artifact': ['nullifying-orb','manaflow-band','nimbus-cloak'],
-                        'Excellence': ['transcendence','celerity','absolute-focus'],
-                        'Power': ['scorch','waterwalking','gathering-storm']}
+         'sorcery': {'Keystones': ['summon-aery', 'arcane-comet', 'phase-rush'],
+                        'Artifact': ['nullifying-orb', 'manaflow-band', 'nimbus-cloak'],
+                        'Excellence': ['transcendence', 'celerity', 'absolute-focus'],
+                        'Power': ['scorch', 'waterwalking', 'gathering-storm']}
          }
-secondary_runes = {'domination': ['cheap-shot','taste-of-blood','sudden-impact', 'zombie-ward','ghost-poro','eyeball-collection',
-                                  'ravenous-hunter','ingenious-hunter','relentless-hunter','ultimate-hunter'],
-                   'precision': ['overheal','triumph','presence-of-mind','legend-alacrity','legend-tenacity','legend-bloodline',
-                                 'coup-de-grace','cut-down','last-stand'],
-                   'inspiration': ['hextech-flashtraption','magical-footwear','perfect-timing','future\'s-market','minion-dematerializer',
-                                   'biscuit-delivery','cosmic-insight','approach-velocity','time-warp-tonic'],
-                   'resolve': ['demolish','font-of-life','shield-bash','conditioning','second-wind','bone-plating','overgrowth','revitalize',
-                               'unflinching'],
-                   'sorcery': ['nullifying-orb','manaflow-band','nimbus-cloak','transcendence','celerity','absolute-focus','scorch','waterwalking',
-                               'gathering-storm']
+secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact', 'zombie-ward','ghost-poro',
+                                  'eyeball-collection', 'ravenous-hunter', 'ingenious-hunter', 'relentless-hunter',
+                                  'ultimate-hunter'],
+                   'precision': ['overheal', 'triumph', 'presence-of-mind', 'legend-alacrity', 'legend-tenacity',
+                                 'legend-bloodline', 'coup-de-grace', 'cut-down', 'last-stand'],
+                   'inspiration': ['hextech-flashtraption', 'magical-footwear', 'perfect-timing', 'future\'s-market',
+                                   'minion-dematerializer', 'biscuit-delivery', 'cosmic-insight', 'approach-velocity',
+                                   'time-warp-tonic'],
+                   'resolve': ['demolish', 'font-of-life', 'shield-bash', 'conditioning', 'second-wind',
+                               'bone-plating', 'overgrowth', 'revitalize', 'unflinching'],
+                   'sorcery': ['nullifying-orb', 'manaflow-band','nimbus-cloak', 'transcendence', 'celerity',
+                               'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
-
 
 class RuneSaver(MDApp):
     def build(self):
         #Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
         self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Lime"
+        self.theme_cls.primary_palette = "DeepPurple"
         global sm
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(Library('library'))
@@ -183,9 +185,13 @@ class ViewRune(Screen):
 
     def edit_rune(self, rune, event):
         screen = sm.get_screen('rune_page')
-        screen.toolbar.title = rune.champ.title()
+        screen.toolbar.title = rune.name.title()
         screen.toolbar.right_action_items = [['icons/{}.png'.format(rune.champ)]]
-        screen.edit(rune)
+
+        array = rune.attributes()
+        array.reverse()
+
+        screen.set_up_panels(array)
         screen.previous = self.name
         sm.current = 'rune_page'
 
@@ -208,7 +214,7 @@ class ChampSelect(Screen):
         with open('Resources/champions.txt', 'r') as file:
             for champ in file.readlines():
                 champ = champ.strip('\n')
-                source = 'images/{}.jpg'.format(champ)
+                source = 'images/{}.png'.format(champ)
                 card = Card(source, champ.title())
                 card.bind(on_release=partial(self.create_rune, champ))
 
@@ -234,7 +240,7 @@ class ChampSelect(Screen):
         screen.toolbar.title = champ.title()
         screen.toolbar.right_action_items = [['icons/'+champ+'.png']]
         screen.previous = self.name
-        screen.default_panels('precision', 'resolve')
+        screen.set_up_panels()
 
         sm.current = 'rune_page'
 
@@ -266,18 +272,10 @@ class RunePage(Screen):
             
         self.toolbar = MDToolbar(title="Holder Text")
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
-        
-        self.panel = ExpansionPanel('Main Rune',
-                                    self.create_content(main_runes))
-        self.grid.add_widget(self.panel)
-        self.primary_panels.append(self.panel)
-        self.get_runes()
 
-        self.panel2 = ExpansionPanel('Secondary Rune',
-                                     self.create_content(main_runes))
-        self.secondary_panels.append(self.panel2)
-        self.grid.add_widget(self.panel2)
-        self.get_secondary_runes()
+        for i in range(8):
+            self.grid.add_widget(ExpansionPanel('Holder Text'))
+        self.set_up_panels()
 
         self.save_btn = MDFloatingActionButton(icon='check')
         self.save_btn.bind(on_release=self.show_save_box)
@@ -293,46 +291,12 @@ class RunePage(Screen):
     def go_back(self, event):
         sm.current = self.previous
 
-    def default_panels(self, prim, second):
-        attributes = [prim]
-        attributes.extend(titles[prim])
-        attributes.extend([second, 'slot 1', 'slot 2'])
-        attributes.reverse()
-
-        secondary = secondary_runes[attributes[2]]
-
-        for i in range(len(attributes)):
-            self.grid.children[i].panel_cls.text = attributes[i].title()
-            if i <= 1:
-                # Secondary panels
-                self.grid.children[i].content = self.create_content(secondary)
-            elif i >= 3 and i < 7:
-                # Primary panels
-                self.grid.children[i].content = self.create_content(runes[attributes[7]][attributes[3 : 7][i - 3].title()])
-
-    #Adds all panels given a main rune
-    def get_runes(self, main='domination'):
-        for title in titles[main]:
-            panel = ExpansionPanel(title, self.create_content(runes[main][title]))
-            self.primary_panels.append(panel)
-            self.grid.add_widget(panel)
-
-    def get_secondary_runes(self, main='sorcery'):
-        all_runes = []
-        for i in range(1, len(titles[main])):
-            all_runes.extend(runes[main][titles[main][i]])
-
-        self.secondary_panels.append(ExpansionPanel('Slot 1', self.create_content(all_runes)))
-        self.grid.add_widget(self.secondary_panels[1])
-        self.secondary_panels.append(ExpansionPanel('Slot 2', self.create_content(all_runes)))
-        self.grid.add_widget(self.secondary_panels[2])
-
     #Creates a content widget containing all the runes specified in the array
     def create_content(self, array):
         items = []
         for value in array:
             value = value.strip('\n')
-            item = ListItem(value.title(), 'Runes/'+value+'.png')
+            item = ListItem(value.title(), 'Runes/{}.png'.format(value))
             item.bind(on_release=partial(self.update_panel, item, value))
             items.append(item)
 
@@ -340,26 +304,18 @@ class RunePage(Screen):
 
     #All contents of the expansion panels below it must change
     def update_panel(self, item, text, event):
-
-        if main_runes.__contains__(text) and not self.secondary_panels.__contains__(item.parent.parent):
-            i = 3
-            for child in self.grid.children:
-                if child != item.parent.parent and not self.secondary_panels.__contains__(child):
-                    child.content = self.create_content(runes[text][titles[text][i]])
-                    child.panel_cls.text = titles[text][i]
-                    i-=1
-
-        elif main_runes.__contains__(text):
-            all_runes = []
-            for i in range(1, len(titles[text])):
-                all_runes.extend(runes[text][titles[text][i]])
-            i = 1
-            slots = ['Slot 1', 'Slot 2']
-            for child in self.grid.children:
-                if child != item.parent.parent and not self.primary_panels.__contains__(child):
-                    child.content = self.create_content(all_runes)
-                    child.panel_cls.text = slots[i]
-                    i-=1
+        # a = [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]
+        main = []
+        main.extend(runes.keys())
+        if main.__contains__(text):
+            panel_titles = []
+            panel_titles.extend(runes[text].keys())
+            if item.parent.parent == self.grid.children[7]:
+                rune = [None, None, text, panel_titles[3], panel_titles[2], panel_titles[1], panel_titles[0], text]
+                self.set_up_panels(rune, True, False)
+            else:
+                rune = ['slot 2', 'slot 1', text, None, None, None, None, text]
+                self.set_up_panels(rune, False, True)
 
         item.parent.parent.panel_cls.text = text.title()
 
@@ -389,22 +345,40 @@ class RunePage(Screen):
         sm.add_widget(Library('library'))
         sm.current = 'library'
 
-    def edit(self, rune):
-        attributes = rune.attributes()
-        attributes.reverse()
-        main = []
-        secondary = secondary_runes[rune.secondary]
-        main.extend(runes[rune.main].keys())
-        main.reverse()
+    def set_up_panels(self, rune=None, primary_panels=True, secondary_panels=True):
+        rune_name = []
+        rune_name.extend(runes.keys())
 
-        for i in range(len(attributes)):
-            self.grid.children[i].panel_cls.text = attributes[i].title()
-            if i <= 1:
+        if rune is None:
+            rune = ['slot 2', 'slot 1', 'secondary', 'slot 3', 'slot 2', 'slot 1', 'keystones', 'primary']
+            main = titles['domination']
+            main.append('domination')
+            secondary = secondary_runes['sorcery']
+
+        else:
+            main = titles[rune[7]][0:4]
+            main.reverse()
+            main.append(rune[7])
+            secondary = secondary_runes[rune[2]]
+
+        for i in range(len(rune)):
+            if i <= 1 and secondary_panels:
                 #Secondary panels
+                self.grid.children[i].panel_cls.text = rune[i].title()
                 self.grid.children[i].content = self.create_content(secondary)
-            elif i >=3 and i < 7:
+
+            elif i == 7 and primary_panels:
+                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].content = self.create_content(rune_name)
+
+            elif i == 2 and secondary_panels:
+                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].content = self.create_content(rune_name)
+
+            elif i >= 3 and i < 7 and primary_panels:
                 #Primary panels
-                self.grid.children[i].content = self.create_content(runes[rune.main][main[i-3]])
+                self.grid.children[i].content = self.create_content(runes[main[4]][main[i-3]])
+                self.grid.children[i].panel_cls.text = rune[i].title()
 
     def back(self, event=None):
         self.dialog_btn.dismiss()

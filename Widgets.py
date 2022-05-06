@@ -40,7 +40,7 @@ class Rune(SwipeToDeleteItem):
         super().__init__(self.name, 'icons/{}.png'.format(self.champ))
 
     def attributes(self):
-        return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]
+        return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2.strip('\n')]
 
 
 class SavedRunes: 
@@ -53,12 +53,12 @@ class SavedRunes:
         
 
 class ExpansionPanel(MDExpansionPanel):
-    def __init__(self, title, content):
-
+    def __init__(self, title, content=None):
         self.panel_cls = MDExpansionPanelOneLine(text=title)
         self.panel_cls.font_style = 'Body2'
-        self.content = content
-        self.main = False
+
+        if content is not None:
+            self.content = content
         super().__init__()
 
     def change_icon(self, icon):

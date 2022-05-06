@@ -23,14 +23,5 @@ runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','
                         'Excellence': ['transcendence','celerity','absolute-focus'],
                         'Power': ['scorch','waterwalking','gathering-storm']}
          }
-main = []
-secondary = []
-main.extend(runes['domination'].keys())
-main.reverse()
-secondary.extend(runes['sorcery'].keys())
-secondary.reverse()
-secondary.pop()
-
-
-print(main)
-print(secondary)
+a = ['a', 'b', 'c\n']
+print(a[2].strip('\n'))
