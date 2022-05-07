@@ -1,12 +1,19 @@
-import csv 
-from kivymd.uix.button import MDFlatButton, ButtonBehavior, MDIconButton
+import csv
+
+from kivy.animation import Animation
+from kivy.properties import StringProperty
+from kivy.utils import get_color_from_hex
+from kivymd.uix.button import MDFlatButton, ButtonBehavior, MDIconButton, MDFloatingActionButton
 from kivymd.uix.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem
+from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconListItem
 from kivymd.uix.label import MDLabel
 from kivy.uix.scrollview import ScrollView
+from kivymd.uix.selection import MDSelectionList
+from kivymd.uix.tooltip import MDTooltip
+
 
 class Scroll(ScrollView):
     def __init__(self, **kwargs):
@@ -34,14 +41,10 @@ class SwipeToDeleteItem(MDCardSwipe):
         self.add_widget(self.back_layer)
         self.add_widget(self.front_layer)
 
-class Rune(SwipeToDeleteItem):
-    def __init__(self, row):
-        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-        super().__init__(self.name, 'icons/{}.png'.format(self.champ))
 
-    def attributes(self):
-        return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2.strip('\n')]
 
+class FloatingButton(MDFloatingActionButton, MDTooltip):
+    pass
 
 class SavedRunes: 
     def __init__(self, account_name):
@@ -50,6 +53,10 @@ class SavedRunes:
             reader = csv.reader(file)
             for line in reader: 
                 self.runes.append(Rune(line))
+
+    def add_new(self, new_rune):
+        for rune in self.runes:
+
         
 
 class ExpansionPanel(MDExpansionPanel):
@@ -67,10 +74,10 @@ class ExpansionPanel(MDExpansionPanel):
 class ListItem(OneLineAvatarListItem):
     def __init__(self, text, image_source):
         self.text = text
-        img = ImageLeftWidget()
-        img.source = image_source
+        self.icon = ImageLeftWidget()
+        self.icon.source = image_source
         super().__init__()
-        self.add_widget(img)
+        self.add_widget(self.icon)
 
 class Content(MDBoxLayout):
     def __init__(self, items_array):
@@ -113,3 +120,10 @@ class RuneCard(MDCard):
         if text is not None:
             self.add_widget(MDLabel(text=text, halign='center', font_style='Caption'))
 
+class Rune(SwipeToDeleteItem):
+    def __init__(self, row):
+        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+        super().__init__(self.name, 'icons/{}.png'.format(self.champ))
+
+    def attributes(self):
+        return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]

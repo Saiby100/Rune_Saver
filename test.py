@@ -1,27 +1,94 @@
-runes =  {'domination': {'Keystones': ['electrocute','predator','dark-harvest','hail-of-blades'],
-                        'Malice': ['cheap-shot','taste-of-blood','sudden-impact'],
-                        'Tracking': ['zombie-ward','ghost-poro','eyeball-collection'],
-                        'Hunter': ['ravenous-hunter','ingenious-hunter','relentless-hunter','ultimate-hunter']},
+from kivy.lang import Builder
+from kivy.properties import StringProperty
+from kivy.uix.screenmanager import Screen
 
-         'precision': {'Keystones': ['press-the-attack','lethal-tempo','fleet-footwork','conqueror'],
-                        'Heroism': ['overheal','triumph','presence-of-mind'],
-                        'Legend': ['legend-alacrity','legend-tenacity','legend-bloodline'],
-                        'Combat': ['coup-de-grace','cut-down','last-stand']},
+from kivymd.icon_definitions import md_icons
+from kivymd.app import MDApp
+from kivymd.uix.list import OneLineIconListItem
 
-         'inspiration': {'Keystones': ['glacial-augment','unsealed-spellbook','first-strike'],
-                        'Contraptions': ['hextech-flashtraption','magical-footwear','perfect-timing'],
-                        'Tomorrow': ['future\'s-market','minion-dematerializer','biscuit-delivery'],
-                        'Beyond': ['cosmic-insight','approach-velocity','time-warp-tonic']},
 
-         'resolve': {'Keystones': ['grasp-of-the-undying','aftershock','guardian'],
-                        'Strength': ['demolish','font-of-life','shield-bash'],
-                        'Resistance': ['conditioning','second-wind','bone-plating'],
-                        'Vitality': ['overgrowth','revitalize','unflinching']},
+Builder.load_string(
+    '''
+#:import images_path kivymd.images_path
 
-         'sorcery': {'Keystones': ['summon-aery','arcane-comet','phase-rush'],
-                        'Artifact': ['nullifying-orb','manaflow-band','nimbus-cloak'],
-                        'Excellence': ['transcendence','celerity','absolute-focus'],
-                        'Power': ['scorch','waterwalking','gathering-storm']}
-         }
-a = ['a', 'b', 'c\n']
-print(a[2].strip('\n'))
+
+<CustomOneLineIconListItem>
+
+    IconLeftWidget:
+        icon: root.icon
+
+
+<PreviousMDIcons>
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        spacing: dp(10)
+        padding: dp(20)
+
+        MDBoxLayout:
+            adaptive_height: True
+
+            MDIconButton:
+                icon: 'magnify'
+
+            MDTextField:
+                id: search_field
+                hint_text: 'Search icon'
+                on_text: root.set_list_md_icons(self.text, True)
+
+        RecycleView:
+            id: rv
+            key_viewclass: 'viewclass'
+            key_size: 'height'
+
+            RecycleBoxLayout:
+                padding: dp(10)
+                default_size: None, dp(48)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+'''
+)
+
+
+class CustomOneLineIconListItem(OneLineIconListItem):
+    icon = StringProperty()
+
+
+class PreviousMDIcons(Screen):
+
+    def set_list_md_icons(self, text="", search=False):
+        '''Builds a list of icons for the screen MDIcons.'''
+
+        def add_icon_item(name_icon):
+            self.ids.rv.data.append(
+                {
+                    "viewclass": "CustomOneLineIconListItem",
+                    "icon": name_icon,
+                    "text": name_icon,
+                }
+            )
+
+        self.ids.rv.data = []
+        for name_icon in md_icons.keys():
+            if search:
+                if text in name_icon:
+                    add_icon_item(name_icon)
+            else:
+                add_icon_item(name_icon)
+
+
+class MainApp(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.screen = PreviousMDIcons()
+
+    def build(self):
+        return self.screen
+
+    def on_start(self):
+        self.screen.set_list_md_icons()
+
+
+MainApp().run()

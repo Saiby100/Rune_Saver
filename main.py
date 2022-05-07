@@ -15,7 +15,6 @@ from functools import partial
 from kivymd.uix.list import MDList
 import csv
 from kivymd.uix.dialog import MDDialog
-from kivy.utils import get_color_from_hex
 
 Window.size = (300, 500)
 
@@ -75,53 +74,15 @@ class RuneSaver(MDApp):
         global sm
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(Library('library'))
-        # sm.add_widget(ChampSelect('champ_select'))
-        # sm.add_widget(RunePage('rune_page'))
-        # sm.add_widget(SearchPage('search_page'))
+        sm.add_widget(ChampSelect('champ_select'))
+        sm.add_widget(RunePage('rune_page'))
 
         return sm
-
-class SearchPage(Screen): 
-    def __init__(self, page_name, prev_page):
-        super().__init__(name=page_name)
-        self.previous = prev_page
-
-        #Initializing Layouts
-        self.box = MDBoxLayout(orientation='vertical')
-        self.anchor_layout = AnchorLayout(anchor_x='center',
-                                          anchor_y='top',
-                                          padding=[0, 5])
-        self.root = ScrollView(size_hint=(1, None),
-                               size=(Window.width, Window.height - 60))
-
-        self.text_field = MDTextField(hint_text='search',
-                                      pos_hint={'center_x', .55},
-                                      size_hint_x=.6)
-        self.toolbar = MDToolbar(md_bg_color=get_color_from_hex('212121'))
-        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
-        self.toolbar.right_action_items = [['magnify', partial(self.search, self.text_field.text)]]
-
-        self.anchor_layout.add_widget(self.text_field)
-        self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.root)
-
-        self.add_widget(self.box)
-        self.add_widget(self.anchor_layout)
-
-    def go_back(self, event):
-        sm.current = self.previous
-        sm.remove_widget(self)
-
-    def search(self, text, event):
-        if self.previous == 'library':
-            self.results_box = MDBoxLayout(orientation='vertical')
-            self.runes = MDList(padding=[10, 0])
 
 class Library(Screen):
     # use list object to save runes
     def __init__(self, page_name):
         super().__init__(name=page_name)
-
         #Initializing Layouts
         self.box = MDBoxLayout(orientation='vertical')
         self.anchor_layout = AnchorLayout(anchor_x='right',
@@ -132,9 +93,9 @@ class Library(Screen):
 
         #Initializing Widgets
         self.toolbar = MDToolbar(title='My Runes')
-        self.toolbar.right_action_items = [['magnify', self.search]]
-
-        self.add_btn = MDFloatingActionButton(icon='plus')
+        self.toolbar.right_action_items = [['account']]
+        self.add_btn = FloatingButton(icon='plus',
+                                      tooltip_text='Add New Rune')
         self.add_btn.bind(on_release=self.champ_select)
 
         self.my_runes = MDList(padding=[10, 0])
@@ -142,10 +103,12 @@ class Library(Screen):
 
         #Adding widgets to layouts
         for rune in self.saved_runes: 
-            rune.icon.bind(on_release=partial(self.remove, rune))
-            rune.list_item.bind(on_release=partial(self.view_rune, rune))
+            rune.back_layer.children[0].bind(on_release=partial(self.remove, rune))
+            rune.front_layer.bind(on_release=partial(self.view_rune, rune))
+            # self.selection_list.add_widget(rune)
             self.my_runes.add_widget(rune)
 
+        # self.root.add_widget(self.selection_list)
         self.root.add_widget(self.my_runes)
         self.box.add_widget(self.toolbar)
         self.box.add_widget(self.root)
@@ -155,20 +118,23 @@ class Library(Screen):
         self.add_widget(self.box)
         self.add_widget(self.anchor_layout)
 
-    def view_rune(self, rune, event): 
-        self.rune = rune 
-        sm.add_widget(ViewRune('view_page'))
-        sm.current = 'view_page'
+    def view_rune(self, rune, event):
+        if rune.list_item.icon.pos[0] == 16:
+            self.rune = rune
+            sm.add_widget(ViewRune('view_page'))
+            sm.current = 'view_page'
 
     def champ_select(self, event):
         sm.current = 'champ_select'
 
-    def search(self, event):
-        sm.add_widget(SearchPage('search', self.name))
-        sm.current = 'search'
-
-    def remove(self, item, instance):
+    def remove(self, item, event):
         self.my_runes.remove_widget(item)
+
+class SearchPage(Screen):
+    def set_list_cards(self, text="", search=False):
+
+        def add_card(card_name):
+            self.rv.data.append({'viewclass'})
 
 
 class ViewRune(Screen):
@@ -254,7 +220,6 @@ class ChampSelect(Screen):
 
         #Initializing Widgets
         self.toolbar = MDToolbar(title='Select Champion')
-        self.toolbar.right_action_items = [['magnify']]
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
 
         #Adding Widgets to Layouts
@@ -309,7 +274,7 @@ class RunePage(Screen):
             self.grid.add_widget(ExpansionPanel('Holder Text'))
         self.set_up_panels()
 
-        self.save_btn = MDFloatingActionButton(icon='check')
+        self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
         self.save_btn.bind(on_release=self.show_save_box)
 
         self.root.add_widget(self.grid)
