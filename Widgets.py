@@ -54,9 +54,12 @@ class SavedRunes:
             for line in reader: 
                 self.runes.append(Rune(line))
 
-    def add_new(self, new_rune):
-        for rune in self.runes:
-
+    def add_new_rune(self, new_rune):
+        for i, rune in enumerate(self.runes): 
+            if new_rune.champ <= rune: 
+                self.runes.insert(i, new_rune)
+                return
+        self.runes.append(new_rune)            
         
 
 class ExpansionPanel(MDExpansionPanel):
