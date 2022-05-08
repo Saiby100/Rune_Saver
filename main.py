@@ -17,9 +17,7 @@ import csv
 from kivymd.uix.dialog import MDDialog
 import atexit
 
-Window.size = (300, 500)
-
-# main_runes = ['domination', 'precision', 'inspiration', 'resolve', 'sorcery']
+# Window.size = (300, 500)
 
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
           'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
@@ -325,6 +323,7 @@ class BuildRune(Screen):
                 self.set_up_panels(rune, False, True)
 
         item.parent.parent.panel_cls.text = text.title()
+        # item.parent.parent.close_panel(item.parent.parent, False)
 
     #Displays the dialog box
     def show_save_box(self, event):

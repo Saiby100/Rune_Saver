@@ -8,8 +8,6 @@ from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tooltip import MDTooltip
 
-
-
 class FlatButton(MDFlatButton, ButtonBehavior): 
     pass
 
@@ -25,7 +23,6 @@ class SwipeToDeleteItem(MDCardSwipe):
 
         self.back_layer = MDCardSwipeLayerBox()
         self.back_layer.add_widget(self.icon)
-        
 
         self.add_widget(self.back_layer)
         self.add_widget(self.front_layer)
@@ -67,9 +64,6 @@ class ExpansionPanel(MDExpansionPanel):
         if content is not None:
             self.content = content
         super().__init__()
-
-    def change_icon(self, icon):
-        self.icon = icon
 
 class ListItem(OneLineAvatarListItem):
     def __init__(self, text, image_source):
