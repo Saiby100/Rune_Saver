@@ -59,9 +59,11 @@ class SavedRunes:
             if new_rune.champ <= rune: 
                 self.runes.insert(i, new_rune)
                 return
-        self.runes.append(new_rune)            
-        
+        self.runes.append(new_rune)       
 
+    def delete_rune(self, rune): 
+        self.runes.remove(rune)     
+        
 class ExpansionPanel(MDExpansionPanel):
     def __init__(self, title, content=None):
         self.panel_cls = MDExpansionPanelOneLine(text=title)

@@ -66,12 +66,18 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
+
+
 class RuneSaver(MDApp):
     def build(self):
         #Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
+        global sm, file_runes
+
+        file_runes = SavedRunes('Saiby100')
+
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "DeepPurple"
-        global sm
+        
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(Library('library'))
         sm.add_widget(ChampSelect('champ_select'))
@@ -99,13 +105,13 @@ class Library(Screen):
         self.add_btn.bind(on_release=self.champ_select)
 
         self.my_runes = MDList(padding=[10, 0])
-        self.saved_runes = SavedRunes('Saiby100').runes
+        self.saved_runes = file_runes.runes
 
         #Adding widgets to layouts
         for rune in self.saved_runes: 
             rune.back_layer.children[0].bind(on_release=partial(self.remove, rune))
             rune.front_layer.bind(on_release=partial(self.view_rune, rune))
-            # self.selection_list.add_widget(rune)
+
             self.my_runes.add_widget(rune)
 
         # self.root.add_widget(self.selection_list)
@@ -127,8 +133,10 @@ class Library(Screen):
     def champ_select(self, event):
         sm.current = 'champ_select'
 
-    def remove(self, item, event):
-        self.my_runes.remove_widget(item)
+    def remove(self, rune, event):
+        file_runes.delete_rune(rune)
+        self.my_runes.remove_widget(rune)
+        
 
 class SearchPage(Screen):
     def set_list_cards(self, text="", search=False):
@@ -327,20 +335,22 @@ class RunePage(Screen):
         self.dialog_btn.open()
 
     def save(self, event=None):
-        info = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
+        rune = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
         for panel in self.primary_panels:
-            info.append(panel.panel_cls.text.lower())
+            rune.append(panel.panel_cls.text.lower())
         for panel in self.secondary_panels:
-            info.append(panel.panel_cls.text.lower())
- 
-        with open('accounts/Saiby100.csv', 'a', newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow(info)
+            rune.append(panel.panel_cls.text.lower())
         
-        self.back()
-        sm.remove_widget(sm.get_screen('library'))
-        sm.add_widget(Library('library'))
-        sm.current = 'library'
+        print(rune)
+ 
+        # with open('accounts/Saiby100.csv', 'a', newline="") as file:
+        #     writer = csv.writer(file)
+        #     writer.writerow(info)
+        
+        # self.back()
+        # sm.remove_widget(sm.get_screen('library'))
+        # sm.add_widget(Library('library'))
+        # sm.current = 'library'
 
     def set_up_panels(self, rune=None, primary_panels=True, secondary_panels=True):
         rune_name = []
