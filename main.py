@@ -17,7 +17,7 @@ import csv
 from kivymd.uix.dialog import MDDialog
 import atexit
 
-# Window.size = (300, 500)
+Window.size = (300, 500)
 
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
           'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
