@@ -17,7 +17,7 @@ import csv
 from kivymd.uix.dialog import MDDialog
 import atexit
 
-# Window.size = (300, 500)
+Window.size = (300, 500)
 
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
           'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
@@ -154,11 +154,9 @@ class ViewRune(Screen):
                                           padding=30)
         self.box = BoxLayout(orientation='vertical',
                              pos_hint={'top': 1})
-        self.root = ScrollView(size_hint=(1, None),
-                               size=(Window.width, Window.height - 64))
         self.grid = MDGridLayout(cols=2,
                                  size_hint_y=None,
-                                 spacing=10,
+                                 spacing=5,
                                  padding=10)
         self.grid.bind(minimum_height=self.grid.setter('height'))
 
@@ -174,9 +172,8 @@ class ViewRune(Screen):
 
         # Adding Widgets to Layouts
         self.anchor_layout.add_widget(self.edit_btn)
-        self.root.add_widget(self.grid)
         self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.root)
+        self.box.add_widget(self.grid)
 
         # Adding Layout to Screen
         self.add_widget(self.box)
