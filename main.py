@@ -16,8 +16,15 @@ from kivymd.uix.list import MDList
 import csv
 from kivymd.uix.dialog import MDDialog
 import atexit
+import os
+from kivymd.uix.snackbar import Snackbar
 
 Window.size = (300, 500)
+
+accounts = os.listdir('accounts')
+
+with open('Resources/config.txt', 'r') as file:
+    current = file.readline()
 
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
           'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
@@ -65,15 +72,14 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                    'sorcery': ['nullifying-orb', 'manaflow-band', 'nimbus-cloak', 'transcendence', 'celerity',
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
-
+rune_descriptions = {'cheap-shot': ''}
 
 class RuneSaver(MDApp):
     def build(self):
         # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
         global sm, file_runes
 
-        with open('Resources/config.txt', 'r') as file:
-            file_runes = SavedRunes(file.readline())
+        file_runes = SavedRunes(current)
 
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
@@ -98,8 +104,8 @@ class Library(Screen):
                                size=(Window.width, Window.height - 60))
 
         # Initializing Widgets
-        self.toolbar = MDToolbar(title='My Runes')
-        self.toolbar.right_action_items = [['account']]
+        self.toolbar = MDToolbar(title='{}\'s Runes'.format(current))
+        self.toolbar.right_action_items = [['account', self.change_account]]
         self.add_btn = FloatingButton(icon='plus',
                                       tooltip_text='Add New Rune')
         self.add_btn.bind(on_release=self.champ_select)
@@ -135,6 +141,78 @@ class Library(Screen):
     def delete_rune(self, rune, event):
         file_runes.delete_rune(rune)
         self.my_runes.remove_widget(rune)
+
+    def change_account(self, event):
+        items = []
+        for account in accounts:
+            item = ListItem(account.strip('.csv'), 'icons/user.png')
+            item.divider = None
+            item.bind(on_release=partial(self.switch, account.strip('.csv')))
+            items.append(item)
+
+
+        add_account_item = ListItem('Add account', 'icons/plus.png')
+        add_account_item.divider = None
+        add_account_item.bind(on_release=self.new_account)
+        items.append(add_account_item)
+
+        self.dialog_box = MDDialog(title='Choose Profile:',
+                                   type='simple',
+                                   items=items)
+
+        self.dialog_box.open()
+
+    def switch(self, account, event):
+        global current
+        if account == current:
+            self.dialog_box.dismiss()
+            return
+
+        save()
+        current = account
+        with open('Resources/config.txt', 'w') as file:
+            file.write(account)
+
+        file_runes.change_account(account)
+        self.my_runes.clear_widgets()
+        self.root.clear_widgets()
+
+        for rune in file_runes.runes:
+            rune.back_layer.children[0].bind(on_release=partial(self.delete_rune, rune))
+            rune.front_layer.bind(on_release=partial(self.view_rune, rune))
+
+            self.my_runes.add_widget(rune)
+
+        self.root.add_widget(self.my_runes)
+        self.toolbar.title = '{}\'s Runes'.format(current)
+
+        self.dialog_box.dismiss()
+
+    def new_account(self, event):
+        if len(accounts) >= 4:
+            Snackbar(text='Max Accounts Reached',
+                     duration=1).open()
+            return
+        self.create_account_box = MDDialog(title='Profile name:',
+                                           type='custom',
+                                           content_cls=MDTextField(),
+                                           buttons=[MDFlatButton(text='Create', on_release=self.create_account)])
+        self.create_account_box.open()
+
+    def create_account(self, event):
+        try:
+            global accounts
+            file_name = self.create_account_box.content_cls.text
+            open('accounts/{}.csv'.format(file_name), 'x')
+
+            self.dialog_box.dismiss()
+            self.create_account_box.dismiss()
+
+            accounts = os.listdir('accounts')
+            Snackbar(text='Profile Successfully created!', duration=1).open()
+
+        except (FileExistsError):
+            Snackbar(text='Profile already exists', duration=1).open()
 
 
 class SearchPage(Screen):
@@ -320,12 +398,11 @@ class BuildRune(Screen):
                 self.set_up_panels(rune, False, True)
 
         item.parent.parent.panel_cls.text = text.title()
-        # item.parent.parent.close_panel(item.parent.parent, False)
 
     #Displays the dialog box
     def show_save_box(self, event):
         save_btn = MDFlatButton(text='SAVE', on_release=self.save)
-        back_btn = FlatButton(text='CANCEL', on_release=self.close_box)
+        back_btn = MDFlatButton(text='CANCEL', on_release=self.close_box)
 
         self.dialog_btn = MDDialog(title='Rune Name:',
                                    type='custom',
@@ -417,10 +494,12 @@ class BuildRune(Screen):
 
 
 if __name__ == '__main__':
-    RuneSaver().run()
-
     @atexit.register
     def save():
-        with open('accounts/{}.csv'.format('Saiby100'), 'w', newline='') as file:
+        with open('accounts/{}.csv'.format(current), 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(file_runes.to_array())
+
+    RuneSaver().run()
+
+

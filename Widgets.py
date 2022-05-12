@@ -8,9 +8,6 @@ from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tooltip import MDTooltip
 
-class FlatButton(MDFlatButton, ButtonBehavior): 
-    pass
-
 class SwipeToDeleteItem(MDCardSwipe):
     def __init__(self, text, img_source):
         super().__init__()
@@ -55,6 +52,14 @@ class SavedRunes:
             temp_arr.extend(rune.attributes())
             array.append(temp_arr)
         return array
+
+    def change_account(self, account_name):
+        self.runes = []
+        with open('accounts/{}.csv'.format(account_name), 'r') as file:
+            reader = csv.reader(file)
+            for line in reader:
+                self.runes.append(Rune(line))
+
         
 class ExpansionPanel(MDExpansionPanel):
     def __init__(self, title, content=None):
@@ -68,8 +73,10 @@ class ExpansionPanel(MDExpansionPanel):
 class ListItem(OneLineAvatarListItem):
     def __init__(self, text, image_source):
         self.text = text
+        self.source = image_source
         self.icon = ImageLeftWidget()
         self.icon.source = image_source
+        # self.divider = None
         super().__init__()
         self.add_widget(self.icon)
 
