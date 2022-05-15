@@ -1,0 +1,7 @@
+While not channeling Teleport and being out-of-combat for 5 seconds, swap one of your equipped summoner spells to a new, single use summoner spell. You cannot select a summoner spell you have already equipped.
+
+Your first swap becomes available at the 6 minute mark, with an initial 300 second cooldown. Selecting a unique summoner spell reduces the swap cooldown by 25 seconds. You must swap to 3 different summoner spells before returning to one you've already used. Selecting a summoner spell puts it on a 5 second cooldown.
+
+Using a selected summoner spell puts the summoner spell on the same slot on a 10 second cooldown.
+
+Cooldown: 300−150 seconds (depending on unique swaps)

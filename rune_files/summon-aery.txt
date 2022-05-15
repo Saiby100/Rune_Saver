@@ -1,0 +1,6 @@
+Your attacks and abilities send Aery to a target, damaging enemy champions or shielding allies.
+
+Damage: 10-40 (based on level) (+ 10% AP) (+ 15% bonus AD)
+Shield: 35-80 (based on level) (+ 25% AP) or (+ 40% bonus AD)
+
+Aery cannot be sent out again until she returns to you.

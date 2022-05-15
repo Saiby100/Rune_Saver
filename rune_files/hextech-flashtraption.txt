@@ -1,0 +1,9 @@
+Passive: While  Flash is on cooldown, it is replaced by Hexflash.
+
+Hexflash: Channel for up to 2 seconds to blink to a new location.
+
+Uses Quick Casting by default, which requires the First Cast to be held and the Second Cast occurs on release.
+
+Range: 200-425 based on channel time
+
+Cooldown: 20 seconds. Goes on a 10 second cooldown when you enter champion combat.

@@ -1,0 +1,1 @@
+Damaging a champion below 50% of their maximum health deals 20-60 (based on level) (+ 5 per Soul) (+ 25% bonus AD) (+ 15% AP) bonus Adaptive damage and reaps 1 Soul. This cannot happen again for 45 seconds, resetting to 1.5 seconds on champion takedown.

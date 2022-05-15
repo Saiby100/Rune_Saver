@@ -1,0 +1,3 @@
+Gain 5 out-of-combat movement speed (+8 per Bounty Hunter stack), up to 45 at 5 stacks.
+
+Earn a Bounty Hunter stack for takedowns, up to one per unique enemy champion.

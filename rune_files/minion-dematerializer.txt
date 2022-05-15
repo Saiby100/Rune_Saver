@@ -1,0 +1,3 @@
+Start the game with 3 Minion Dematerializers that kill and absorb lane minions instantly. Minion Dematerializers are on cooldown for the first 180 seconds of the game.
+
+Absorbing a minion increases your damage by 6% against that type of minion permanently, and an extra 3% for each additional minion of that type absorbed.

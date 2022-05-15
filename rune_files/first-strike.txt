@@ -1,0 +1,5 @@
+Dealing damage to an enemy champion within the first 0.25 seconds of champion combat, grants 5 gold and First Strike for 3 seconds, causing all of your damage dealt against champions to deal 10% bonus damage. Afterwards, you are granted (100% for Melee / 70% for Ranged) of all bonus damage dealt within the duration as gold.
+
+First Strike will be placed on cooldown after being struck by an enemy champion before you strike them.
+
+Cooldown: 25−15 seconds (depending on level)

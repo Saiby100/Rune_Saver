@@ -1,0 +1,7 @@
+Every 4 seconds in combat, your next basic attack on a champion will:
+
+- Deal bonus damage equal to 4% of your max health
+- Heal you for 2% of your max health
+- Permanently increases your health by 5.
+
+Ranged Champions: Damage and healing are reduced by 40% and gain 3 permanent health instead.

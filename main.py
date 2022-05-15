@@ -1,5 +1,5 @@
 from Widgets import *
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
 from kivy.core.window import Window
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.scrollview import ScrollView
@@ -18,6 +18,7 @@ from kivymd.uix.dialog import MDDialog
 import atexit
 import os
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.spinner import MDSpinner
 
 Window.size = (300, 500)
 
@@ -26,52 +27,6 @@ accounts = os.listdir('accounts')
 with open('Resources/config.txt', 'r') as file:
     current = file.readline()
 
-titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
-          'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
-          'inspiration': ['Keystones', 'Contraptions', 'Tomorrow', 'Beyond'],
-          'resolve': ['Keystones', 'Strength', 'Resistance', 'Vitality'],
-          'sorcery': ['Keystones', 'Artifact', 'Excellence', 'Power']
-          }
-
-runes = {'domination': {'Keystones': ['electrocute', 'predator', 'dark-harvest', 'hail-of-blades'],
-                        'Malice': ['cheap-shot', 'taste-of-blood', 'sudden-impact'],
-                        'Tracking': ['zombie-ward', 'ghost-poro', 'eyeball-collection'],
-                        'Hunter': ['treasure-hunter', 'ingenious-hunter', 'relentless-hunter', 'ultimate-hunter']},
-
-         'precision': {'Keystones': ['press-the-attack', 'lethal-tempo', 'fleet-footwork', 'conqueror'],
-                       'Heroism': ['overheal', 'triumph', 'presence-of-mind'],
-                       'Legend': ['legend-alacrity', 'legend-tenacity', 'legend-bloodline'],
-                       'Combat': ['coup-de-grace', 'cut-down', 'last-stand']},
-
-         'inspiration': {'Keystones': ['glacial-augment', 'unsealed-spellbook', 'first-strike'],
-                         'Contraptions': ['hextech-flashtraption', 'magical-footwear', 'perfect-timing'],
-                         'Tomorrow': ['future\'s-market', 'minion-dematerializer', 'biscuit-delivery'],
-                         'Beyond': ['cosmic-insight', 'approach-velocity', 'time-warp-tonic']},
-
-         'resolve': {'Keystones': ['grasp-of-the-undying', 'aftershock', 'guardian'],
-                     'Strength': ['demolish', 'font-of-life', 'shield-bash'],
-                     'Resistance': ['conditioning', 'second-wind', 'bone-plating'],
-                     'Vitality': ['overgrowth', 'revitalize', 'unflinching']},
-
-         'sorcery': {'Keystones': ['summon-aery', 'arcane-comet', 'phase-rush'],
-                     'Artifact': ['nullifying-orb', 'manaflow-band', 'nimbus-cloak'],
-                     'Excellence': ['transcendence', 'celerity', 'absolute-focus'],
-                     'Power': ['scorch', 'waterwalking', 'gathering-storm']}
-         }
-
-secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact', 'zombie-ward', 'ghost-poro',
-                                  'eyeball-collection', 'treasure-hunter', 'ingenious-hunter', 'relentless-hunter',
-                                  'ultimate-hunter'],
-                   'precision': ['overheal', 'triumph', 'presence-of-mind', 'legend-alacrity', 'legend-tenacity',
-                                 'legend-bloodline', 'coup-de-grace', 'cut-down', 'last-stand'],
-                   'inspiration': ['hextech-flashtraption', 'magical-footwear', 'perfect-timing', 'future\'s-market',
-                                   'minion-dematerializer', 'biscuit-delivery', 'cosmic-insight', 'approach-velocity',
-                                   'time-warp-tonic'],
-                   'resolve': ['demolish', 'font-of-life', 'shield-bash', 'conditioning', 'second-wind',
-                               'bone-plating', 'overgrowth', 'revitalize', 'unflinching'],
-                   'sorcery': ['nullifying-orb', 'manaflow-band', 'nimbus-cloak', 'transcendence', 'celerity',
-                               'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
-                   }
 rune_descriptions = {'cheap-shot': ''}
 
 class RuneSaver(MDApp):
@@ -209,16 +164,12 @@ class Library(Screen):
             self.create_account_box.dismiss()
 
             accounts = os.listdir('accounts')
+            self.switch(file_name, None)
             Snackbar(text='Profile Successfully created!', duration=1).open()
 
         except (FileExistsError):
             Snackbar(text='Profile already exists', duration=1).open()
 
-
-class SearchPage(Screen):
-    def set_list_cards(self, text="", search=False):
-        def add_card(card_name):
-            self.rv.data.append({'viewclass'})
 
 
 class ViewRune(Screen):
@@ -246,7 +197,9 @@ class ViewRune(Screen):
         self.edit_btn.bind(on_release=partial(self.edit_rune, self.rune))
 
         for attribute in self.rune.attributes():
-            self.grid.add_widget(RuneCard('Runes/{}.png'.format(attribute), attribute.title()))
+            rune_card = RuneCard('Runes/{}.png'.format(attribute), attribute.title())
+            rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
+            self.grid.add_widget(rune_card)
 
         # Adding Widgets to Layouts
         self.anchor_layout.add_widget(self.edit_btn)
@@ -258,16 +211,15 @@ class ViewRune(Screen):
         self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
-        sm.remove_widget(sm.get_screen('view_page'))
+        sm.remove_widget(self)
         sm.current = 'library'
 
     #Edit the chosen rune
     def edit_rune(self, rune, event):
         self.rune = rune
         screen = sm.get_screen('rune_page')
-        screen.toolbar.title = rune.name.title()
+        screen.toolbar.title = rune.name
         screen.toolbar.right_action_items = [['icons/{}.png'.format(rune.champ)]]
-        screen.edit_mode = True
 
         array = rune.attributes()
         array.reverse()
@@ -276,6 +228,52 @@ class ViewRune(Screen):
         screen.previous = self.name
         sm.current = 'rune_page'
 
+    def view_rune_attribute(self, rune_attribute, event):
+        sm.add_widget(InfoPage(rune_attribute, 'rune_info'))
+        sm.current = 'rune_info'
+
+class InfoPage(Screen):
+    def __init__(self, attribute, page_name):
+        super().__init__(name=page_name)
+        self.attribute = attribute
+        self.box = MDBoxLayout(orientation='vertical', padding=10)
+        self.anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top', padding=15)
+        text = ""
+
+        with open('rune_files/{}.txt'.format(self.attribute), 'r') as file:
+            for line in file.readlines():
+                text += line
+
+        self.card = MDCard(orientation='vertical',
+                           padding='10dp',
+                           spacing=0,
+                           radius='25dp')
+        self.card.add_widget(Image(source='Runes/{}.png'.format(self.attribute),
+                                   size_hint_y=None,
+                                   height=50))
+        self.card.add_widget(MDLabel(text=self.attribute.title(),
+                                     halign='center',
+                                     font_style='H6',
+                                     size_hint_y=None,
+                                     pos_hint={'top': 1}))
+        self.card.add_widget(MDLabel(text=text,
+                                     halign='left',
+                                     font_style='Subtitle2',
+                                     pos_hint={'y': 1}))
+
+
+        # self.info_card = RuneCard('Runes/{}.png'.format(self.attribute), text)
+
+        self.box.add_widget(self.card)
+        self.anchor_layout.add_widget(FloatingButton(icon='arrow-left',
+                                                     on_release=self.go_back))
+
+        self.add_widget(self.box)
+        self.add_widget(self.anchor_layout)
+
+    def go_back(self, event):
+        sm.current = 'view_page'
+        sm.remove_widget(self)
 
 class ChampSelect(Screen):
     def __init__(self, page_name):
@@ -315,9 +313,9 @@ class ChampSelect(Screen):
 
     #Build a rune for the champion chosen
     def build_rune(self, champ, event):
-        self.champion = champ
         screen = sm.get_screen('rune_page')
 
+        screen.champion = champ
         screen.toolbar.title = champ.title()
         screen.toolbar.right_action_items = [['icons/{}.png'.format(champ)]]
         screen.previous = self.name
@@ -333,6 +331,7 @@ class BuildRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
         self.previous = None
+        self.champion = None
 
         # Initializing Layouts
         self.stack_layout = MDStackLayout(size_hint_y=None,
@@ -401,7 +400,7 @@ class BuildRune(Screen):
 
     #Displays the dialog box
     def show_save_box(self, event):
-        save_btn = MDFlatButton(text='SAVE', on_release=self.save)
+        save_btn = MDFlatButton(text='SAVE', on_release=self.save_rune)
         back_btn = MDFlatButton(text='CANCEL', on_release=self.close_box)
 
         self.dialog_btn = MDDialog(title='Rune Name:',
@@ -411,10 +410,8 @@ class BuildRune(Screen):
         self.dialog_btn.open()
 
     #Saves the rune
-    def save(self, event=None):
+    def save_rune(self, event=None):
         try:
-            rune_info = [sm.get_screen('champ_select').champion, self.dialog_btn.content_cls.text]
-        except AttributeError:
             rune_screen = sm.get_screen('view_page')
             rune = rune_screen.rune
             rune_info = [rune.champ, self.dialog_btn.content_cls.text]
@@ -432,11 +429,13 @@ class BuildRune(Screen):
             sm.current = 'library'
             return
 
+        except ScreenManagerException:
+            rune_info = [self.champion, self.dialog_btn.content_cls.text]
+
         for i in range(len(self.grid.children) - 1, -1, -1):
             rune_info.append(self.grid.children[i].panel_cls.text.lower())
 
         screen = sm.get_screen('library')
-        screen.root.clear_widgets()
         screen.my_runes.clear_widgets()
 
         rune = Rune(rune_info)
@@ -447,9 +446,9 @@ class BuildRune(Screen):
         for r in file_runes.runes:
             screen.my_runes.add_widget(r)
 
-        screen.root.add_widget(screen.my_runes)
         self.close_box()
 
+        Snackbar(text='Rune Saved Successfully!', duration=1).open()
         sm.current = 'library'
 
     #Creates titles and panel contents for expansion panels

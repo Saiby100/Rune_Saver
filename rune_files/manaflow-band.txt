@@ -1,0 +1,5 @@
+Hitting enemy champions with a spell grants 25 maximum mana, up to 250 mana.
+
+Cooldown: 15 seconds
+
+Upon earning 250 mana, Manaflow Band restores 1% of your missing mana every 5 seconds.

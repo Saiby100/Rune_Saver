@@ -1,0 +1,6 @@
+After immobilizing an enemy champion, increase your Armor and Magic Resist by 35 + 80% of your Bonus Resists for 2.5s. Then explode, dealing magic damage to nearby enemies.
+
+Damage: 25-120 (+8% of your bonus health)
+Cooldown: 20s
+
+Resistance bonus from Aftershock capped at: 80-150 (based on level)

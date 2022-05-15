@@ -1,0 +1,7 @@
+When your wards expire, they leave behind a Ghost Poro, which is untargetable and grants sight over a 450-unit area for 90 seconds. Wards killed by enemies or replacement do not spawn Ghost Poros.
+
+Nearby enemy champions (within 400 center-to-edge radius) scare the Ghost Poro away, causing it to also alert its team and reveal a 150 radius around the triggering champion for 6 seconds.
+
+Gain 1.2 bonus Attack Damage or 2 Ability Power (Adaptive) for every Ghost Poro spawned and when your Ghost Poro spots an enemy champion, up to 10 stacks, for a maximum of 12 bonus Attack Damage or 20 Ability Power (Adaptive). After reaching 10 stacks, additionally gain 6 bonus Attack Damage or 10 Ability Power (Adaptive).
+
+Adaptive: Grants bonuses in the stat you already have the most bonuses in. Defaults to the first listed.

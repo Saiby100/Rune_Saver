@@ -1,0 +1,1 @@
+Gain 7.5% bonus movement speed toward enemy champions with impaired movement. This bonus is doubled to 15% toward enemy champions whose movement you have impaired.

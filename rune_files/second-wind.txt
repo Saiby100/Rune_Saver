@@ -1,0 +1,3 @@
+After taking damage from an enemy champion, gain health regeneration equal to 6 (+4% of your missing health) over 10 seconds.
+
+If attacked while already under the effect of Second Wind, the duration will refresh.

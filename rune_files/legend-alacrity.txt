@@ -1,0 +1,7 @@
+Gain 3% attack speed plus an additional 1.5% for every Legend stack (max 10 stacks).
+
+Legend: Gain Legend stacks for every 100 points earned, up to 10:
+- 100 points for champion takedowns
+- 100 points for epic monster takedowns
+- 25 points for large monster kills
+- 4 points for minion kills

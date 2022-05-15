@@ -1,0 +1,9 @@
+Damaging an enemy champion with an ability hurls a comet at their location, or if Arcane Comet is on cooldown, reduces its remaining cooldown.
+
+Adaptive Damage: 30-100 (based on level) (+ 20% AP) (+ 35% bonus AD)
+Cooldown: 20-8 seconds
+
+Cooldown Reduction:
+Single Target: 20%
+Area of Effect: 10%
+Damage over Time: 5%

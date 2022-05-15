@@ -1,0 +1,7 @@
+Collect 1 Eyeball per champion takedown, up to 10.
+
+Gain an adaptive bonus of 1.2 bonus Attack Damage or 2 Ability Power per Eyeball collected, up to 12 bonus Attack Damage or 20 Ability Power.
+
+Completing your collection awards an additional adaptive bonus of 6 Attack Damage or 10 Ability Power.
+
+Adaptive will grant bonuses based on which stat you already have the most bonuses for. This defaults to the first listed.

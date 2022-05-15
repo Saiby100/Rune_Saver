@@ -1,0 +1,1 @@
+While above 70% health, gain an adaptive bonus of 1.8-18 attack damage or 3-30 ability power (based on level).

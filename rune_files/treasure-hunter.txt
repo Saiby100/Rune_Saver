@@ -1,0 +1,3 @@
+Gain 70 gold per unique takedown (+20 gold per Bounty Hunter stack), up to 550 gold at 5 unique takedowns.
+
+Earn a Bounty Hunter stack whenever scoring a takedown against an enemy champion, up to one per unique champion.

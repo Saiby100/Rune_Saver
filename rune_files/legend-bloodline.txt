@@ -1,0 +1,8 @@
+Passive: Gain 0.4% life steal per Legend stack, up to 6% with 15 stacks. At maximum Legend stacks, gain 100 bonus health.
+
+Legend: Gain Legend stacks for every 100 points earned, up to 15:
+
+- 100 points for champion takedowns
+- 100 points for epic monster takedowns
+- 25 points for large monster kills
+- 4 points for minion kills

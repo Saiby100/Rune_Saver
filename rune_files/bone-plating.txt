@@ -1,0 +1,4 @@
+After taking damage from an enemy champion, the next 3 spells or attacks you receive from them deal 30-60 less damage.
+
+Duration: 1.5 seconds
+Cooldown: 45 seconds

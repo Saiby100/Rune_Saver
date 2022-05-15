@@ -1,0 +1,5 @@
+Heal when you damage an enemy champion.
+
+Healing: 18-35 (+ 20% bonus AD) (+ 10% AP) health (based on level)
+
+Cooldown: 20 seconds

@@ -1,0 +1,3 @@
+When you take magic damage that would reduce your health below 30%, gain a shield that absorbs 40-120 magic damage based on level (+ 10% AP) (+ 15% bonus AD) for 4 seconds.
+
+Cooldown: 60 seconds

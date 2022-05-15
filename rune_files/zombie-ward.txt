@@ -1,0 +1,5 @@
+Scoring a takedown on an enemy ward summons a friendly Zombie Ward in its place (10 second assist timer). If the brush where you killed the enemy ward already contains an allied ward, you instead gain a Zombie Ward in your Trinket Slot that can be placed at any location within the next 30 seconds.
+
+Gain 1.2 Attack Damage or 2 Ability Power (Adaptive) for every Zombie Ward spawned, up to 10, for a maximum of 12 Attack Damage or 20 Ability Power (Adaptive). After spawning 10 Zombie Wards, gain an additional 6 Attack Damage or 10 Ability Power (Adaptive).
+
+Zombie Wards grant sight over 1100 units, are visible to the enemy team, have 1 health, last for 120 seconds and don't count towards your ward limit.

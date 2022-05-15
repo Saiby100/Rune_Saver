@@ -1,0 +1,7 @@
+Gain bonus movement speed for 10 seconds, ramping up to 45% over 1.5 seconds, while moving toward enemy champions (3000 range, includes enemy champions out of vision). Activating Predator will not break stealth.
+
+After ramping up, your next attack or damaging ability against an enemy champion deals 40-120 (+0.2 of bonus attack damage) (+10% of ability power) bonus Adaptive damage and ends the effect (depending on level).
+
+Deals either physical or magic damage depending on your bonus statistics, defaulting based on the origin of the effect.
+
+Cooldown: 90-60 seconds (depending on level)

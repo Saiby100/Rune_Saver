@@ -1,0 +1,9 @@
+Every 10 minutes, gain AP or AD, adaptive.
+
+10 min: + 8 AP or 5 AD
+20 min: + 24 AP or 14 AD
+30 min: + 48 AP or 29 AD
+40 min: + 80 AP or 48 AD
+50 min: + 120 AP or 72 AD
+60 min: + 168 AP or 101 AD
+etc...

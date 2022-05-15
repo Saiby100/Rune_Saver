@@ -1,0 +1,1 @@
+Casting a summoner spell grants ghosting and 5−25% bonus movement speed for 2 seconds (depending on summoner spell cooldown).

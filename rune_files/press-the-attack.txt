@@ -1,0 +1,1 @@
+Hitting an enemy champion with 3 consecutive basic attacks deals 40-180 bonus adaptive damage (based on level) and makes them vulnerable, increasing the damage they take by 8-12% from all sources for 6 seconds.

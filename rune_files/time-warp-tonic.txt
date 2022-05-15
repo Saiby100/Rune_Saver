@@ -1,0 +1,3 @@
+Consuming a potion or biscuit grants 30% of its health immediately, and mana if applicable. Health/mana per tick is then reduced by half for the effect's regular duration. If consumables are stacked, the instant restoration is applied after the duration of the initial consumable ends.
+
+Additionally, you gain 4% bonus movement speed while under the effect of a potion or biscuit.

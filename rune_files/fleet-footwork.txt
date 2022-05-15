@@ -1,0 +1,3 @@
+Moving and basic attacking generates Energize stacks, up to 100.
+
+When fully Energized, your next basic attack heals you for 10−100 (+0.3 bonus attack damage) (+20% ability power) (depending on level) and grants 20% bonus movement speed for 1 second. Against minions, the healing is (20% for Melee / 10% for Ranged) effective.

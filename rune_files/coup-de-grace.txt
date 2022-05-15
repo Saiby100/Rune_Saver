@@ -1,0 +1,1 @@
+Deal 8% more damage to champions who have less than 40% health.

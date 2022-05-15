@@ -1,0 +1,5 @@
+You can enter debt to buy items. The amount you can borrow increases over time.
+
+Lending fee: 50 gold
+Debt limit: 150 + 5/min
+(Debt doesn't become available until 2 minutes)

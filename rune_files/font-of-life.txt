@@ -1,0 +1,3 @@
+Impairing the movement of an enemy champion marks them for 4 seconds.
+
+Allied champions who attack marked enemies heal for 5 (+ 1% of your max health) over 2 seconds.

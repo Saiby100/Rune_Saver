@@ -1,0 +1,1 @@
+Outgoing and incoming heals and shields are 5% stronger and increased by an additional 10% on targets below 40% health.

@@ -1,0 +1,3 @@
+Your next damaging ability hit sets champions on fire, dealing 15-35 bonus magic damage based on level after 1 second.
+
+Cooldown: 10 seconds

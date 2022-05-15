@@ -1,0 +1,5 @@
+After exiting stealth or using a dash, blink or teleport, dealing any damage to a champion grants you 7 Lethality and 6 Magic Penetration for 5 seconds.
+
+The triggering damage will also benefit from the penetration.
+
+Cooldown: 4 seconds (on expiration)

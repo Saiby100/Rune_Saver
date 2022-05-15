@@ -1,0 +1,4 @@
+Hitting an enemy champion with 3 attacks or separate abilities within 4 seconds grants ranged champions 15-40% Movement Speed, which is increased to 30-60% for melee champions (depending on level) and 75% Slow Resistance for the duration.
+
+Duration: 4 seconds
+Cooldown: 30-10 seconds (depending on level)

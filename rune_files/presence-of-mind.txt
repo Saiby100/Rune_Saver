@@ -1,0 +1,3 @@
+Champion takedowns, after a 1-second delay, restore 15% of your maximum mana or 15% of your maximum energy.
+
+Damaging an enemy champion increases your mana regeneration by 1.5−11 mana per second (depending on level), reduced to 80% effectiveness for ranged champions, for 4 seconds. When triggering this effect, energy users regenerate 1.5 energy per second instead.

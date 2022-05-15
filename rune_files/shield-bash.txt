@@ -1,0 +1,3 @@
+While shielded, gain 1 − 10 (based on level) bonus armor and magic resistance.
+
+Whenever you gain a shield, your next basic attack against a champion deals 5-30 (based on level) (+ 1.5% bonus health) (+ 8.5% shield amount) bonus Adaptive damage. The empowered attack lasts up to 2 seconds after the shield expires.

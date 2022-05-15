@@ -1,0 +1,5 @@
+Gain bonuses upon reaching the following levels:
+
+- Level 5: 5 ability haste.
+- Level 8: 5 ability haste.
+- Level 11: On champion takedowns, reduce the remaining cooldown of your basic abilities by 20%.

@@ -1,0 +1,3 @@
+Hitting a champion with 3 seperate attacks or abilities within 3s deals bonus adaptive damage.
+Damage: 30 - 180 (+0.4 bonus AD, +0.25 AP) damage.
+Cooldown: 25 - 20s

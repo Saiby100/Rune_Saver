@@ -1,0 +1,1 @@
+Gain 10% slow resist and tenacity. This increases based on your missing health, up to 30% slow resist and tenacity at 30% maximum health or below.

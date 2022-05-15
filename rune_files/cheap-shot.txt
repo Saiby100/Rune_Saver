@@ -1,0 +1,4 @@
+Damaging champions with impaired movement or actions deals 10-45 bonus true damage (based on level).
+
+Cooldown: 4 seconds
+Activates on damage occurring after the impairment.

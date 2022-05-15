@@ -1,0 +1,5 @@
+While within 350 units of an allied champion, you raise your Guard. Allied champions you affect with unit-targeted abilities are also Guarded for 3 seconds, regardless of distance.
+
+If you or a Guarded ally would take 90−250 (depending on level) damage within 2.5 seconds or lethal damage from an enemy champion, monster or turret, you both first gain a shield for 50−130 (+15% of Guardian's ability power) (+9% of Guardian's bonus health) for 2 seconds (depending on level). Guardian only goes on cooldown when the shield is triggered.
+
+Cooldown: 70-40s (depending on level)

@@ -1,0 +1,5 @@
+Basic attacks on-damage against enemy champions grant (2 for Melee / 1 for Ranged) stacks of Conqueror. Abilities, spells and item actives on-damage will grant 2 stacks.
+
+Each stack of Conqueror grants 1.2−2.7 bonus Attack Damage (depending on level) or 2−4.5 Ability Power (depending on level) for 5 seconds (Adaptive), stacking up to 12 times, for a maximum of 14.4−32.4 bonus Attack Damage (depending on level) or 24−54 Ability Power (depending on level). While fully stacked, you heal for (9% for Melee / 6% Ranged) of the post-mitigation damage from any attack you deal to enemy champions, and the stacks refresh upon dealing damage to enemy champions with attacks or abilities.
+
+Persistent damage and ongoing sources of damage will grant the stacks only once every 5 seconds. Spells and effects that deal default damage will not grant any stacks.

@@ -1,0 +1,3 @@
+Excess healing on you becomes a shield for up to 10% of your total health + 10.
+
+Shield is built up from 20-100% (at levels 1-18) of excess healing. After 6 seconds, the shield decays by 2.5% of the max shield value each second.

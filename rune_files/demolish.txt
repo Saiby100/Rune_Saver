@@ -1,0 +1,3 @@
+Charge up a powerful attack against a tower over 3 seconds, while within 600 range of it. The charged attack deals 100 (+35% of your max health) bonus physical damage.
+
+Cooldown: 45 seconds

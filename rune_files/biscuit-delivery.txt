@@ -1,0 +1,5 @@
+Receive a Total Biscuit of Everlasting Will at 2:00, 4:00 and 6:00. If the inventory is full while receiving a biscuit, the biscuit(s) will appear as soon as a slot in the inventory is available.
+
+Consuming a Biscuit will instantly grant 50 mana and permanently increase your maximum mana by 50, in addition to its effects. You will also gain the increased mana if you sell the biscuit for 5 gold.
+
+Manaless: Champions without mana restore 12% missing health instead.
