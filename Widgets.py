@@ -1,6 +1,4 @@
 import csv
-
-from kivy.animation import Animation
 from kivymd.uix.button import MDIconButton, MDFloatingActionButton
 from kivymd.uix.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
@@ -57,14 +55,13 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
-rune_info = {''}
-
 class SwipeToDeleteItem(MDCardSwipe):
     def __init__(self, text, img_source):
         super().__init__()
         self.size_hint_y = None
         self.height = 55
-        self.icon = MDIconButton(icon='trash-can', pos_hint={'center_y': .5})
+        self.icon = MDIconButton(icon='trash-can',
+                                 pos_hint={'center_y': .5})
         self.list_item = ListItem(text, img_source)
         self.front_layer = MDCardSwipeFrontBox()
         self.front_layer.add_widget(self.list_item)
@@ -81,7 +78,7 @@ class FloatingButton(MDFloatingActionButton, MDTooltip):
 class SavedRunes: 
     def __init__(self, account_name):
         self.runes = []
-        with open('accounts/{}.csv'.format(account_name), 'r') as file: 
+        with open(f'accounts/{account_name}.csv', 'r') as file:
             reader = csv.reader(file)
             for line in reader: 
                 self.runes.append(Rune(line))
@@ -106,7 +103,7 @@ class SavedRunes:
 
     def change_account(self, account_name):
         self.runes = []
-        with open('accounts/{}.csv'.format(account_name), 'r') as file:
+        with open(f'accounts/{account_name}.csv', 'r') as file:
             reader = csv.reader(file)
             for line in reader:
                 self.runes.append(Rune(line))
@@ -132,7 +129,6 @@ class ListItem(OneLineAvatarListItem):
         self.source = image_source
         self.icon = ImageLeftWidget()
         self.icon.source = image_source
-        # self.divider = None
         super().__init__()
         self.add_widget(self.icon)
 
@@ -158,7 +154,9 @@ class Card(MDCard):
                               keep_ratio=False,
                               size_hint=(None,None),
                               size=(90,70)))
-        self.add_widget(MDLabel(text=txt, font_style='Caption', halign='center'))
+        self.add_widget(MDLabel(text=txt,
+                                font_style='Caption',
+                                halign='center'))
 
 class RuneCard(MDCard): 
     def __init__(self, src, text=None):
@@ -175,7 +173,9 @@ class RuneCard(MDCard):
                               height=65))
 
         if text is not None:
-            self.add_widget(MDLabel(text=text, halign='center', font_style='Caption'))
+            self.add_widget(MDLabel(text=text,
+                                    halign='center',
+                                    font_style='Caption'))
 
 
 class Rune(SwipeToDeleteItem):

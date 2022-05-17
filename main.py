@@ -1,3 +1,5 @@
+from kivymd.uix.relativelayout import MDRelativeLayout
+
 from Widgets import *
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
 from kivy.core.window import Window
@@ -18,6 +20,7 @@ from kivymd.uix.dialog import MDDialog
 import atexit
 import os
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.tab import MDTabsScrollView
 from kivymd.uix.spinner import MDSpinner
 
 Window.size = (300, 500)
@@ -27,11 +30,10 @@ accounts = os.listdir('accounts')
 with open('Resources/config.txt', 'r') as file:
     current = file.readline()
 
-rune_descriptions = {'cheap-shot': ''}
-
 class RuneSaver(MDApp):
     def build(self):
-        # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
+        # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime,
+        # Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
         global sm, file_runes
 
         file_runes = SavedRunes(current)
@@ -45,7 +47,7 @@ class RuneSaver(MDApp):
 
         return sm
 
-
+#Page with user's saved runes
 class Library(Screen):
     # use list object to save runes
     def __init__(self, page_name):
@@ -59,7 +61,7 @@ class Library(Screen):
                                size=(Window.width, Window.height - 60))
 
         # Initializing Widgets
-        self.toolbar = MDToolbar(title='{}\'s Runes'.format(current))
+        self.toolbar = MDToolbar(title=f'{current}\'s Runes')
         self.toolbar.right_action_items = [['account', self.change_account]]
         self.add_btn = FloatingButton(icon='plus',
                                       tooltip_text='Add New Rune')
@@ -105,7 +107,6 @@ class Library(Screen):
             item.bind(on_release=partial(self.switch, account.strip('.csv')))
             items.append(item)
 
-
         add_account_item = ListItem('Add account', 'icons/plus.png')
         add_account_item.divider = None
         add_account_item.bind(on_release=self.new_account)
@@ -139,7 +140,7 @@ class Library(Screen):
             self.my_runes.add_widget(rune)
 
         self.root.add_widget(self.my_runes)
-        self.toolbar.title = '{}\'s Runes'.format(current)
+        self.toolbar.title =f'{current}\'s Runes'
 
         self.dialog_box.dismiss()
 
@@ -158,7 +159,7 @@ class Library(Screen):
         try:
             global accounts
             file_name = self.create_account_box.content_cls.text
-            open('accounts/{}.csv'.format(file_name), 'x')
+            open(f'accounts/{file_name}.csv', 'x')
 
             self.dialog_box.dismiss()
             self.create_account_box.dismiss()
@@ -170,8 +171,7 @@ class Library(Screen):
         except (FileExistsError):
             Snackbar(text='Profile already exists', duration=1).open()
 
-
-
+#Page to view rune attributes for each saved rune
 class ViewRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
@@ -191,13 +191,13 @@ class ViewRune(Screen):
 
         # Initializing Widgets
         self.toolbar = MDToolbar(title=self.rune.name)
-        self.toolbar.right_action_items = [['icons/{}.png'.format(self.rune.champ)]]
+        self.toolbar.right_action_items = [[f'icons/{self.rune.champ}.png']]
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
         self.edit_btn = MDFloatingActionButton(icon='pencil')
         self.edit_btn.bind(on_release=partial(self.edit_rune, self.rune))
 
         for attribute in self.rune.attributes():
-            rune_card = RuneCard('Runes/{}.png'.format(attribute), attribute.title())
+            rune_card = RuneCard(f'Runes/{attribute}.png', attribute.title())
             rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
             self.grid.add_widget(rune_card)
 
@@ -219,7 +219,7 @@ class ViewRune(Screen):
         self.rune = rune
         screen = sm.get_screen('rune_page')
         screen.toolbar.title = rune.name
-        screen.toolbar.right_action_items = [['icons/{}.png'.format(rune.champ)]]
+        screen.toolbar.right_action_items = [[f'icons/{rune.champ}.png']]
 
         array = rune.attributes()
         array.reverse()
@@ -229,52 +229,66 @@ class ViewRune(Screen):
         sm.current = 'rune_page'
 
     def view_rune_attribute(self, rune_attribute, event):
+        if (titles.keys().__contains__(rune_attribute)):
+            return
         sm.add_widget(InfoPage(rune_attribute, 'rune_info'))
         sm.current = 'rune_info'
 
+#Page to view rune effects
 class InfoPage(Screen):
     def __init__(self, attribute, page_name):
         super().__init__(name=page_name)
-        self.attribute = attribute
-        self.box = MDBoxLayout(orientation='vertical', padding=10)
-        self.anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top', padding=15)
-        text = ""
 
-        with open('rune_files/{}.txt'.format(self.attribute), 'r') as file:
+        self.attribute = attribute
+
+        #Initializing Layouts
+        self.box = MDBoxLayout(orientation='vertical',
+                               padding=10)
+        self.box2 = MDBoxLayout(orientation='vertical',
+                                pos_hint={'top': 1},
+                                padding=[20, 15],
+                                adaptive_height=True,
+                                spacing=20)
+        self.anchor_layout = AnchorLayout(anchor_x='left',
+                                          anchor_y='top',
+                                          padding=15)
+        self.anchor_layout2 = AnchorLayout(anchor_x='center',
+                                           anchor_y='center',
+                                           padding=15)
+        text = ""
+        with open(f'rune_files/{self.attribute}.txt', 'r') as file:
             for line in file.readlines():
                 text += line
 
+        #Intializing and adding widgets to layouts
         self.card = MDCard(orientation='vertical',
                            padding='10dp',
-                           spacing=0,
                            radius='25dp')
-        self.card.add_widget(Image(source='Runes/{}.png'.format(self.attribute),
+        self.box2.add_widget(Image(source=f'Runes/{self.attribute}.png',
                                    size_hint_y=None,
                                    height=50))
-        self.card.add_widget(MDLabel(text=self.attribute.title(),
+        self.box2.add_widget(MDLabel(text=self.attribute.title(),
                                      halign='center',
-                                     font_style='H6',
-                                     size_hint_y=None,
-                                     pos_hint={'top': 1}))
-        self.card.add_widget(MDLabel(text=text,
-                                     halign='left',
-                                     font_style='Subtitle2',
-                                     pos_hint={'y': 1}))
-
-
-        # self.info_card = RuneCard('Runes/{}.png'.format(self.attribute), text)
+                                     font_style='H6'))
+        self.anchor_layout2.add_widget(MDLabel(text=text,
+                                               halign='left',
+                                               font_style='Subtitle2'))
 
         self.box.add_widget(self.card)
         self.anchor_layout.add_widget(FloatingButton(icon='arrow-left',
                                                      on_release=self.go_back))
 
+        #Adding layouts to screen
         self.add_widget(self.box)
         self.add_widget(self.anchor_layout)
+        self.add_widget(self.box2)
+        self.add_widget(self.anchor_layout2)
 
     def go_back(self, event):
         sm.current = 'view_page'
         sm.remove_widget(self)
 
+#Page to choose a champion
 class ChampSelect(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
@@ -317,16 +331,16 @@ class ChampSelect(Screen):
 
         screen.champion = champ
         screen.toolbar.title = champ.title()
-        screen.toolbar.right_action_items = [['icons/{}.png'.format(champ)]]
+        screen.toolbar.right_action_items = [[f'icons/{champ}.png']]
         screen.previous = self.name
-        screen.set_up_panels()
+        # screen.set_up_panels()
 
         sm.current = 'rune_page'
 
     def go_back(self, event):
         sm.current = 'library'
 
-
+#Page to build a rune
 class BuildRune(Screen):
     def __init__(self, page_name):
         super().__init__(name=page_name)
@@ -370,13 +384,15 @@ class BuildRune(Screen):
 
     def go_back(self, event):
         sm.current = self.previous
+        if self.previous == 'view_page':
+            self.set_up_panels()
 
     # Creates a content widget containing all the runes specified in the array
     def create_content(self, array):
         items = []
         for value in array:
             value = value.strip('\n')
-            item = ListItem(value.title(), 'Runes/{}.png'.format(value))
+            item = ListItem(value.title(), f'Runes/{value}.png')
             item.bind(on_release=partial(self.update_panel, item, value))
             items.append(item)
 
@@ -405,7 +421,7 @@ class BuildRune(Screen):
 
         self.dialog_btn = MDDialog(title='Rune Name:',
                                    type='custom',
-                                   content_cls=MDTextField(),
+                                   content_cls=MDTextField(text=self.toolbar.title),
                                    buttons=[back_btn, save_btn])
         self.dialog_btn.open()
 
@@ -491,11 +507,10 @@ class BuildRune(Screen):
     def close_box(self, event=None):
         self.dialog_btn.dismiss()
 
-
 if __name__ == '__main__':
     @atexit.register
     def save():
-        with open('accounts/{}.csv'.format(current), 'w', newline='') as file:
+        with open(f'accounts/{current}.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(file_runes.to_array())
 

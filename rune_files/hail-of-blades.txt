@@ -1,7 +1,5 @@
 Basic attacking an enemy champion grants 110% bonus attack speed as well as make your bonus attack speed ignore the attack speed cap (2.5) for your next 3 basic attacks on-attack. Attack resets do not consume a stack of Hail of Blades, but do benefit from the bonus attack speed.
 
-The triggering attack benefits from Hail of Blades and will always consume a stack.
-
 Hail of Blades lasts 3 seconds, and consuming a stack against enemy champions refreshes the duration to 3 seconds. The buff stops refreshing if the basic attack targeting a champion is cancelled.
 
 Cooldown: 12 seconds.
