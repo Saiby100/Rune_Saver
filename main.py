@@ -1,5 +1,3 @@
-from kivymd.uix.relativelayout import MDRelativeLayout
-
 from Widgets import *
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
 from kivy.core.window import Window
@@ -20,8 +18,6 @@ from kivymd.uix.dialog import MDDialog
 import atexit
 import os
 from kivymd.uix.snackbar import Snackbar
-from kivymd.uix.tab import MDTabsScrollView
-from kivymd.uix.spinner import MDSpinner
 
 # Window.size = (300, 500)
 

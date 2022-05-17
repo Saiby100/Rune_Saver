@@ -162,7 +162,6 @@ class RuneCard(MDCard):
     def __init__(self, src, text=None):
         super().__init__()
         self.orientation = 'vertical'
-        self.size_hint_y = None
         self.padding = '5dp'
         self.spacing = '5dp'
         self.radius = '25dp'
