@@ -23,7 +23,7 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.tab import MDTabsScrollView
 from kivymd.uix.spinner import MDSpinner
 
-Window.size = (300, 500)
+# Window.size = (300, 500)
 
 accounts = os.listdir('accounts')
 
@@ -57,8 +57,7 @@ class Library(Screen):
         self.anchor_layout = AnchorLayout(anchor_x='right',
                                           anchor_y='bottom',
                                           padding=30)
-        self.root = ScrollView(size_hint=(1, None),
-                               size=(Window.width, Window.height - 60))
+        self.root = ScrollView()
 
         # Initializing Widgets
         self.toolbar = MDToolbar(title=f'{current}\'s Runes')
@@ -76,7 +75,6 @@ class Library(Screen):
 
             self.my_runes.add_widget(rune)
 
-        # self.root.add_widget(self.selection_list)
         self.root.add_widget(self.my_runes)
         self.box.add_widget(self.toolbar)
         self.box.add_widget(self.root)
@@ -181,13 +179,10 @@ class ViewRune(Screen):
         self.anchor_layout = AnchorLayout(anchor_x='right',
                                           anchor_y='bottom',
                                           padding=30)
-        self.box = BoxLayout(orientation='vertical',
-                             pos_hint={'top': 1})
+        self.box = BoxLayout(orientation='vertical')
         self.grid = MDGridLayout(cols=2,
-                                 size_hint_y=None,
                                  spacing=5,
                                  padding=10)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
 
         # Initializing Widgets
         self.toolbar = MDToolbar(title=self.rune.name)
@@ -296,8 +291,7 @@ class ChampSelect(Screen):
         # Initializing Layouts
         self.box = BoxLayout(orientation='vertical',
                              pos_hint={'top': 1})
-        self.root = ScrollView(size_hint=(1, None),
-                               size=(Window.width, Window.height - 64))
+        self.root = ScrollView()
         self.champ_grid = MDStackLayout(size_hint_y=None,
                                         spacing=10,
                                         padding=5)
@@ -348,11 +342,8 @@ class BuildRune(Screen):
         self.champion = None
 
         # Initializing Layouts
-        self.stack_layout = MDStackLayout(size_hint_y=None,
-                                          pos_hint={'top': 1})
-        self.stack_layout.size[1] = 64
-        self.root = ScrollView(size_hint=(1, None),
-                               size=(Window.width, Window.height - 64))
+        self.box = MDBoxLayout(orientation='vertical')
+        self.root = ScrollView()
         self.anchor_layout = AnchorLayout(anchor_x='right',
                                           anchor_y='bottom',
                                           padding=30)
@@ -374,12 +365,12 @@ class BuildRune(Screen):
 
         #Adding widgets to layout
         self.root.add_widget(self.grid)
-        self.stack_layout.add_widget(self.toolbar)
+        self.box.add_widget(self.toolbar)
+        self.box.add_widget(self.root)
         self.anchor_layout.add_widget(self.save_btn)
 
         #Adding layouts to screen
-        self.add_widget(self.root)
-        self.add_widget(self.stack_layout)
+        self.add_widget(self.box)
         self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
