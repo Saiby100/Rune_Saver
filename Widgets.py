@@ -4,7 +4,7 @@ from kivymd.uix.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBo
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem
+from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineListItem
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tooltip import MDTooltip
 
@@ -108,7 +108,6 @@ class SavedRunes:
             for line in reader:
                 self.runes.append(Rune(line))
 
-        
 class ExpansionPanel(MDExpansionPanel):
     def __init__(self, title, content=None):
         self.panel_cls = MDExpansionPanelOneLine(text=title)
@@ -120,8 +119,6 @@ class ExpansionPanel(MDExpansionPanel):
 
     def change_content(self, main_rune, title):
         pass
-
-
 
 class ListItem(OneLineAvatarListItem):
     def __init__(self, text, image_source):
@@ -175,7 +172,6 @@ class RuneCard(MDCard):
             self.add_widget(MDLabel(text=text,
                                     halign='center',
                                     font_style='Caption'))
-
 
 class Rune(SwipeToDeleteItem):
     def __init__(self, row):

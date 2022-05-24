@@ -1,5 +1,6 @@
+from kivy.properties import Clock
 from Widgets import *
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException, SlideTransition, CardTransition, RiseInTransition, NoTransition
 from kivy.core.window import Window
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.scrollview import ScrollView
@@ -18,6 +19,8 @@ from kivymd.uix.dialog import MDDialog
 import atexit
 import os
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.menu import MDDropdownMenu
+from kivy.metrics import dp
 
 # Window.size = (300, 500)
 
@@ -30,18 +33,57 @@ class RuneSaver(MDApp):
     def build(self):
         # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime,
         # Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
-        global sm, file_runes
+        global sm, file_runes, current
 
-        file_runes = SavedRunes(current)
+        try:
+            file_runes = SavedRunes(current)
+        except FileNotFoundError:
+            if len(accounts) == 0:
+                open('accounts/default.csv', 'x')
+                accounts.append(f'{current}.csv')
+                current = 'default'
+            else:
+                current = accounts[0].strip('.csv')
+
+            with open('Resources/config.txt', 'w') as file:
+                file.write(current)
+
+            file_runes = SavedRunes(current)
 
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
         sm = ScreenManager(transition=FadeTransition())
+        sm.add_widget(SplashScreen('splash_screen'))
+
+        return sm
+
+    def on_start(self):
+        Clock.schedule_once(self.add_screens, 2)
+
+    def add_screens(self, event):
         sm.add_widget(Library('library'))
         sm.add_widget(ChampSelect('champ_select'))
         sm.add_widget(BuildRune('rune_page'))
 
-        return sm
+        sm.current = 'library'
+        sm.remove_widget(sm.get_screen('splash_screen'))
+
+class SplashScreen(Screen):
+    def __init__(self, page_name):
+        super().__init__(name=page_name)
+        self.box = MDBoxLayout(orientation='vertical',
+                               padding=50)
+
+        self.img = Image(source='icons/splash-icon.png',
+                         size_hint_x=None,
+                         pos_hint={'center_x': .5})
+        self.label = MDLabel(text='Rune Saver For League Of Legends',
+                             halign='center')
+
+        self.box.add_widget(self.img)
+        self.box.add_widget((self.label))
+
+        self.add_widget(self.box)
 
 #Page with user's saved runes
 class Library(Screen):
@@ -56,8 +98,17 @@ class Library(Screen):
         self.root = ScrollView()
 
         # Initializing Widgets
-        self.toolbar = MDToolbar(title=f'{current}\'s Runes')
-        self.toolbar.right_action_items = [['account', self.change_account]]
+        self.toolbar = MDToolbar(title=current)
+        self.toolbar.right_action_items = [['account', self.change_account],
+                                           ['dots-vertical', lambda x: self.open_menu(x)]]
+        menu_items = [{'text': title,
+                       'viewclass': 'OneLineListItem',
+                       'on_release': lambda x=title: self.drop_menu_button(x),
+                       'height': dp(56)
+                       } for title in ['Rename profile', 'Delete profile']
+                      ]
+        self.drop_menu = MDDropdownMenu(items=menu_items,
+                                        width_mult=2.7)
         self.add_btn = FloatingButton(icon='plus',
                                       tooltip_text='Add New Rune')
         self.add_btn.bind(on_release=self.champ_select)
@@ -80,6 +131,61 @@ class Library(Screen):
         self.add_widget(self.box)
         self.add_widget(self.anchor_layout)
 
+    def open_menu(self, button):
+        self.drop_menu.caller = button
+        self.drop_menu.open()
+
+    def drop_menu_button(self, text_item):
+        self.profile_box = None
+        if text_item == 'Delete profile':
+            buttons = [MDFlatButton(text='No', on_release=lambda x: self.profile_box.dismiss()),
+                       MDFlatButton(text='Yes', on_release=lambda x: self.delete_account())]
+            self.profile_box = MDDialog(text=f'Are you sure you want to delete \'{current}\'?',
+                                        buttons=buttons,
+                                        padding=5)
+            self.profile_box.open()
+        else:
+            self.profile_box = MDDialog(title='Profile name:',
+                                           type='custom',
+                                           content_cls=MDTextField(text=current),
+                                           buttons=[MDFlatButton(text='Rename',
+                                                                 on_release=self.rename_account)])
+            self.profile_box.open()
+
+        self.drop_menu.dismiss()
+
+    def rename_account(self, event):
+        global current, accounts
+
+        name = self.profile_box.content_cls.text
+
+        if accounts.__contains__(name+'.csv'):
+            Snackbar(text='Profile already exists with that name', duration=1).open()
+            return
+
+        old_name = f'accounts/{current}.csv'
+        new_name = f'accounts/{name}.csv'
+        os.rename(old_name, new_name)
+
+        current = name
+        accounts = os.listdir('accounts')
+        self.toolbar.title = current
+
+        self.profile_box.dismiss()
+
+    def delete_account(self):
+        if len(accounts) == 1:
+            file_runes.runes.clear()
+            self.my_runes.clear_widgets()
+            self.profile_box.dismiss()
+            return
+
+        account = current
+        accounts.remove(f'{current}.csv')
+        self.switch(accounts[0].strip('.csv'), None)
+        os.remove(f'accounts/{account}.csv')
+        self.profile_box.dismiss()
+
     def view_rune(self, rune, event):
         if rune.list_item.icon.pos[0] == 16:
             self.rune = rune
@@ -101,7 +207,7 @@ class Library(Screen):
             item.bind(on_release=partial(self.switch, account.strip('.csv')))
             items.append(item)
 
-        add_account_item = ListItem('Add account', 'icons/plus.png')
+        add_account_item = ListItem('Add Profile', 'icons/plus.png')
         add_account_item.divider = None
         add_account_item.bind(on_release=self.new_account)
         items.append(add_account_item)
@@ -118,14 +224,13 @@ class Library(Screen):
             self.dialog_box.dismiss()
             return
 
-        save()
+        save()  #Save any changes made to the current profile before switching
         current = account
         with open('Resources/config.txt', 'w') as file:
             file.write(account)
 
         file_runes.change_account(account)
         self.my_runes.clear_widgets()
-        self.root.clear_widgets()
 
         for rune in file_runes.runes:
             rune.back_layer.children[0].bind(on_release=partial(self.delete_rune, rune))
@@ -133,10 +238,11 @@ class Library(Screen):
 
             self.my_runes.add_widget(rune)
 
-        self.root.add_widget(self.my_runes)
-        self.toolbar.title =f'{current}\'s Runes'
-
-        self.dialog_box.dismiss()
+        self.toolbar.title = current
+        try:
+            self.dialog_box.dismiss()
+        except AttributeError:
+            return
 
     def new_account(self, event):
         if len(accounts) >= 4:
