@@ -1,6 +1,7 @@
 from kivy.properties import Clock
+from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from Widgets import *
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException, SlideTransition, CardTransition, RiseInTransition, NoTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
 from kivy.core.window import Window
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.scrollview import ScrollView
@@ -21,6 +22,7 @@ import os
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
+from kivymd.uix.tab import MDTabs
 
 # Window.size = (300, 500)
 
@@ -92,14 +94,14 @@ class Library(Screen):
         super().__init__(name=page_name)
         # Initializing Layouts
         self.box = MDBoxLayout(orientation='vertical')
-        self.anchor_layout = AnchorLayout(anchor_x='right',
+        self.anchor_layout = AnchorLayout(anchor_x='center',
                                           anchor_y='bottom',
                                           padding=30)
         self.root = ScrollView()
 
         # Initializing Widgets
         self.toolbar = MDToolbar(title=current)
-        self.toolbar.right_action_items = [['account', self.change_account],
+        self.toolbar.right_action_items = [['account', self.open_dialog_box],
                                            ['dots-vertical', lambda x: self.open_menu(x)]]
         menu_items = [{'text': title,
                        'viewclass': 'OneLineListItem',
@@ -115,6 +117,12 @@ class Library(Screen):
 
         self.my_runes = MDList(padding=[10, 0])
 
+        self.nav_box = MDBottomNavigation()
+        self.runes_nav_item = MDBottomNavigationItem(name='screen 1',
+                                                     text='Runes')
+        self.profile_nav_item = MDBottomNavigationItem(name='screen 2',
+                                                       text='Profile')
+
         # Adding widgets to layouts
         for rune in file_runes.runes:
             rune.back_layer.children[0].bind(on_release=partial(self.delete_rune, rune))
@@ -123,8 +131,11 @@ class Library(Screen):
             self.my_runes.add_widget(rune)
 
         self.root.add_widget(self.my_runes)
+        self.nav_box.add_widget(self.runes_nav_item)
+        self.nav_box.add_widget(self.profile_nav_item)
+        self.runes_nav_item.add_widget(self.root)
         self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.root)
+        self.box.add_widget(self.nav_box)
         self.anchor_layout.add_widget(self.add_btn)
 
         # Adding Layouts to Screen
@@ -136,6 +147,7 @@ class Library(Screen):
         self.drop_menu.open()
 
     def drop_menu_button(self, text_item):
+        # Displays menu to delete or rename account
         self.profile_box = None
         if text_item == 'Delete profile':
             buttons = [MDFlatButton(text='No', on_release=lambda x: self.profile_box.dismiss()),
@@ -199,15 +211,15 @@ class Library(Screen):
         file_runes.delete_rune(rune)
         self.my_runes.remove_widget(rune)
 
-    def change_account(self, event):
+    def open_dialog_box(self, event):
         items = []
         for account in accounts:
-            item = ListItem(account.strip('.csv'), 'icons/user.png')
+            item = IconListItem(account.strip('.csv'), 'account-circle')
             item.divider = None
             item.bind(on_release=partial(self.switch, account.strip('.csv')))
             items.append(item)
 
-        add_account_item = ListItem('Add Profile', 'icons/plus.png')
+        add_account_item = IconListItem('Add Profile', 'account-plus')
         add_account_item.divider = None
         add_account_item.bind(on_release=self.new_account)
         items.append(add_account_item)
@@ -278,6 +290,7 @@ class ViewRune(Screen):
         self.rune = sm.get_screen('library').rune
 
         # Initializing Layouts
+        self.tab_manager = MDTabs()
         self.anchor_layout = AnchorLayout(anchor_x='right',
                                           anchor_y='bottom',
                                           padding=30)
@@ -288,24 +301,34 @@ class ViewRune(Screen):
 
         # Initializing Widgets
         self.toolbar = MDToolbar(title=self.rune.name)
-        self.toolbar.right_action_items = [[f'icons/{self.rune.champ}.png']]
+        self.toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
+
         self.edit_btn = MDFloatingActionButton(icon='pencil')
         self.edit_btn.bind(on_release=partial(self.edit_rune, self.rune))
 
+        self.rune_tab = Tab(title='Rune')
+        self.build_tab = Tab(title='Builds')
+
         for attribute in self.rune.attributes():
-            rune_card = RuneCard(f'Runes/{attribute}.png', attribute.title())
+            rune_card = RuneCard(f'icons/runes/{attribute}.png', attribute.title())
             rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
             self.grid.add_widget(rune_card)
 
         # Adding Widgets to Layouts
         self.anchor_layout.add_widget(self.edit_btn)
+
+        self.rune_tab.add_widget(self.grid)
+        self.rune_tab.add_widget(self.anchor_layout)
+
+        self.tab_manager.add_widget(self.rune_tab)
+        self.tab_manager.add_widget(self.build_tab)
+
         self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.grid)
+        self.box.add_widget(self.tab_manager)
 
         # Adding Layout to Screen
         self.add_widget(self.box)
-        self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
         sm.remove_widget(self)
@@ -316,7 +339,7 @@ class ViewRune(Screen):
         self.rune = rune
         screen = sm.get_screen('rune_page')
         screen.toolbar.title = rune.name
-        screen.toolbar.right_action_items = [[f'icons/{rune.champ}.png']]
+        screen.toolbar.right_action_items = [[f'icons/champ_icons/{rune.champ}.png']]
 
         array = rune.attributes()
         array.reverse()
@@ -361,7 +384,7 @@ class InfoPage(Screen):
         self.card = MDCard(orientation='vertical',
                            padding='10dp',
                            radius='25dp')
-        self.box2.add_widget(Image(source=f'Runes/{self.attribute}.png',
+        self.box2.add_widget(Image(source=f'icons/runes/{self.attribute}.png',
                                    size_hint_y=None,
                                    height=50))
         self.box2.add_widget(MDLabel(text=self.attribute.title(),
@@ -403,7 +426,7 @@ class ChampSelect(Screen):
         with open('Resources/champions.txt', 'r') as file:
             for champ in file.readlines():
                 champ = champ.strip('\n')
-                source = 'images/{}.png'.format(champ)
+                source = f'icons/champ_images/{champ}.png'
                 card = Card(source, champ.title())
                 card.bind(on_release=partial(self.build_rune, champ))
 
@@ -427,7 +450,7 @@ class ChampSelect(Screen):
 
         screen.champion = champ
         screen.toolbar.title = champ.title()
-        screen.toolbar.right_action_items = [[f'icons/{champ}.png']]
+        screen.toolbar.right_action_items = [[f'icons/champ_icons/{champ}.png']]
         screen.previous = self.name
         # screen.set_up_panels()
 
@@ -444,6 +467,7 @@ class BuildRune(Screen):
         self.champion = None
 
         # Initializing Layouts
+        self.tab_manager = MDTabs()
         self.box = MDBoxLayout(orientation='vertical')
         self.root = ScrollView()
         self.anchor_layout = AnchorLayout(anchor_x='right',
@@ -465,10 +489,18 @@ class BuildRune(Screen):
         self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
         self.save_btn.bind(on_release=self.show_save_box)
 
+        self.rune_tab = Tab(title='Rune')
+        self.build_tab = Tab(title='Build')
+
         #Adding widgets to layout
         self.root.add_widget(self.grid)
+        self.rune_tab.add_widget(self.root)
+
+        self.tab_manager.add_widget(self.rune_tab)
+        self.tab_manager.add_widget(self.build_tab)
+
         self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.root)
+        self.box.add_widget(self.tab_manager)
         self.anchor_layout.add_widget(self.save_btn)
 
         #Adding layouts to screen
@@ -485,7 +517,7 @@ class BuildRune(Screen):
         items = []
         for value in array:
             value = value.strip('\n')
-            item = ListItem(value.title(), f'Runes/{value}.png')
+            item = ListItem(value.title(), f'icons/runes/{value}.png')
             item.bind(on_release=partial(self.update_panel, item, value))
             items.append(item)
 
@@ -499,13 +531,14 @@ class BuildRune(Screen):
             panel_titles = []
             panel_titles.extend(runes[text].keys())
             if item.parent.parent == self.grid.children[7]:
-                rune = [None, None, text, panel_titles[3], panel_titles[2], panel_titles[1], panel_titles[0], text]
+                rune = [None, None, text, panel_titles[3], panel_titles[2],
+                        panel_titles[1], panel_titles[0], text]
                 self.set_up_panels(rune, True, False)
             else:
                 rune = ['slot 2', 'slot 1', text, None, None, None, None, text]
                 self.set_up_panels(rune, False, True)
 
-        item.parent.parent.panel_cls.text = text.title()
+        item.parent.parent.change_title(text.title())
 
     #Displays the dialog box
     def show_save_box(self, event):
@@ -578,23 +611,25 @@ class BuildRune(Screen):
             secondary = secondary_runes[rune[2]]
 
         for i in range(len(rune)):
+
             if i <= 1 and secondary_panels:
                 # Secondary panels
-                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].change_title(rune[i].title())
                 self.grid.children[i].content = self.create_content(secondary)
 
             elif i == 7 and primary_panels:
-                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].change_title(rune[i].title())
                 self.grid.children[i].content = self.create_content(rune_name)
 
             elif i == 2 and secondary_panels:
-                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].change_title(rune[i].title())
                 self.grid.children[i].content = self.create_content(rune_name)
 
             elif i >= 3 and i < 7 and primary_panels:
                 # Primary panels
                 self.grid.children[i].content = self.create_content(runes[main[4]][main[i - 3]])
-                self.grid.children[i].panel_cls.text = rune[i].title()
+                self.grid.children[i].change_title(rune[i].title())
+
 
     #Closes the dialog box
     def close_box(self, event=None):

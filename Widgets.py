@@ -4,8 +4,10 @@ from kivymd.uix.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBo
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineListItem
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget
 from kivymd.uix.label import MDLabel
+from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
 
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
@@ -117,8 +119,11 @@ class ExpansionPanel(MDExpansionPanel):
             self.content = content
         super().__init__()
 
-    def change_content(self, main_rune, title):
-        pass
+    def change_title(self, new_title):
+        self.panel_cls.text = new_title
+
+    def change_content(self, new_content):
+        self.content = new_content
 
 class ListItem(OneLineAvatarListItem):
     def __init__(self, text, image_source):
@@ -129,6 +134,13 @@ class ListItem(OneLineAvatarListItem):
         super().__init__()
         self.add_widget(self.icon)
 
+class IconListItem(OneLineIconListItem):
+    def __init__(self, text, icon):
+        super().__init__()
+        self.text = text
+        self.icon = IconLeftWidget(icon=icon)
+        self.add_widget(self.icon)
+
 class Content(MDBoxLayout):
     def __init__(self, items_array):
         super().__init__()
@@ -137,6 +149,7 @@ class Content(MDBoxLayout):
 
         for item in items_array:
             self.add_widget(item)
+
 
 class Card(MDCard):
     def __init__(self, src, txt):
@@ -175,12 +188,21 @@ class RuneCard(MDCard):
 
 class Rune(SwipeToDeleteItem):
     def __init__(self, row):
-        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-        super().__init__(self.name, 'icons/{}.png'.format(self.champ))
+        self.build = []
+        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
+        self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+        super().__init__(self.name, f'icons/champ_icons/{self.champ}.png')
 
     def attributes(self):
         return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]
 
     def edit(self, row):
-        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+        self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
+        self.slot3, self.secondary, self.slot_1, self.slot_2 = row
         self.list_item.text = self.name
+
+    def add_build(self):
+        pass
+
+class Tab(MDFloatLayout, MDTabsBase):
+    pass
