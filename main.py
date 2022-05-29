@@ -15,42 +15,25 @@ from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.stacklayout import MDStackLayout
 from functools import partial
 from kivymd.uix.list import MDList
-import csv
 from kivymd.uix.dialog import MDDialog
 import atexit
-import os
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from kivymd.uix.tab import MDTabs
+from Profile import Profile
 
 # Window.size = (300, 500)
-
-accounts = os.listdir('accounts')
-
-with open('Resources/config.txt', 'r') as file:
-    current = file.readline()
+profile = Profile()
 
 class RuneSaver(MDApp):
+    '''App manager.'''
     def build(self):
         # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime,
         # Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
-        global sm, file_runes, current
+        global sm, saved_runes
 
-        try:
-            file_runes = SavedRunes(current)
-        except FileNotFoundError:
-            if len(accounts) == 0:
-                open('accounts/default.csv', 'x')
-                accounts.append(f'{current}.csv')
-                current = 'default'
-            else:
-                current = accounts[0].strip('.csv')
-
-            with open('Resources/config.txt', 'w') as file:
-                file.write(current)
-
-            file_runes = SavedRunes(current)
+        saved_runes = SavedRunes(profile.data())
 
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
@@ -71,6 +54,7 @@ class RuneSaver(MDApp):
         sm.remove_widget(sm.get_screen('splash_screen'))
 
 class SplashScreen(Screen):
+    '''Displays on app launch.'''
     def __init__(self, page_name):
         super().__init__(name=page_name)
         self.box = MDBoxLayout(orientation='vertical',
@@ -87,9 +71,8 @@ class SplashScreen(Screen):
 
         self.add_widget(self.box)
 
-#Page with user's saved runes
 class Library(Screen):
-    # use list object to save runes
+    '''Page with user's saved runes.'''
     def __init__(self, page_name):
         super().__init__(name=page_name)
         # Initializing Layouts
@@ -100,7 +83,7 @@ class Library(Screen):
         self.root = ScrollView()
 
         # Initializing Widgets
-        self.toolbar = MDToolbar(title=current)
+        self.toolbar = MDToolbar(title=profile.name)
         self.toolbar.right_action_items = [['account', self.open_dialog_box],
                                            ['dots-vertical', lambda x: self.open_menu(x)]]
         menu_items = [{'text': title,
@@ -124,9 +107,9 @@ class Library(Screen):
                                                        text='Profile')
 
         # Adding widgets to layouts
-        for rune in file_runes.runes:
-            rune.back_layer.children[0].bind(on_release=partial(self.delete_rune, rune))
-            rune.front_layer.bind(on_release=partial(self.view_rune, rune))
+        for rune in saved_runes.runes:
+            rune.bind_back(on_release=partial(self.delete_rune, rune))
+            rune.bind_front(on_release=partial(self.view_rune, rune))
 
             self.my_runes.add_widget(rune)
 
@@ -147,59 +130,52 @@ class Library(Screen):
         self.drop_menu.open()
 
     def drop_menu_button(self, text_item):
-        # Displays menu to delete or rename account
+        ''' Displays menu to delete or rename account'''
         self.profile_box = None
         if text_item == 'Delete profile':
             buttons = [MDFlatButton(text='No', on_release=lambda x: self.profile_box.dismiss()),
-                       MDFlatButton(text='Yes', on_release=lambda x: self.delete_account())]
-            self.profile_box = MDDialog(text=f'Are you sure you want to delete \'{current}\'?',
+                       MDFlatButton(text='Yes', on_release=lambda x: self.delete_profile())]
+            self.profile_box = MDDialog(text=f'Are you sure you want to delete \'{profile.name}\'?',
                                         buttons=buttons,
                                         padding=5)
             self.profile_box.open()
         else:
             self.profile_box = MDDialog(title='Profile name:',
                                            type='custom',
-                                           content_cls=MDTextField(text=current),
+                                           content_cls=MDTextField(text=profile.name),
                                            buttons=[MDFlatButton(text='Rename',
-                                                                 on_release=self.rename_account)])
+                                                                 on_release=self.rename_profile)])
             self.profile_box.open()
 
         self.drop_menu.dismiss()
 
-    def rename_account(self, event):
-        global current, accounts
-
+    def rename_profile(self, event):
         name = self.profile_box.content_cls.text
 
-        if accounts.__contains__(name+'.csv'):
+        if not profile.rename(name):
             Snackbar(text='Profile already exists with that name', duration=1).open()
             return
 
-        old_name = f'accounts/{current}.csv'
-        new_name = f'accounts/{name}.csv'
-        os.rename(old_name, new_name)
-
-        current = name
-        accounts = os.listdir('accounts')
-        self.toolbar.title = current
-
+        self.toolbar.title = profile.name
         self.profile_box.dismiss()
 
-    def delete_account(self):
-        if len(accounts) == 1:
-            file_runes.runes.clear()
-            self.my_runes.clear_widgets()
-            self.profile_box.dismiss()
-            return
+    def delete_profile(self):
+        if profile.delete():
+            saved_runes.change_account(profile.data())
 
-        account = current
-        accounts.remove(f'{current}.csv')
-        self.switch(accounts[0].strip('.csv'), None)
-        os.remove(f'accounts/{account}.csv')
+            self.my_runes.clear_widgets()
+
+            for rune in saved_runes.runes:
+                rune.bind_back(on_release=partial(self.delete_rune, rune))
+                rune.bind_front(on_release=partial(self.view_rune, rune))
+
+                self.my_runes.add_widget(rune)
+
+        self.toolbar.title = profile.name
         self.profile_box.dismiss()
 
     def view_rune(self, rune, event):
-        if rune.list_item.icon.pos[0] == 16:
+        if rune.img.pos[0] == 16:
             self.rune = rune
             sm.add_widget(ViewRune('view_page'))
             sm.current = 'view_page'
@@ -208,83 +184,74 @@ class Library(Screen):
         sm.current = 'champ_select'
 
     def delete_rune(self, rune, event):
-        file_runes.delete_rune(rune)
+        saved_runes.delete_rune(rune)
         self.my_runes.remove_widget(rune)
 
     def open_dialog_box(self, event):
         items = []
-        for account in accounts:
+        for account in profile.profiles():
             item = IconListItem(account.strip('.csv'), 'account-circle')
             item.divider = None
-            item.bind(on_release=partial(self.switch, account.strip('.csv')))
+            item.bind(on_release=partial(self.switch_profile, account.strip('.csv')))
             items.append(item)
 
         add_account_item = IconListItem('Add Profile', 'account-plus')
         add_account_item.divider = None
-        add_account_item.bind(on_release=self.new_account)
+        add_account_item.bind(on_release=self.get_profile_name)
         items.append(add_account_item)
 
         self.dialog_box = MDDialog(title='Choose Profile:',
                                    type='simple',
                                    items=items)
-
         self.dialog_box.open()
 
-    def switch(self, account, event):
-        global current
-        if account == current:
+    def switch_profile(self, account, event):
+        if account == profile.name:
             self.dialog_box.dismiss()
             return
+        profile.save(saved_runes.to_array())
+        profile.set_current(account)
+        saved_runes.change_account(profile.data())
 
-        save()  #Save any changes made to the current profile before switching
-        current = account
-        with open('Resources/config.txt', 'w') as file:
-            file.write(account)
-
-        file_runes.change_account(account)
         self.my_runes.clear_widgets()
 
-        for rune in file_runes.runes:
-            rune.back_layer.children[0].bind(on_release=partial(self.delete_rune, rune))
-            rune.front_layer.bind(on_release=partial(self.view_rune, rune))
+        for rune in saved_runes.runes:
+            rune.bind_back(on_release=partial(self.delete_rune, rune))
+            rune.bind_front(on_release=partial(self.view_rune, rune))
 
             self.my_runes.add_widget(rune)
 
-        self.toolbar.title = current
+        self.toolbar.title = profile.name
         try:
             self.dialog_box.dismiss()
         except AttributeError:
             return
 
-    def new_account(self, event):
-        if len(accounts) >= 4:
+    def get_profile_name(self, event):
+        if len(profile.profiles()) >= 4:
             Snackbar(text='Max Accounts Reached',
                      duration=1).open()
             return
         self.create_account_box = MDDialog(title='Profile name:',
                                            type='custom',
                                            content_cls=MDTextField(),
-                                           buttons=[MDFlatButton(text='Create', on_release=self.create_account)])
+                                           buttons=[MDFlatButton(text='Create', on_release=self.create_profile)])
         self.create_account_box.open()
 
-    def create_account(self, event):
-        try:
-            global accounts
-            file_name = self.create_account_box.content_cls.text
-            open(f'accounts/{file_name}.csv', 'x')
+    def create_profile(self, event):
+        file_name = self.create_account_box.content_cls.text
+        if not profile.add_new(file_name):
+            Snackbar(text=f'\'{file_name}\' already exists', duration=1).open()
+            return
+        #Profile already switches when add_new is called.
+        self.switch_profile(file_name, None)
+        Snackbar(text='Profile Successfully created!', duration=1).open()
 
-            self.dialog_box.dismiss()
-            self.create_account_box.dismiss()
+        self.create_account_box.dismiss()
+        self.dialog_box.dismiss()
 
-            accounts = os.listdir('accounts')
-            self.switch(file_name, None)
-            Snackbar(text='Profile Successfully created!', duration=1).open()
-
-        except (FileExistsError):
-            Snackbar(text='Profile already exists', duration=1).open()
-
-#Page to view rune attributes for each saved rune
 class ViewRune(Screen):
+    '''Page to view rune attributes for each saved rune.'''
     def __init__(self, page_name):
         super().__init__(name=page_name)
         self.rune = sm.get_screen('library').rune
@@ -341,21 +308,23 @@ class ViewRune(Screen):
         screen.toolbar.title = rune.name
         screen.toolbar.right_action_items = [[f'icons/champ_icons/{rune.champ}.png']]
 
-        array = rune.attributes()
-        array.reverse()
+        for i, attr in enumerate(rune.attributes()):
+            if i < 5:
+                screen.panel_manager.primary_panels[i].change_title(attr)
+            else:
+                screen.panel_manager.secondary_panels[i-5].change_title(attr)
 
-        screen.set_up_panels(array)
         screen.previous = self.name
         sm.current = 'rune_page'
 
     def view_rune_attribute(self, rune_attribute, event):
-        if (titles.keys().__contains__(rune_attribute)):
+        if rune_attribute in titles.keys():
             return
         sm.add_widget(InfoPage(rune_attribute, 'rune_info'))
         sm.current = 'rune_info'
 
-#Page to view rune effects
 class InfoPage(Screen):
+    '''Page to view rune effects.'''
     def __init__(self, attribute, page_name):
         super().__init__(name=page_name)
 
@@ -408,8 +377,8 @@ class InfoPage(Screen):
         sm.current = 'view_page'
         sm.remove_widget(self)
 
-#Page to choose a champion
 class ChampSelect(Screen):
+    '''Page to choose a champion.'''
     def __init__(self, page_name):
         super().__init__(name=page_name)
 
@@ -452,15 +421,14 @@ class ChampSelect(Screen):
         screen.toolbar.title = champ.title()
         screen.toolbar.right_action_items = [[f'icons/champ_icons/{champ}.png']]
         screen.previous = self.name
-        # screen.set_up_panels()
 
         sm.current = 'rune_page'
 
     def go_back(self, event):
         sm.current = 'library'
 
-#Page to build a rune
 class BuildRune(Screen):
+    '''Page to build a rune.'''
     def __init__(self, page_name):
         super().__init__(name=page_name)
         self.previous = None
@@ -482,9 +450,12 @@ class BuildRune(Screen):
         self.toolbar = MDToolbar(title="Holder Text")
         self.toolbar.left_action_items = [['arrow-left', self.go_back]]
 
-        for i in range(8):
-            self.grid.add_widget(ExpansionPanel('Holder Text'))
-        self.set_up_panels()
+        self.panel_manager = PanelManager(['Primary', 'Keystone', 'Slot 1', 'Slot 2', 'Slot 3'],
+                                          ['Secondary', 'Slot 1', 'Slot 2'])
+        for panel in self.panel_manager.primary_panels:
+            self.grid.add_widget(panel)
+        for panel in self.panel_manager.secondary_panels:
+            self.grid.add_widget(panel)
 
         self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
         self.save_btn.bind(on_release=self.show_save_box)
@@ -510,35 +481,7 @@ class BuildRune(Screen):
     def go_back(self, event):
         sm.current = self.previous
         if self.previous == 'view_page':
-            self.set_up_panels()
-
-    # Creates a content widget containing all the runes specified in the array
-    def create_content(self, array):
-        items = []
-        for value in array:
-            value = value.strip('\n')
-            item = ListItem(value.title(), f'icons/runes/{value}.png')
-            item.bind(on_release=partial(self.update_panel, item, value))
-            items.append(item)
-
-        return Content(items)
-
-    # All contents of the expansion panels below it must change
-    def update_panel(self, item, text, event):
-        main = []
-        main.extend(runes.keys())
-        if main.__contains__(text):
-            panel_titles = []
-            panel_titles.extend(runes[text].keys())
-            if item.parent.parent == self.grid.children[7]:
-                rune = [None, None, text, panel_titles[3], panel_titles[2],
-                        panel_titles[1], panel_titles[0], text]
-                self.set_up_panels(rune, True, False)
-            else:
-                rune = ['slot 2', 'slot 1', text, None, None, None, None, text]
-                self.set_up_panels(rune, False, True)
-
-        item.parent.parent.change_title(text.title())
+            self.panel_manager.reset_panels()
 
     #Displays the dialog box
     def show_save_box(self, event):
@@ -553,83 +496,48 @@ class BuildRune(Screen):
 
     #Saves the rune
     def save_rune(self, event=None):
-        try:
+        '''Saves the rune'''
+        try:#If the viewpage exists (Rune needs to be edited)
             rune_screen = sm.get_screen('view_page')
             rune = rune_screen.rune
             rune_info = [rune.champ, self.dialog_btn.content_cls.text]
 
-            for i in range(len(self.grid.children) - 1, -1, -1):
-                rune_info.append(self.grid.children[i].panel_cls.text.lower())
+            for panel in self.panel_manager.primary_panels:
+                rune_info.append(panel.text())
 
-            screen = sm.get_screen('library')
+            for panel in self.panel_manager.secondary_panels:
+                rune_info.append(panel.text())
+
             rune.edit(rune_info)
 
-            screen.my_runes.children[screen.my_runes.children.index(rune)] = rune
+            screen = sm.get_screen('library')
+            screen.my_runes.remove_widget(rune)
+            screen.my_runes.add_widget(rune, len(screen.my_runes.children)-saved_runes.rune_index(rune))
 
-            self.close_box()
             sm.remove_widget(rune_screen)
-            sm.current = 'library'
-            return
 
-        except ScreenManagerException:
+        except ScreenManagerException: #If the viewpage doesn't exist (Rune must be added)
             rune_info = [self.champion, self.dialog_btn.content_cls.text]
 
-        for i in range(len(self.grid.children) - 1, -1, -1):
-            rune_info.append(self.grid.children[i].panel_cls.text.lower())
+            for panel in self.panel_manager.primary_panels:
+                rune_info.append(panel.text())
 
-        screen = sm.get_screen('library')
-        screen.my_runes.clear_widgets()
+            for panel in self.panel_manager.secondary_panels:
+                rune_info.append(panel.text())
 
-        rune = Rune(rune_info)
-        rune.back_layer.children[0].bind(on_release=partial(screen.delete_rune, rune))
-        rune.front_layer.bind(on_release=partial(screen.view_rune, rune))
-        file_runes.add_new_rune(rune)
+            screen = sm.get_screen('library')
 
-        for r in file_runes.runes:
-            screen.my_runes.add_widget(r)
+            rune = Rune(rune_info)
+            rune.bind_front(on_release=partial(screen.view_rune, rune))
+            rune.bind_back(on_release=partial(screen.delete_rune, rune))
+
+            saved_runes.add_new_rune(rune)
+            screen.my_runes.add_widget(rune, saved_runes.rune_index(rune))
 
         self.close_box()
 
         Snackbar(text='Rune Saved Successfully!', duration=1).open()
         sm.current = 'library'
-
-    #Creates titles and panel contents for expansion panels
-    def set_up_panels(self, rune=None, primary_panels=True, secondary_panels=True):
-        rune_name = []
-        rune_name.extend(runes.keys())
-
-        if rune is None:
-            rune = ['slot 2', 'slot 1', 'secondary', 'slot 3', 'slot 2', 'slot 1', 'keystones', 'primary']
-            main = titles['domination']
-            main.append('domination')
-            secondary = secondary_runes['sorcery']
-
-        else:
-            main = titles[rune[7]][0:4]
-            main.reverse()
-            main.append(rune[7])
-            secondary = secondary_runes[rune[2]]
-
-        for i in range(len(rune)):
-
-            if i <= 1 and secondary_panels:
-                # Secondary panels
-                self.grid.children[i].change_title(rune[i].title())
-                self.grid.children[i].content = self.create_content(secondary)
-
-            elif i == 7 and primary_panels:
-                self.grid.children[i].change_title(rune[i].title())
-                self.grid.children[i].content = self.create_content(rune_name)
-
-            elif i == 2 and secondary_panels:
-                self.grid.children[i].change_title(rune[i].title())
-                self.grid.children[i].content = self.create_content(rune_name)
-
-            elif i >= 3 and i < 7 and primary_panels:
-                # Primary panels
-                self.grid.children[i].content = self.create_content(runes[main[4]][main[i - 3]])
-                self.grid.children[i].change_title(rune[i].title())
-
 
     #Closes the dialog box
     def close_box(self, event=None):
@@ -638,10 +546,10 @@ class BuildRune(Screen):
 if __name__ == '__main__':
     @atexit.register
     def save():
-        with open(f'accounts/{current}.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(file_runes.to_array())
+        profile.save(saved_runes.to_array())
 
     RuneSaver().run()
+
+
 
 
