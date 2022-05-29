@@ -139,7 +139,7 @@ vex
 vi
 viego
 viktor
-vladmir
+vladimir
 volibear
 warwick
 wukong
