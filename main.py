@@ -43,12 +43,11 @@ class RuneSaver(MDApp):
         return sm
 
     def on_start(self):
-        sm.add_widget(InfoPage(name='info'))
-        # sm.add_widget(Library(name='library'))
-        # sm.add_widget(ChampSelect('champ_select'))
-        # sm.add_widget(BuildRune('rune_page'))
+        sm.add_widget(Library(name='library'))
+        sm.add_widget(ChampSelect(name='champ_select'))
+        sm.add_widget(BuildRune('rune_page'))
 
-        sm.current = 'info'
+        sm.current = 'library'
 
 class SplashScreen(Screen):
     '''Displays on app launch.'''
@@ -147,7 +146,7 @@ class Library(Screen):
             sm.add_widget(ViewRune(name='view_page'))
             sm.current = 'view_page'
 
-    def champ_select(self, event):
+    def champ_select(self):
         try: 
             sm.current = 'champ_select'
         except ScreenManagerException:
@@ -260,15 +259,17 @@ class ViewRune(Screen):
     def view_rune_attribute(self, rune_attribute, event):
         if rune_attribute in titles.keys():
             return
-        sm.add_widget(InfoPage(rune_attribute, 'rune_info'))
+
+        screen = InfoPage(rune_attribute, name='rune_info')
+        sm.add_widget(screen)
         sm.current = 'rune_info'
 
 class InfoPage(Screen):
     '''Page to view rune effects.'''
-    def __init__(self, **kwargs):
+    def __init__(self, attr, **kwargs):
         super().__init__(**kwargs)
 
-        self.attribute = 'lethal-tempo'
+        self.attribute = attr
 
         text = ""
         with open(f'rune_files/{self.attribute}.txt', 'r') as file:
@@ -280,23 +281,14 @@ class InfoPage(Screen):
         self.ids.attr_title.text = self.attribute.title()
         self.ids.attr_description.text = text
 
-    def go_back(self, event):
+    def go_back(self):
         sm.current = 'view_page'
         sm.remove_widget(self)
 
 class ChampSelect(Screen):
     '''Page to choose a champion.'''
-    def __init__(self, page_name):
-        super().__init__(name=page_name)
-
-        # Initializing Layouts
-        self.box = BoxLayout(orientation='vertical',
-                             pos_hint={'top': 1})
-        self.root = ScrollView()
-        self.champ_grid = MDStackLayout(size_hint_y=None,
-                                        spacing=10,
-                                        padding=5)
-        self.champ_grid.bind(minimum_height=self.champ_grid.setter('height'))
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         # Initializing Champion Cards
         with open('resources/champions.txt', 'r') as file:
@@ -306,27 +298,15 @@ class ChampSelect(Screen):
                 card = Card(source, champ.title())
                 card.bind(on_release=partial(self.build_rune, champ))
 
-                self.champ_grid.add_widget(card)
-
-        # Initializing Widgets
-        self.toolbar = MDToolbar(title='Select Champion')
-        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
-
-        # Adding Widgets to Layouts
-        self.root.add_widget(self.champ_grid)
-        self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.root)
-
-        # Adding Layouts to Screen
-        self.add_widget(self.box)
+                self.ids.champ_grid.add_widget(card)
 
     #Build a rune for the champion chosen
     def build_rune(self, champ, event):
         screen = sm.get_screen('rune_page')
 
         screen.champion = champ
-        screen.toolbar.title = champ.title()
-        screen.toolbar.right_action_items = [[f'icons/champ_icons/{champ}.png']]
+        screen.ids.toolbar.title = champ.title()
+        screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{champ}.png']]
         screen.previous = self.name
 
         sm.current = 'rune_page'
@@ -342,48 +322,48 @@ class BuildRune(Screen):
         self.champion = None
 
         # Initializing Layouts
-        self.tab_manager = MDTabs()
-        self.box = MDBoxLayout(orientation='vertical')
-        self.root = ScrollView()
-        self.anchor_layout = AnchorLayout(anchor_x='right',
-                                          anchor_y='bottom',
-                                          padding=30)
-        self.grid = MDGridLayout(cols=1,
-                                 padding=[10, 0],
-                                 size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
+        # self.tab_manager = MDTabs()
+        # self.box = MDBoxLayout(orientation='vertical')
+        # self.root = ScrollView()
+        # self.anchor_layout = AnchorLayout(anchor_x='right',
+        #                                   anchor_y='bottom',
+        #                                   padding=30)
+        # self.grid = MDGridLayout(cols=1,
+        #                          padding=[10, 0],
+        #                          size_hint_y=None)
+        # self.grid.bind(minimum_height=self.grid.setter('height'))
 
-        #Initializing widgets
-        self.toolbar = MDToolbar(title="Holder Text")
-        self.toolbar.left_action_items = [['arrow-left', self.go_back]]
+        # #Initializing widgets
+        # self.ids.toolbar = MDToolbar(title="Holder Text")
+        # self.toolbar.left_action_items = [['arrow-left', self.go_back]]
 
         self.panel_manager = PanelManager(['Primary', 'Keystone', 'Slot 1', 'Slot 2', 'Slot 3'],
                                           ['Secondary', 'Slot 1', 'Slot 2'])
         for panel in self.panel_manager.primary_panels:
-            self.grid.add_widget(panel)
+            self.ids.panel_grid.add_widget(panel)
         for panel in self.panel_manager.secondary_panels:
-            self.grid.add_widget(panel)
+            self.ids.panel_grid.add_widget(panel)
 
-        self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
-        self.save_btn.bind(on_release=self.show_save_box)
+        # self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
+        # self.save_btn.bind(on_release=self.show_save_box)
 
-        self.rune_tab = Tab(title='Rune')
-        self.build_tab = Tab(title='Build')
+        # self.rune_tab = Tab(title='Rune')
+        # self.build_tab = Tab(title='Build')
 
-        #Adding widgets to layout
-        self.root.add_widget(self.grid)
-        self.rune_tab.add_widget(self.root)
+        # #Adding widgets to layout
+        # self.root.add_widget(self.grid)
+        # self.rune_tab.add_widget(self.root)
 
-        self.tab_manager.add_widget(self.rune_tab)
-        self.tab_manager.add_widget(self.build_tab)
+        # self.tab_manager.add_widget(self.rune_tab)
+        # self.tab_manager.add_widget(self.build_tab)
 
-        self.box.add_widget(self.toolbar)
-        self.box.add_widget(self.tab_manager)
-        self.anchor_layout.add_widget(self.save_btn)
+        # self.box.add_widget(self.toolbar)
+        # self.box.add_widget(self.tab_manager)
+        # self.anchor_layout.add_widget(self.save_btn)
 
-        #Adding layouts to screen
-        self.add_widget(self.box)
-        self.add_widget(self.anchor_layout)
+        # #Adding layouts to screen
+        # self.add_widget(self.box)
+        # self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
         sm.current = self.previous
@@ -391,13 +371,13 @@ class BuildRune(Screen):
             self.panel_manager.reset_panels()
 
     #Displays the dialog box
-    def show_save_box(self, event):
+    def show_save_box(self):
         save_btn = MDFlatButton(text='SAVE', on_release=self.save_rune)
         back_btn = MDFlatButton(text='CANCEL', on_release=self.close_box)
 
         self.dialog_btn = MDDialog(title='Rune Name:',
                                    type='custom',
-                                   content_cls=MDTextField(text=self.toolbar.title),
+                                   content_cls=MDTextField(text=self.ids.toolbar.title),
                                    buttons=[back_btn, save_btn])
         self.dialog_btn.open()
 

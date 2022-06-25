@@ -22,7 +22,7 @@
                 AnchorLayout: 
                     anchor_x: 'center'
                     anchor_y: 'bottom'
-                    padding: 30
+                    padding: 20
 
                     MDFloatingActionButton: 
                         icon: 'plus'
@@ -106,9 +106,57 @@
 
         FloatingButton: 
             icon: 'arrow-left'
-            on_release: root.go_back
+            on_release: root.go_back()
 
 
 <ChampSelect>: 
+    MDBoxLayout: 
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: 'Select Champion'
+            left_action_items: [['arrow-left', root.go_back]]
+        
+        ScrollView: 
+            
+            MDStackLayout:
+                id: champ_grid 
+                size_hint_y: None
+                spacing: 10
+                padding: 5
+                height: self.minimum_height
+
+
 
 <BuildRune>:
+    MDBoxLayout: 
+        orientation: 'vertical'
+
+        MDToolbar:
+            id: toolbar
+            left_action_items: [['arrow-left', root.go_back]]
+
+        MDTabs: 
+            Tab: 
+                title: 'Rune'
+
+                ScrollView:
+                    MDGridLayout:
+                        id: panel_grid
+                        cols: 1
+                        padding: [10, 0]
+                        size_hint_y: None
+                        height: self.minimum_height
+
+            Tab:
+                title: 'Build'
+                
+    AnchorLayout: 
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        padding: 30
+
+        FloatingButton: 
+            icon: 'check'
+            tooltip_text: 'Done'
+            on_release: root.show_save_box()
