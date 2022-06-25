@@ -1,29 +1,18 @@
 import kivymd
 from kivy.properties import Clock
-from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from Widgets import *
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, ScreenManagerException
+from kivy.uix.screenmanager import ScreenManager, Screen, ScreenManagerException, NoTransition
 from kivy.core.window import Window
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFloatingActionButton, MDFlatButton
-from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.toolbar import MDToolbar
-from kivy.uix.boxlayout import BoxLayout
-from kivymd.uix.stacklayout import MDStackLayout
 from functools import partial
-from kivymd.uix.list import MDList
 from kivymd.uix.dialog import MDDialog
 import atexit
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
-from kivymd.uix.tab import MDTabs
 from Profile import Profile
-from kivy.properties import ObjectProperty
 
 profile = Profile()
 
@@ -38,34 +27,27 @@ class RuneSaver(MDApp):
 
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
-        sm = ScreenManager(transition=FadeTransition())
+        sm = ScreenManager(transition=NoTransition())
+        sm.add_widget(SplashScreen(name='splash'))
 
         return sm
 
-    def on_start(self):
+    def on_start(self): 
+        Clock.schedule_once(self.add_screens, 2)
+
+    def add_screens(self, event):
         sm.add_widget(Library(name='library'))
         sm.add_widget(ChampSelect(name='champ_select'))
         sm.add_widget(BuildRune('rune_page'))
 
         sm.current = 'library'
+        sm.remove_widget(sm.get_screen('splash'))
+
 
 class SplashScreen(Screen):
     '''Displays on app launch.'''
-    def __init__(self, page_name):
-        super().__init__(name=page_name)
-        self.box = MDBoxLayout(orientation='vertical',
-                               padding=50)
+    pass 
 
-        self.img = Image(source='icons/splash-icon.png',
-                         size_hint_x=None,
-                         pos_hint={'center_x': .5})
-        self.label = MDLabel(text='Rune Saver For League Of Legends',
-                             halign='center')
-
-        self.box.add_widget(self.img)
-        self.box.add_widget((self.label))
-
-        self.add_widget(self.box)
 
 class Library(Screen):
     '''Page with user's saved runes.'''
@@ -244,8 +226,8 @@ class ViewRune(Screen):
     #Edit the chosen rune
     def edit_rune(self, event=None):
         screen = sm.get_screen('rune_page')
-        screen.toolbar.title = self.rune.name
-        screen.toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
+        screen.ids.toolbar.title = self.rune.name
+        screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
 
         for i, attr in enumerate(self.rune.attributes()):
             if i < 5:
@@ -321,49 +303,12 @@ class BuildRune(Screen):
         self.previous = None
         self.champion = None
 
-        # Initializing Layouts
-        # self.tab_manager = MDTabs()
-        # self.box = MDBoxLayout(orientation='vertical')
-        # self.root = ScrollView()
-        # self.anchor_layout = AnchorLayout(anchor_x='right',
-        #                                   anchor_y='bottom',
-        #                                   padding=30)
-        # self.grid = MDGridLayout(cols=1,
-        #                          padding=[10, 0],
-        #                          size_hint_y=None)
-        # self.grid.bind(minimum_height=self.grid.setter('height'))
-
-        # #Initializing widgets
-        # self.ids.toolbar = MDToolbar(title="Holder Text")
-        # self.toolbar.left_action_items = [['arrow-left', self.go_back]]
-
         self.panel_manager = PanelManager(['Primary', 'Keystone', 'Slot 1', 'Slot 2', 'Slot 3'],
                                           ['Secondary', 'Slot 1', 'Slot 2'])
         for panel in self.panel_manager.primary_panels:
             self.ids.panel_grid.add_widget(panel)
         for panel in self.panel_manager.secondary_panels:
             self.ids.panel_grid.add_widget(panel)
-
-        # self.save_btn = FloatingButton(icon='check', tooltip_text='Done')
-        # self.save_btn.bind(on_release=self.show_save_box)
-
-        # self.rune_tab = Tab(title='Rune')
-        # self.build_tab = Tab(title='Build')
-
-        # #Adding widgets to layout
-        # self.root.add_widget(self.grid)
-        # self.rune_tab.add_widget(self.root)
-
-        # self.tab_manager.add_widget(self.rune_tab)
-        # self.tab_manager.add_widget(self.build_tab)
-
-        # self.box.add_widget(self.toolbar)
-        # self.box.add_widget(self.tab_manager)
-        # self.anchor_layout.add_widget(self.save_btn)
-
-        # #Adding layouts to screen
-        # self.add_widget(self.box)
-        # self.add_widget(self.anchor_layout)
 
     def go_back(self, event):
         sm.current = self.previous

@@ -1,3 +1,13 @@
+<SplashScreen>:
+    RelativeLayout: 
+        orientation: 'vertical'
+
+        Image: 
+            source: 'icons/splash-icon.png'
+            size_hint: None, None
+            size: 100, 100
+            pos_hint: {'center_x': .5, 'center_y': .5}
+
 <Library>: 
     MDBoxLayout: 
         orientation: 'vertical'
@@ -6,8 +16,7 @@
             title: root.profile_name()
             right_action_items: 
                 [['account', root.open_dialog_box], 
-                ['dots-vertical', lambda x: root.open_menu(x)]
-                ]
+                ['dots-vertical', lambda x: root.open_menu(x)]]
         
         MDBottomNavigation:
             MDBottomNavigationItem:
@@ -20,7 +29,7 @@
                         padding: [5, 0]
 
                 AnchorLayout: 
-                    anchor_x: 'center'
+                    anchor_x: 'right'
                     anchor_y: 'bottom'
                     padding: 20
 
