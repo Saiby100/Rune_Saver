@@ -3,8 +3,8 @@ import os
 
 class Profile:
     '''Class for managing profiles.'''
-    def __init__(self):
-        with open('Resources/config.txt', 'r') as file:
+    def __init__(self):        
+        with open('resources/config.txt', 'r') as file:
             self.name = file.readline()
         self.path = f'accounts/{self.name}.csv'
 
@@ -36,7 +36,7 @@ class Profile:
         self.name = accounts[0].strip('.csv')
         self.path = f'accounts/{accounts[0]}'
 
-        with open('Resources/config.txt', 'w') as file:
+        with open('resources/config.txt', 'w') as file:
             file.write(self.name)
         return True
 
@@ -62,7 +62,7 @@ class Profile:
         self.name = account_name
         self.path = f'accounts/{account_name}.csv'
 
-        with open('Resources/config.txt', 'w') as file:
+        with open('resources/config.txt', 'w') as file:
             file.write(self.name)
 
     def add_new(self, name):

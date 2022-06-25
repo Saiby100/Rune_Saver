@@ -9,6 +9,32 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
 
+items = ['Abyssal Mask', 'Anathema\'s Chains', 'Archangel\'s Staff',
+         'Ardent Censer', 'Axiom Arc', "Banshee's Veil", 'Berserker\'s Greaves',
+         'Black Cleaver', 'Black Mist Scythe', 'Blade of the Ruined Ki', 'Bloodthirster',
+         'Boots of Swiftness', 'Bulwark of the Mountai', 'Chempunk Chainsword',
+         'Chemtech Putrifier', 'Cosmic Drive', 'Crown of the Shattered Quee',
+         'dark seal', 'Dead Man\'s Plate', 'Death\'s Dance', 'Demonic Embrace',
+         'Divine Sunderer', 'Duskblade of Draktharr', 'Eclipse', 'Edge of Night',
+         'Essence Reaver', 'Evenshroud', 'Everfrost', 'Fimbulwinter', 'Force of Nature',
+         'Frostfire Gauntlet', 'Frozen Heart', 'Galeforce', 'Gargoyle Stoneplate', 'Goredrinker',
+         'Guardian Angel', 'Guinsoo\'s Rageblade', 'hailblade', 'Hextech Rocketbelt', 'Horizon Focus',
+         'Hullbreaker', 'Immortal Shieldbow', 'Imperial Mandate', 'Infinity Edge', 'Ionian Boots of Lucidity',
+         "Knight's Vow", 'Kraken Slayer', "Liandry's Anguish", 'Lich Bane', 'Locket of the Iron Solari',
+         "Lord Dominik's Regards", 'Lost Chapter', 'Luden\'s Tempest', 'Manamune', 'Maw of Malmortius',
+         "Mejai's Soulstealer", 'Mercurial Scimitar', "Mikael's Blessi", 'Mobility Boots', 'Moonstone Renewer',
+         'Morellonomico', 'Mortal Reminder', 'Muramana', "Nashor's Tooth", 'Navori Quickblades',
+         'Night Harvester', 'Pauldrons of Whiterock', 'Phantom Dancer', 'Plated Steelcaps', "Prowler's Claw",
+         "Rabadon's Deathca", "Randuin's Ome", 'Rapid Firecanno', 'Ravenous Hydra', 'Redemptio', 'Riftmaker',
+         "Runaan's Hurricane", "Rylai's Crystal Scepter", "Seraph's Embrace", "Serpent's Fa", "Serylda's Grudge",
+         'Shadowflame', 'Shard of True Ice', "Shurelya's Battleso", 'Silvermere Daw', "Sorcerer's Shoes",
+         'Spirit Visage', 'Staff of Flowing Water', "Sterak's Gage", 'Stormrazor', 'Stridebreaker',
+         'Sunfire Aegis', 'The Collector', 'Thornmail', 'Titanic Hydra', 'Trinity Force', 'Turbo Chemtank',
+         'Umbral Glaive', 'Vigilant Wardstone', 'void staff', "Warmog's Armor", "Winter's Approach", "Wit's End",
+         "Youmuu's Ghostblade", "Zeke's Convergence", "Zhonya's Hourglass"
+         ]
+
+
 titles = {'domination': ['Keystones', 'Malice', 'Tracking', 'Hunter'],
           'precision': ['Keystones', 'Heroism', 'Legend', 'Combat'],
           'inspiration': ['Keystones', 'Contraptions', 'Tomorrow', 'Beyond'],
@@ -60,7 +86,6 @@ class SwipeToDeleteItem(MDCardSwipe):
     def __init__(self, text, img_source):
         super().__init__()
         self.size_hint_y = None
-        self.height = 55
         self.icon = MDIconButton(icon='trash-can',
                                  pos_hint={'center_y': .5})
         self.list_item = OneLineAvatarListItem(text=text)
@@ -75,6 +100,7 @@ class SwipeToDeleteItem(MDCardSwipe):
 
         self.add_widget(self.back_layer)
         self.add_widget(self.front_layer)
+        self.height = self.list_item.height
 
     def bind_back(self, **kwargs):
         self.icon.bind(**kwargs)
@@ -130,14 +156,13 @@ class Card(MDCard):
         super().__init__()
         self.orientation = 'vertical'
         self.size_hint = (None, None)
-        self.size = (90, 90)
         self.radius = '25dp'
 
         self.add_widget(Image(source=src,
                               allow_stretch=True,
                               keep_ratio=False,
                               size_hint=(None,None),
-                              size=(90,70)))
+                              size=(self.size[0], self.size[1]-20)))
         self.add_widget(MDLabel(text=txt,
                                 font_style='Caption',
                                 halign='center'))
@@ -151,14 +176,18 @@ class RuneCard(MDCard):
         self.radius = '25dp'
 
         self.add_widget(Image(source=src,
-                              allow_stretch=True,
-                              size_hint_y=None,
-                              height=65))
+                              allow_stretch=True))
 
         if text is not None:
             self.add_widget(MDLabel(text=text,
                                     halign='center',
                                     font_style='Caption'))
+
+class ItemCard(RuneCard):
+    def __init__(self, src, text=None):
+        super().__init__(src, text)
+        self.size_hint = (None, None)
+
 
 class Rune(SwipeToDeleteItem):
     def __init__(self, row):

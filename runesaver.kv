@@ -1,0 +1,114 @@
+<Library>: 
+    MDBoxLayout: 
+        orientation: 'vertical'
+
+        MDToolbar: 
+            title: root.profile_name()
+            right_action_items: 
+                [['account', root.open_dialog_box], 
+                ['dots-vertical', lambda x: root.open_menu(x)]
+                ]
+        
+        MDBottomNavigation:
+            MDBottomNavigationItem:
+                name: 'screen 1'
+                text: 'Runes'
+
+                ScrollView:
+                    MDList:
+                        id: my_runes
+                        padding: [5, 0]
+
+                AnchorLayout: 
+                    anchor_x: 'center'
+                    anchor_y: 'bottom'
+                    padding: 30
+
+                    MDFloatingActionButton: 
+                        icon: 'plus'
+                        on_release: root.champ_select()
+
+            MDBottomNavigationItem: 
+                name: 'screen 2'
+                text: 'Profile' 
+
+<ViewRune>:
+    BoxLayout: 
+        orientation: 'vertical'
+
+        MDToolbar:
+            id: toolbar
+            left_action_items:
+                [['arrow-left', root.go_back]]
+                
+        MDTabs: 
+            Tab: 
+                title: 'Rune'
+
+                GridLayout: 
+                    id: rune_grid
+                    cols: 2
+                    spacing: 5
+                    padding: 10
+
+                AnchorLayout:
+                    anchor_x: 'right'
+                    anchor_y: 'bottom'
+                    padding: 30
+
+                    MDFloatingActionButton:
+                        id: edit_btn
+                        icon: 'pencil'
+                        on_release: root.edit_rune(root.rune)
+
+            Tab: 
+                title: 'Builds'
+
+<InfoPage>: 
+
+    MDBoxLayout: 
+        orientation: 'vertical'
+        padding: 10
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        spacing: 10
+
+        MDCard: 
+            orientation: 'vertical'
+            padding: [20, 5]
+            radius: '25dp'
+            spacing: '10dp'
+
+            RelativeLayout:
+                Image:
+                    id: rune_img
+                    size_hint_y: None
+                    pos_hint: {'center_x': .5, 'top': .98}
+                
+                MDLabel:
+                    id: attr_title
+                    halign: 'center'
+                    font_style: 'H6'
+                    size_hint_y: None
+                    pos_hint: {'center_x': .5, 'top': .9}
+                
+                MDLabel: 
+                    id: attr_description
+                    halign: 'left'
+                    font_style: 'Subtitle2'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    pos_hint: {'top': .7}
+
+    AnchorLayout: 
+        anchor_x: 'left'
+        anchor_y: 'top'
+        padding: 15
+
+        FloatingButton: 
+            icon: 'arrow-left'
+            on_release: root.go_back
+
+
+<ChampSelect>: 
+
+<BuildRune>:

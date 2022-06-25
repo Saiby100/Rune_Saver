@@ -1,1 +1,4 @@
-Basic attacks on-attack against enemy champions grant a stack for 6 seconds, stacking up to 6 times. Gain (13% for Melee / 7% for Ranged) bonus attack speed for each stack, up to (78% for Melee / 42% for Ranged) bonus attack speed at maximum stacks. At maximum stacks, gain (50 for Melee / 75 for Ranged) bonus attack range and increase the attack speed cap to 10. Stacks decay by 1 every 0.5 seconds upon expiring.
+Basic attacks on-attack against enemy champions grant a stack for 6 seconds, stacking up to 6 times. 
+Gain (13% for Melee / 7% for Ranged) bonus attack speed for each stack, up to (78% for Melee / 42% for Ranged) bonus attack speed at maximum stacks. 
+At maximum stacks, gain (50 for Melee / 75 for Ranged) bonus attack range and increase the attack speed cap to 10. 
+Stacks decay by 1 every 0.5 seconds upon expiring.
