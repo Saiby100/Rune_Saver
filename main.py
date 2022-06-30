@@ -1,4 +1,3 @@
-import kivymd
 from kivy.properties import Clock
 from Widgets import *
 from kivy.uix.screenmanager import ScreenManager, Screen, ScreenManagerException, NoTransition
@@ -14,6 +13,9 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from Profile import Profile
 
+Window.minimum_width, Window.minimum_height = (705, 500)
+Window.size = (1039, 670)
+
 profile = Profile()
 
 class RuneSaver(MDApp):
@@ -27,19 +29,20 @@ class RuneSaver(MDApp):
 
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Orange"
+        
         sm = ScreenManager(transition=NoTransition())
         sm.add_widget(SplashScreen(name='splash'))
 
         return sm
 
     def on_start(self): 
-        Clock.schedule_once(self.add_screens, 2)
+        # Clock.schedule_once(self.add_screens, 2)
+        self.add_screens(None)
 
     def add_screens(self, event):
         sm.add_widget(Library(name='library'))
-        sm.add_widget(ChampSelect(name='champ_select'))
-        sm.add_widget(BuildRune('rune_page'))
-
+        # sm.add_widget(ChampSelect(name='champ_select'))
+        # sm.add_widget(BuildRune('rune_page'))
         sm.current = 'library'
         sm.remove_widget(sm.get_screen('splash'))
 
@@ -57,8 +60,9 @@ class Library(Screen):
         menu_items = [{'text': title,
                        'viewclass': 'OneLineListItem',
                        'on_release': lambda x=title: self.drop_menu_button(x),
-                       'height': dp(56)
-                       } for title in ['Rename profile', 'Delete profile']
+                       'height': dp(56),
+                       'divider': None
+                       } for title in ['Switch Profile', 'Rename profile', 'Delete profile']
                       ]
         self.drop_menu = MDDropdownMenu(items=menu_items,
                                         width_mult=2.7)
@@ -77,23 +81,26 @@ class Library(Screen):
         self.drop_menu.caller = button
         self.drop_menu.open()
 
-    def drop_menu_button(self, text_item):
+    def drop_menu_button(self, title):
         ''' Displays menu to delete or rename account'''
         self.profile_box = None
-        if text_item == 'Delete profile':
+        if title == 'Delete profile':
             buttons = [MDFlatButton(text='No', on_release=lambda x: self.profile_box.dismiss()),
                        MDFlatButton(text='Yes', on_release=lambda x: self.delete_profile())]
             self.profile_box = MDDialog(text=f'Are you sure you want to delete \'{profile.name}\'?',
                                         buttons=buttons,
                                         padding=5)
             self.profile_box.open()
-        else:
+        elif title == 'Rename profile':
             self.profile_box = MDDialog(title='Profile name:',
                                            type='custom',
                                            content_cls=MDTextField(text=profile.name),
                                            buttons=[MDFlatButton(text='Rename',
                                                                  on_release=self.rename_profile)])
             self.profile_box.open()
+
+        else: 
+            self.open_dialog_box()
 
         self.drop_menu.dismiss()
 
@@ -104,31 +111,32 @@ class Library(Screen):
             Snackbar(text='Profile already exists with that name', duration=1).open()
             return
 
-        self.toolbar.title = profile.name
+        self.ids.toolbar.title = profile.name
         self.profile_box.dismiss()
 
     def delete_profile(self):
         if profile.delete():
             saved_runes.change_account(profile.data())
 
-            self.my_runes.clear_widgets()
+            self.ids.my_runes.clear_widgets()
 
             for rune in saved_runes.runes:
                 rune.bind_back(on_release=partial(self.delete_rune, rune))
                 rune.bind_front(on_release=partial(self.view_rune, rune))
 
-                self.my_runes.add_widget(rune)
+                self.ids.my_runes.add_widget(rune)
 
-        self.toolbar.title = profile.name
+        self.ids.toolbar.title = profile.name
         self.profile_box.dismiss()
 
     def view_rune(self, rune, event):
-        if rune.img.pos[0] == 16:
+        if rune.ids.img.pos[0] == 16:
             self.rune = rune
             sm.add_widget(ViewRune(name='view_page'))
             sm.current = 'view_page'
 
     def champ_select(self):
+        print(Window.size)
         try: 
             sm.current = 'champ_select'
         except ScreenManagerException:
@@ -137,9 +145,9 @@ class Library(Screen):
 
     def delete_rune(self, rune, event):
         saved_runes.delete_rune(rune)
-        self.my_runes.remove_widget(rune)
+        self.ids.my_runes.remove_widget(rune)
 
-    def open_dialog_box(self, event):
+    def open_dialog_box(self):
         items = []
         for account in profile.profiles():
             item = IconListItem(account.strip('.csv'), 'account-circle')
@@ -165,15 +173,15 @@ class Library(Screen):
         profile.set_current(account)
         saved_runes.change_account(profile.data())
 
-        self.my_runes.clear_widgets()
+        self.ids.my_runes.clear_widgets()
 
         for rune in saved_runes.runes:
             rune.bind_back(on_release=partial(self.delete_rune, rune))
             rune.bind_front(on_release=partial(self.view_rune, rune))
 
-            self.my_runes.add_widget(rune)
+            self.ids.my_runes.add_widget(rune)
 
-        self.toolbar.title = profile.name
+        self.ids.toolbar.title = profile.name
         try:
             self.dialog_box.dismiss()
         except AttributeError:
@@ -343,8 +351,9 @@ class BuildRune(Screen):
             rune.edit(rune_info)
 
             screen = sm.get_screen('library')
-            screen.my_runes.remove_widget(rune)
-            screen.my_runes.add_widget(rune, len(screen.my_runes.children)-saved_runes.rune_index(rune))
+            index = screen.ids.my_runes.children.index(rune)
+            screen.ids.my_runes.remove_widget(rune)
+            screen.ids.my_runes.add_widget(rune, index)
 
             sm.remove_widget(rune_screen)
 
@@ -364,7 +373,7 @@ class BuildRune(Screen):
             rune.bind_back(on_release=partial(screen.delete_rune, rune))
 
             saved_runes.add_new_rune(rune)
-            screen.my_runes.add_widget(rune, saved_runes.rune_index(rune))
+            screen.ids.my_runes.add_widget(rune, saved_runes.rune_index(rune))
 
         self.close_box()
 
@@ -381,7 +390,3 @@ if __name__ == '__main__':
         profile.save(saved_runes.to_array())
 
     RuneSaver().run()
-
-
-
-

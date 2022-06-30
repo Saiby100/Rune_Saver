@@ -1,3 +1,39 @@
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
+<SwipeToDeleteItem>:
+    #Rune on Library page
+    size_hint_y: None
+    height: list_item.height
+
+    MDCardSwipeLayerBox:
+        MDIconButton:
+            id: delete_icon
+            icon: 'trash-can'
+
+    MDCardSwipeFrontBox:
+        OneLineAvatarListItem:
+            id: list_item
+            text: root.text
+            ripple_scale: 0
+
+            ImageLeftWidget:
+                id: img
+                source: root.source
+       
+<ItemDrawer>:
+    #Navigation item on home screen
+    text_color: app.theme_cls.text_color
+    on_release: 
+        sm.current = self.text
+        self.parent.set_color_item(self)
+
+    IconLeftWidget:
+        icon: root.icon
+        theme_text_color: 'Custom'
+        text_color: root.text_color
+
+
+
 <SplashScreen>:
     RelativeLayout: 
         orientation: 'vertical'
@@ -9,37 +45,64 @@
             pos_hint: {'center_x': .5, 'center_y': .5}
 
 <Library>: 
-    MDBoxLayout: 
-        orientation: 'vertical'
+    MDGridLayout: 
+        cols: 2
 
-        MDToolbar: 
-            title: root.profile_name()
-            right_action_items: 
-                [['account', root.open_dialog_box], 
-                ['dots-vertical', lambda x: root.open_menu(x)]]
-        
-        MDBottomNavigation:
-            MDBottomNavigationItem:
-                name: 'screen 1'
-                text: 'Runes'
+        ScrollView:
+            size_hint_x: .35
+            padding: [10, 0]
+            DrawerList:
+                id: nav_drawer
+                ItemDrawer:
+                    text: 'Profile'
+                    icon: 'account'
 
-                ScrollView:
-                    MDList:
-                        id: my_runes
-                        padding: [5, 0]
+                ItemDrawer: 
+                    text: 'Rune Library'
+                    icon: 'plus'
+                    text_color: app.theme_cls.primary_color
+                
+                ItemDrawer: 
+                    text: 'Match History'
+                    icon: 'plus'
+                
+                ItemDrawer: 
+                    text: 'All Champions'
+                    icon: 'plus'
 
-                AnchorLayout: 
-                    anchor_x: 'right'
-                    anchor_y: 'bottom'
-                    padding: 20
+                ItemDrawer: 
+                    text: 'All Items'
+                    icon: 'plus' 
 
-                    MDFloatingActionButton: 
-                        icon: 'plus'
-                        on_release: root.champ_select()
+        MDGridLayout: 
+            cols: 1
+            spacing: 5
+            padding: [5, 10]
 
-            MDBottomNavigationItem: 
-                name: 'screen 2'
-                text: 'Profile' 
+            MDTextField:
+                hint_text: 'search'
+                size_hint_x: None
+                size_hint_y: None
+                width: 450
+                pos_hint: {'center_x': 1}
+
+
+            ScrollView:
+                scroll_type: ['bars']
+                scroll_wheel_distance: 50
+                effect_cls: 'ScrollEffect'
+                MDList:
+                    id: my_runes
+                    padding: [5, 0]
+
+    AnchorLayout: 
+        anchor_x: 'right'
+        anchor_y: 'bottom'
+        padding: 20
+
+        MDFloatingActionButton: 
+            icon: 'plus'
+            on_release: root.champ_select()
 
 <ViewRune>:
     BoxLayout: 
@@ -126,8 +189,10 @@
             title: 'Select Champion'
             left_action_items: [['arrow-left', root.go_back]]
         
-        ScrollView: 
-            
+        ScrollView:
+            scroll_wheel_distance: 50
+            effect_cls: 'ScrollEffect'
+            scroll_type: ['bars']
             MDStackLayout:
                 id: champ_grid 
                 size_hint_y: None
@@ -150,6 +215,9 @@
                 title: 'Rune'
 
                 ScrollView:
+                    effect_cls: 'ScrollEffect'
+                    scroll_type: ['bars']
+                    scroll_wheel_distance: 50
                     MDGridLayout:
                         id: panel_grid
                         cols: 1

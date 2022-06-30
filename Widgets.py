@@ -8,6 +8,13 @@ from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconL
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import StringProperty
+from kivymd.app import MDApp
+from kivymd.uix.list import MDList
+from kivymd.theming import ThemableBehavior
+from kivymd.uix.behaviors import HoverBehavior, RectangularRippleBehavior
+from kivy.utils import get_color_from_hex
 
 items = ['Abyssal Mask', 'Anathema\'s Chains', 'Archangel\'s Staff',
          'Ardent Censer', 'Axiom Arc', "Banshee's Veil", 'Berserker\'s Greaves',
@@ -82,32 +89,57 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
-class SwipeToDeleteItem(MDCardSwipe):
-    def __init__(self, text, img_source):
-        super().__init__()
-        self.size_hint_y = None
-        self.icon = MDIconButton(icon='trash-can',
-                                 pos_hint={'center_y': .5})
-        self.list_item = OneLineAvatarListItem(text=text)
-        self.img = ImageLeftWidget()
-        self.img.source=img_source
-        self.list_item.add_widget(self.img)
-        self.front_layer = MDCardSwipeFrontBox()
-        self.front_layer.add_widget(self.list_item)
+class DrawerList(ThemableBehavior, MDList): 
+    def set_color_item(self, instance_item):
+        app = MDApp.get_running_app()
+        for item in self.children: 
+            if item.text_color == app.theme_cls.primary_color:
+                item.text_color = app.theme_cls.text_color
+                break
+        instance_item.text_color = app.theme_cls.primary_color
 
-        self.back_layer = MDCardSwipeLayerBox()
-        self.back_layer.add_widget(self.icon)
+class ItemDrawer(OneLineIconListItem, HoverBehavior):
+    icon = StringProperty()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app = MDApp.get_running_app()
+        self.theme_text_color = 'Custom'
+        self.divider = None
 
-        self.add_widget(self.back_layer)
-        self.add_widget(self.front_layer)
-        self.height = self.list_item.height
+    def on_enter(self):
+        if self.text_color != self.app.theme_cls.primary_color: 
+            self.text_color = self.app.theme_cls.accent_color
+    def on_leave(self):
+        if self.text_color != self.app.theme_cls.primary_color: 
+            self.text_color = self.app.theme_cls.text_color
 
+class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior): 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def on_enter(self): 
+        self.app = MDApp.get_running_app()
+        self.bg_color = self.app.theme_cls.bg_dark
+    def on_leave(self): 
+        self.bg_color = self.app.theme_cls.bg_normal
+
+class SwipeToDeleteItem(MDCardSwipe, HoverBehavior):
+    text = StringProperty()
+    source = StringProperty()
+    icon = StringProperty()
     def bind_back(self, **kwargs):
-        self.icon.bind(**kwargs)
+        self.ids.delete_icon.bind(**kwargs)
 
     def bind_front(self, **kwargs):
-        self.list_item.bind(**kwargs)
-
+        self.ids.list_item.bind(**kwargs)
+    
+    #TODO Fix hover issues
+    # def on_enter(self): 
+    #     self.app = MDApp.get_running_app()
+    #     self.ids.list_item.bg_color = self.app.theme_cls.accent_color
+    
+    # def on_leave(self):
+    #     self.ids.list_item.bg_color = self.app.theme_cls.bg_light
 
 class FloatingButton(MDFloatingActionButton, MDTooltip):
     pass
@@ -194,7 +226,8 @@ class Rune(SwipeToDeleteItem):
         self.build = []
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
         self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-        super().__init__(self.name, f'icons/champ_icons/{self.champ}.png')
+        super().__init__(text=self.name, 
+                         source=f'icons/champ_icons/{self.champ}.png')
 
     def attributes(self):
         return [self.main, self.key, self.slot1, self.slot2, self.slot3, self.secondary, self.slot_1, self.slot_2]
