@@ -4,7 +4,7 @@ from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget
+from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget, IconRightWidget
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
@@ -13,8 +13,11 @@ from kivy.properties import StringProperty
 from kivymd.app import MDApp
 from kivymd.uix.list import MDList
 from kivymd.theming import ThemableBehavior
-from kivymd.uix.behaviors import HoverBehavior, RectangularRippleBehavior
+from kivymd.uix.behaviors import HoverBehavior
 from kivy.utils import get_color_from_hex
+from kivymd.uix.list import OneLineAvatarIconListItem
+from kivymd.uix.menu import MDDropdownMenu
+from kivy.metrics import dp
 
 items = ['Abyssal Mask', 'Anathema\'s Chains', 'Archangel\'s Staff',
          'Ardent Censer', 'Axiom Arc', "Banshee's Veil", 'Berserker\'s Greaves',
@@ -109,6 +112,7 @@ class ItemDrawer(OneLineIconListItem, HoverBehavior):
     def on_enter(self):
         if self.text_color != self.app.theme_cls.primary_color: 
             self.text_color = self.app.theme_cls.accent_color
+
     def on_leave(self):
         if self.text_color != self.app.theme_cls.primary_color: 
             self.text_color = self.app.theme_cls.text_color
@@ -123,58 +127,7 @@ class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior):
     def on_leave(self): 
         self.bg_color = self.app.theme_cls.bg_normal
 
-class SwipeToDeleteItem(MDCardSwipe, HoverBehavior):
-    text = StringProperty()
-    source = StringProperty()
-    icon = StringProperty()
-    def bind_back(self, **kwargs):
-        self.ids.delete_icon.bind(**kwargs)
 
-    def bind_front(self, **kwargs):
-        self.ids.list_item.bind(**kwargs)
-    
-    #TODO Fix hover issues
-    # def on_enter(self): 
-    #     self.app = MDApp.get_running_app()
-    #     self.ids.list_item.bg_color = self.app.theme_cls.accent_color
-    
-    # def on_leave(self):
-    #     self.ids.list_item.bg_color = self.app.theme_cls.bg_light
-
-class FloatingButton(MDFloatingActionButton, MDTooltip):
-    pass
-
-class SavedRunes: 
-    def __init__(self, account_data):
-        self.runes = []
-        for line in account_data:
-            self.runes.append(Rune(line))
-
-    def add_new_rune(self, new_rune):
-        for i, rune in enumerate(self.runes):
-            if new_rune.champ <= rune.champ:
-                self.runes.insert(i, new_rune)
-                return
-        self.runes.append(new_rune)
-
-    def delete_rune(self, rune):
-        self.runes.remove(rune)
-
-    def to_array(self):
-        array = []
-        for rune in self.runes:
-            temp_arr = [rune.champ, rune.name]
-            temp_arr.extend(rune.attributes())
-            array.append(temp_arr)
-        return array
-
-    def change_account(self, account_data):
-        self.runes.clear()
-        for line in account_data:
-            self.runes.append(Rune(line))
-
-    def rune_index(self, rune):
-        return self.runes.index(rune)
 
 class IconListItem(OneLineIconListItem):
     def __init__(self, text, icon):
@@ -221,11 +174,34 @@ class ItemCard(RuneCard):
         self.size_hint = (None, None)
 
 
-class Rune(SwipeToDeleteItem):
-    def __init__(self, row):
+
+class FloatingButton(MDFloatingActionButton, MDTooltip):
+    pass
+
+class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
+    text = StringProperty()
+    source = StringProperty()
+
+    def on_enter(self): 
+        self.app = MDApp.get_running_app()
+        self.bg_color = self.app.theme_cls.bg_light
+
+        self.right_icon = IconRightWidget(icon='dots-vertical')
+        self.right_icon.bind(on_release=self.drop_menu_open)
+
+        self.add_widget(self.right_icon)
+    
+    def on_leave(self):
+        self.bg_color = self.app.theme_cls.bg_normal
+
+        self.children[0].remove_widget(self.right_icon)
+    
+
+class Rune(CustomIconAvatarListItem):
+    def __init__(self, **kwargs):
         self.build = []
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
-        self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+        self.slot3, self.secondary, self.slot_1, self.slot_2 = kwargs['row']
         super().__init__(text=self.name, 
                          source=f'icons/champ_icons/{self.champ}.png')
 
@@ -235,10 +211,65 @@ class Rune(SwipeToDeleteItem):
     def edit(self, row):
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
         self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-        self.list_item.text = self.name
+        self.ids.list_item.text = self.name
+
+    def drop_menu_open(self, instance):
+        screen = self.parent.parent.parent.parent.parent #References library screen
+        screen.rune_drop_menu.open()
+
+    def edit_rune(self):
+        self.screen = self.parent.parent.parent.parent.parent #References library screen
+        self.screen.edit_rune(self)
+
+    def delete_rune(self):
+        '''Called when delete icon is pressed'''
+        self.screen = self.parent.parent.parent.parent.parent #References library screen
+        self.screen.delete_rune(self)
+
+    def select_rune(self):
+        '''Called when Rune list item is pressed'''
+        self.screen = self.parent.parent.parent.parent.parent #References library screen
+        self.screen.view_rune(self)
 
     def add_build(self):
         pass
+
+class SavedRunes: 
+    def __init__(self, account_file):
+        self.runes = []
+        for line in account_file:
+            self.runes.append(Rune(row=line))
+
+    def add_new_rune(self, new_rune):
+        '''Adds a new rune in alphabetical order by champion name'''
+        for i, rune in enumerate(self.runes):
+            if new_rune.champ <= rune.champ:
+                self.runes.insert(i, new_rune)
+                return
+        self.runes.append(new_rune)
+
+    def delete_rune(self, rune):
+        '''Removes a rune from the stored runes'''
+        self.runes.remove(rune)
+
+    def to_array(self):
+        '''Returns all runes in a 2D array format'''
+        array = []
+        for rune in self.runes:
+            temp_arr = [rune.champ, rune.name]
+            temp_arr.extend(rune.attributes())
+            array.append(temp_arr)
+        return array
+
+    def change_account(self, account_file):
+        '''Clears the current stored runes and reads in a new file with stored runes'''
+        self.runes.clear()
+        for line in account_file:
+            self.runes.append(Rune(row=line))
+
+    def rune_index(self, rune):
+        '''Returns the index of a rune in the stored runes array'''
+        return self.runes.index(rune)
 
 class Tab(MDFloatLayout, MDTabsBase):
     pass

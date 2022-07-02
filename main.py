@@ -67,12 +67,49 @@ class Library(Screen):
         self.drop_menu = MDDropdownMenu(items=menu_items,
                                         width_mult=2.7)
 
+        rune_menu_items = [{'text': title,
+                            'viewclass': 'OneLineListItem',
+                            'on_release': lambda x=title: self.open_rune_dropmenu(x),
+                            'height': dp(56),
+                            'divider': None
+                            } for title in ['edit', 'delete']
+                          ]
+        self.rune_drop_menu = MDDropdownMenu(items=rune_menu_items,
+                                             width_mult=2.7)
+
         # Adding widgets to layouts
         for rune in saved_runes.runes:
-            rune.bind_back(on_release=partial(self.delete_rune, rune))
-            rune.bind_front(on_release=partial(self.view_rune, rune))
-
             self.ids.my_runes.add_widget(rune)
+
+    '''TODO: Open dropmenu for each right icon on rune.'''
+    def open_rune_dropmenu(self, title):
+        if title == 'edit': 
+            print('edit')
+        else:
+            print('delete')
+
+    def make_rune_list(self, text='', search=False): 
+        '''Searching for a rune'''
+        #TODO Implement search bar
+        def add_rune(rune):
+
+            self.ids.rv.data.append(
+                {
+                    'viewclass': 'Rune',
+                    'row': rune
+                }
+            )
+        
+        self.ids.rv.data = []
+        for rune in saved_runes.to_array():
+            rune.bind_back(on_release=partial(self.delete_rune, rune))
+            rune.bind_font(on_release=partial(self.view_rune, rune))
+            add_rune(rune)
+
+    def change_page(self, text):
+        sm.add_widget(Screen(name=text))
+        sm.current = text
+        
 
     def profile_name(self): 
         return profile.name
@@ -129,11 +166,10 @@ class Library(Screen):
         self.ids.toolbar.title = profile.name
         self.profile_box.dismiss()
 
-    def view_rune(self, rune, event):
-        if rune.ids.img.pos[0] == 16:
-            self.rune = rune
-            sm.add_widget(ViewRune(name='view_page'))
-            sm.current = 'view_page'
+    def view_rune(self, rune):
+        self.rune = rune
+        sm.add_widget(ViewRune(name='view_page'))
+        sm.current = 'view_page'
 
     def champ_select(self):
         print(Window.size)
@@ -143,7 +179,7 @@ class Library(Screen):
             sm.add_widget(ChampSelect('champ_select'))
             print(sm.get_screen('champ_select'))
 
-    def delete_rune(self, rune, event):
+    def delete_rune(self, rune):
         saved_runes.delete_rune(rune)
         self.ids.my_runes.remove_widget(rune)
 
@@ -210,6 +246,21 @@ class Library(Screen):
         self.create_account_box.dismiss()
         self.dialog_box.dismiss()
 
+    def edit_rune(self, rune): 
+        screen = sm.get_screen('rune_page')
+        screen.ids.toolbar.title = rune.name
+        screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{rune.champ}.png']]
+
+        for i, attr in enumerate(rune.attributes()):
+            if i < 5:
+                screen.panel_manager.primary_panels[i].change_title(attr)
+            else:
+                screen.panel_manager.secondary_panels[i-5].change_title(attr)
+
+        screen.previous = self.name
+        screen.rune = rune
+        sm.current = 'rune_page'
+
 class ViewRune(Screen):
     '''Page to view rune attributes for each saved rune.'''
     def __init__(self, **kwargs):
@@ -219,8 +270,6 @@ class ViewRune(Screen):
         toolbar = self.ids.toolbar
         toolbar.title = self.rune.name
         toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
-
-        self.ids.edit_btn.on_release = self.edit_rune
 
         for attribute in self.rune.attributes():
             rune_card = RuneCard(f'icons/runes/{attribute}.png', attribute.title())
@@ -232,7 +281,7 @@ class ViewRune(Screen):
         sm.current = 'library'
 
     #Edit the chosen rune
-    def edit_rune(self, event=None):
+    def edit_rune(self):
         screen = sm.get_screen('rune_page')
         screen.ids.toolbar.title = self.rune.name
         screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
@@ -310,6 +359,7 @@ class BuildRune(Screen):
         super().__init__(name=page_name)
         self.previous = None
         self.champion = None
+        self.rune = None
 
         self.panel_manager = PanelManager(['Primary', 'Keystone', 'Slot 1', 'Slot 2', 'Slot 3'],
                                           ['Secondary', 'Slot 1', 'Slot 2'])
@@ -337,9 +387,8 @@ class BuildRune(Screen):
     #Saves the rune
     def save_rune(self, event=None):
         '''Saves the rune'''
-        try:#If the viewpage exists (Rune needs to be edited)
-            rune_screen = sm.get_screen('view_page')
-            rune = rune_screen.rune
+        if self.previous == 'view_page' or self.previous == 'library':
+            rune = self.rune
             rune_info = [rune.champ, self.dialog_btn.content_cls.text]
 
             for panel in self.panel_manager.primary_panels:
@@ -354,10 +403,14 @@ class BuildRune(Screen):
             index = screen.ids.my_runes.children.index(rune)
             screen.ids.my_runes.remove_widget(rune)
             screen.ids.my_runes.add_widget(rune, index)
+            
+            try:
+                sm.remove_widget(sm.get_screen('view_page'))
+            except: 
+                '''Screen doesn't exist (Rune was edited from library page)'''
+                pass
 
-            sm.remove_widget(rune_screen)
-
-        except ScreenManagerException: #If the viewpage doesn't exist (Rune must be added)
+        else: #If the viewpage doesn't exist (Rune must be added)
             rune_info = [self.champion, self.dialog_btn.content_cls.text]
 
             for panel in self.panel_manager.primary_panels:
