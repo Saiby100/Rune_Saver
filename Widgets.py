@@ -1,15 +1,14 @@
-from kivymd.uix.button import MDIconButton, MDFloatingActionButton
-from kivymd.uix.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDCard
+from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.card import MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.list import ImageLeftWidget, OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget, IconRightWidget
+from kivymd.uix.list import OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget, IconRightWidget
 from kivymd.uix.label import MDLabel
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivymd.app import MDApp
 from kivymd.uix.list import MDList
 from kivymd.theming import ThemableBehavior
@@ -117,7 +116,7 @@ class ItemDrawer(OneLineIconListItem, HoverBehavior):
         if self.text_color != self.app.theme_cls.primary_color: 
             self.text_color = self.app.theme_cls.text_color
 
-class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior): 
+class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
     
@@ -130,11 +129,7 @@ class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior):
 
 
 class IconListItem(OneLineIconListItem):
-    def __init__(self, text, icon):
-        super().__init__()
-        self.text = text
-        self.icon = IconLeftWidget(icon=icon)
-        self.add_widget(self.icon)
+    icon = StringProperty()
 
 class Card(MDCard):
     def __init__(self, src, txt):
@@ -152,21 +147,12 @@ class Card(MDCard):
                                 font_style='Caption',
                                 halign='center'))
 
-class RuneCard(MDCard): 
-    def __init__(self, src, text=None):
-        super().__init__()
-        self.orientation = 'vertical'
-        self.padding = '5dp'
-        self.spacing = '5dp'
-        self.radius = '25dp'
-
-        self.add_widget(Image(source=src,
-                              allow_stretch=True))
-
-        if text is not None:
-            self.add_widget(MDLabel(text=text,
-                                    halign='center',
-                                    font_style='Caption'))
+class RuneCard(MDCard):
+    source = StringProperty()
+    txt = StringProperty()
+    def view_attribute(self): 
+        screen = self.parent.parent.parent.parent.parent.parent.parent.parent #References the ViewRune page
+        screen.view_attribute(self.txt.lower())
 
 class ItemCard(RuneCard):
     def __init__(self, src, text=None):
@@ -178,6 +164,10 @@ class ItemCard(RuneCard):
 class FloatingButton(MDFloatingActionButton, MDTooltip):
     pass
 
+class CustomIconRightWidget(IconRightWidget):
+    '''Icon that contains an instance variable pointing to the rune that it is on'''
+    rune = ObjectProperty()
+
 class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
     text = StringProperty()
     source = StringProperty()
@@ -186,8 +176,9 @@ class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
         self.app = MDApp.get_running_app()
         self.bg_color = self.app.theme_cls.bg_light
 
-        self.right_icon = IconRightWidget(icon='dots-vertical')
-        self.right_icon.bind(on_release=self.drop_menu_open)
+        self.right_icon = CustomIconRightWidget(icon='dots-vertical',
+                                                rune=self)
+        self.right_icon.bind(on_release=self.open_drop_menu)
 
         self.add_widget(self.right_icon)
     
@@ -211,30 +202,25 @@ class Rune(CustomIconAvatarListItem):
     def edit(self, row):
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
         self.slot3, self.secondary, self.slot_1, self.slot_2 = row
-        self.ids.list_item.text = self.name
+        self.text = self.name
 
-    def drop_menu_open(self, instance):
+    def open_drop_menu(self, instance):
+        '''Opens the drop menu on the library page'''
         screen = self.parent.parent.parent.parent.parent #References library screen
+        screen.rune_drop_menu.caller = instance
         screen.rune_drop_menu.open()
-
-    def edit_rune(self):
-        self.screen = self.parent.parent.parent.parent.parent #References library screen
-        self.screen.edit_rune(self)
-
-    def delete_rune(self):
-        '''Called when delete icon is pressed'''
-        self.screen = self.parent.parent.parent.parent.parent #References library screen
-        self.screen.delete_rune(self)
 
     def select_rune(self):
         '''Called when Rune list item is pressed'''
         self.screen = self.parent.parent.parent.parent.parent #References library screen
         self.screen.view_rune(self)
 
+    '''TODO: Add feature for adding item builds for a rune'''
     def add_build(self):
         pass
 
 class SavedRunes: 
+    '''Manages all the saved runes in an account'''
     def __init__(self, account_file):
         self.runes = []
         for line in account_file:
@@ -281,14 +267,14 @@ class PanelManager():
         self.secondary_panels = []
         array = []
         array.extend(runes.keys())
-        #Adds primary panels
+        '''Adds primary panels with no contents except for primary and secondary header panel.'''
         for i, title in enumerate(primary_titles):
             if i == 0:
                 self.primary_panels.append(ExpansionPanel(title, self, Content(array)))
             else:
                 self.primary_panels.append(ExpansionPanel(title, self, Content()))
 
-        #Adds Secondary panels
+        '''Adds secondary panels with no contents except for primary and secondary header panel.'''
         for i, title in enumerate(secondary_titles):
             if i == 0:
                 self.secondary_panels.append(ExpansionPanel(title, self, Content(array)))
@@ -302,6 +288,8 @@ class PanelManager():
         return self.secondary_panels
 
     def update_panels(self, title, panel):
+        '''Updates the title for a panel.
+           If a Primary or Secondary panel is changed, all panels below it's contents change as well.'''
         panel_titles = []
         panel_titles.extend(runes[title.lower()].keys())
 
@@ -364,25 +352,17 @@ class Content(MDBoxLayout):
 
         if rune_headers is not None:
             for rh in rune_headers:
-                self.add_widget(ListItem(rh.title(), f'icons/runes/{rh}.png'))
+                self.add_widget(ListItem(text=rh.title(), 
+                                         source=f'icons/runes/{rh}.png'))
 
     def change_content(self, rune_headers):
         self.clear_widgets()
         for rh in rune_headers:
-            self.add_widget(ListItem(rh.title(), f'icons/runes/{rh}.png'))
+            self.add_widget(ListItem(text=rh.title(),
+                                     source=f'icons/runes/{rh}.png'))
 
 class ListItem(OneLineAvatarListItem):
-    def __init__(self, text, image_source):
-        super().__init__()
+    source = StringProperty()
 
-        self.text = text
-        self.source = image_source
-
-        self.image = ImageLeftWidget()
-        self.image.source = self.source
-        self.add_widget(self.image)
-
-        self.bind(on_release=self.update_panel_title)
-
-    def update_panel_title(self, instance):
+    def update_panel_title(self):
         self.parent.parent.change_title(self.text)

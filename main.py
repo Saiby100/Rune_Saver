@@ -12,9 +12,10 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from Profile import Profile
+from kivymd.uix.spinner import MDSpinner
 
 Window.minimum_width, Window.minimum_height = (705, 500)
-Window.size = (1039, 670)
+Window.size = (995, 670)
 
 profile = Profile()
 
@@ -41,16 +42,25 @@ class RuneSaver(MDApp):
 
     def add_screens(self, event):
         sm.add_widget(Library(name='library'))
-        # sm.add_widget(ChampSelect(name='champ_select'))
-        # sm.add_widget(BuildRune('rune_page'))
+        sm.add_widget(BuildRune(name='rune_page'))
+        sm.add_widget(PlayerProfile(name='profile'))
+        sm.add_widget(MatchHistory(name='match history'))
         sm.current = 'library'
         sm.remove_widget(sm.get_screen('splash'))
+    
+    def change_screen(self, screen_name):
+         sm.current = screen_name
 
 
 class SplashScreen(Screen):
     '''Displays on app launch.'''
     pass 
 
+class PlayerProfile(Screen): 
+    pass
+
+class MatchHistory(Screen): 
+    pass
 
 class Library(Screen):
     '''Page with user's saved runes.'''
@@ -67,33 +77,35 @@ class Library(Screen):
         self.drop_menu = MDDropdownMenu(items=menu_items,
                                         width_mult=2.7)
 
-        rune_menu_items = [{'text': title,
-                            'viewclass': 'OneLineListItem',
-                            'on_release': lambda x=title: self.open_rune_dropmenu(x),
-                            'height': dp(56),
-                            'divider': None
-                            } for title in ['edit', 'delete']
+        rune_menu_items = [{'text': title[0],
+                            'viewclass': 'IconListItem',
+                            'on_release': lambda x=title[0]: self.select_drop_menu_option(x),
+                            'height': dp(45),
+                            'icon': title[1]
+                            } for title in [['edit', 'pencil'], ['delete', 'trash-can']]
                           ]
         self.rune_drop_menu = MDDropdownMenu(items=rune_menu_items,
-                                             width_mult=2.7)
+                                             width_mult=2.6)
 
         # Adding widgets to layouts
         for rune in saved_runes.runes:
             self.ids.my_runes.add_widget(rune)
 
-    '''TODO: Open dropmenu for each right icon on rune.'''
-    def open_rune_dropmenu(self, title):
+    '''TODO: implement edit and delete rune feature'''
+    def select_drop_menu_option(self, title):
+        rune = self.rune_drop_menu.caller.rune
+        self.rune_drop_menu.dismiss()
         if title == 'edit': 
-            print('edit')
+            self.edit_rune(rune)
         else:
-            print('delete')
+            self.delete_rune(rune)
 
-    def make_rune_list(self, text='', search=False): 
+    '''TODO: Implement search bar'''
+    def make_rune_list(self, text='', search=False):
         '''Searching for a rune'''
-        #TODO Implement search bar
         def add_rune(rune):
 
-            self.ids.rv.data.append(
+            self.ids.my_runes.data.append(
                 {
                     'viewclass': 'Rune',
                     'row': rune
@@ -106,17 +118,13 @@ class Library(Screen):
             rune.bind_font(on_release=partial(self.view_rune, rune))
             add_rune(rune)
 
+    '''TODO: Implement feature to switch to match history and profile'''
     def change_page(self, text):
         sm.add_widget(Screen(name=text))
         sm.current = text
         
-
     def profile_name(self): 
         return profile.name
-
-    def open_menu(self, button):
-        self.drop_menu.caller = button
-        self.drop_menu.open()
 
     def drop_menu_button(self, title):
         ''' Displays menu to delete or rename account'''
@@ -145,25 +153,24 @@ class Library(Screen):
         name = self.profile_box.content_cls.text
 
         if not profile.rename(name):
+            #Rename unsuccessful
             Snackbar(text='Profile already exists with that name', duration=1).open()
             return
 
-        self.ids.toolbar.title = profile.name
+        self.ids.account_btn.text = self.profile_name()
         self.profile_box.dismiss()
 
     def delete_profile(self):
         if profile.delete():
+            #Deletion successful
             saved_runes.change_account(profile.data())
 
             self.ids.my_runes.clear_widgets()
 
             for rune in saved_runes.runes:
-                rune.bind_back(on_release=partial(self.delete_rune, rune))
-                rune.bind_front(on_release=partial(self.view_rune, rune))
-
                 self.ids.my_runes.add_widget(rune)
 
-        self.ids.toolbar.title = profile.name
+        self.ids.account_btn.text = self.profile_name()
         self.profile_box.dismiss()
 
     def view_rune(self, rune):
@@ -172,27 +179,29 @@ class Library(Screen):
         sm.current = 'view_page'
 
     def champ_select(self):
+        '''Goes to champ select page'''
         print(Window.size)
-        try: 
-            sm.current = 'champ_select'
-        except ScreenManagerException:
-            sm.add_widget(ChampSelect('champ_select'))
-            print(sm.get_screen('champ_select'))
+        if not sm.has_screen('champ_select'):
+            sm.add_widget(ChampSelect(name='champ_select'))
+
+        sm.current = 'champ_select'
 
     def delete_rune(self, rune):
         saved_runes.delete_rune(rune)
         self.ids.my_runes.remove_widget(rune)
 
     def open_dialog_box(self):
+        '''Opens the box for switching accounts'''
         items = []
         for account in profile.profiles():
-            item = IconListItem(account.strip('.csv'), 'account-circle')
-            item.divider = None
+            item = IconListItem(text=account.strip('.csv'), 
+                                icon='account-circle')
+
             item.bind(on_release=partial(self.switch_profile, account.strip('.csv')))
             items.append(item)
 
-        add_account_item = IconListItem('Add Profile', 'account-plus')
-        add_account_item.divider = None
+        add_account_item = IconListItem(text='Add Profile', 
+                                        icon='account-plus')
         add_account_item.bind(on_release=self.get_profile_name)
         items.append(add_account_item)
 
@@ -212,12 +221,10 @@ class Library(Screen):
         self.ids.my_runes.clear_widgets()
 
         for rune in saved_runes.runes:
-            rune.bind_back(on_release=partial(self.delete_rune, rune))
-            rune.bind_front(on_release=partial(self.view_rune, rune))
-
             self.ids.my_runes.add_widget(rune)
 
-        self.ids.toolbar.title = profile.name
+        self.ids.account_btn.text = self.profile_name()
+
         try:
             self.dialog_box.dismiss()
         except AttributeError:
@@ -246,7 +253,7 @@ class Library(Screen):
         self.create_account_box.dismiss()
         self.dialog_box.dismiss()
 
-    def edit_rune(self, rune): 
+    def edit_rune(self, rune):
         screen = sm.get_screen('rune_page')
         screen.ids.toolbar.title = rune.name
         screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{rune.champ}.png']]
@@ -272,8 +279,8 @@ class ViewRune(Screen):
         toolbar.right_action_items = [[f'icons/champ_icons/{self.rune.champ}.png']]
 
         for attribute in self.rune.attributes():
-            rune_card = RuneCard(f'icons/runes/{attribute}.png', attribute.title())
-            rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
+            rune_card = RuneCard(source=f'icons/runes/{attribute}.png', txt=attribute.title())
+            # rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
             self.ids.rune_grid.add_widget(rune_card)
 
     def go_back(self, event=None):
@@ -295,11 +302,11 @@ class ViewRune(Screen):
         screen.previous = self.name
         sm.current = 'rune_page'
 
-    def view_rune_attribute(self, rune_attribute, event):
-        if rune_attribute in titles.keys():
+    def view_attribute(self, attribute, event=None):
+        if attribute in titles.keys():
             return
 
-        screen = InfoPage(rune_attribute, name='rune_info')
+        screen = InfoPage(attribute, name='rune_info')
         sm.add_widget(screen)
         sm.current = 'rune_info'
 
@@ -355,8 +362,8 @@ class ChampSelect(Screen):
 
 class BuildRune(Screen):
     '''Page to build a rune.'''
-    def __init__(self, page_name):
-        super().__init__(name=page_name)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.previous = None
         self.champion = None
         self.rune = None

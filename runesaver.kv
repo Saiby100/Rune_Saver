@@ -1,6 +1,38 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
-#CUSTOM WIDGETS
+#CUSTOM WIDGETS    
+
+<ListItem>:
+    #Used in Content object on the BuildRune page
+    on_release: root.update_panel_title()
+
+    ImageLeftWidget:
+        source: root.source
+
+<RuneCard>:
+    #Cards on view rune page
+    orientation: 'vertical'
+    padding: '5dp'
+    spacing: '5dp'
+    radius: '25dp'
+    on_release: root.view_attribute()
+
+    Image:
+        source: root.source
+        allow_stretch: True
+    
+    MDLabel: 
+        text: root.txt
+        halign: 'center'
+        #font_style: 'Caption'
+
+<IconListItem>:
+    #Widget used in dropdown menus and account switching
+    divider: None
+
+    IconLeftWidget:
+        icon: root.icon
+
 <CustomIconAvatarListItem>:
     #Rune on Library page
     text: root.text
@@ -15,7 +47,7 @@
     #Navigation item on home screen
     text_color: app.theme_cls.text_color
 
-    on_release: 
+    on_release:
         self.parent.set_color_item(self)
 
     IconLeftWidget:
@@ -25,6 +57,18 @@
 
     
 #SCREENS
+
+<PlayerProfile>:
+    MDLabel: 
+        halign: 'center'
+        text: 'This is the player profile details.'
+
+
+<MatchHistory>:
+    MDLabel: 
+        halign: 'center'
+        text: 'This is the player match history.'
+
 <SplashScreen>:
     RelativeLayout: 
         orientation: 'vertical'
@@ -36,12 +80,16 @@
             pos_hint: {'center_x': .5, 'center_y': .5}
 
 <Library>: 
-    MDGridLayout: 
+    MDGridLayout:
         cols: 2
 
         ScrollView:
             size_hint_x: .3
             padding: [10, 0]
+            scroll_type: ['bars']
+            scroll_wheel_distance: 50
+            effect_cls: 'ScrollEffect'
+
             DrawerList:
                 id: nav_drawer
 
@@ -49,16 +97,20 @@
                     text: 'Profile'
                     icon: 'account'
                     on_release: 
-                        root.change_page(self.text.lower())
+                        app.change_screen(self.text.lower())
 
                 ItemDrawer: 
                     text: 'Rune Library'
                     icon: 'library'
                     text_color: app.theme_cls.primary_color
+                    on_release: 
+                        app.change_screen('library')
                 
                 ItemDrawer: 
                     text: 'Match History'
                     icon: 'history'
+                    on_release: 
+                        app.change_screen(self.text.lower())
         
         MDGridLayout: 
             cols: 1
@@ -69,6 +121,9 @@
                 hint_text: 'search'
                 icon_right: 'magnify'
                 icon_right_color: app.theme_cls.primary_color
+                size_hint_x: None
+                width: 500
+
                 on_text: 
                     root.make_rune_list(self.text, True)
 
@@ -80,7 +135,21 @@
                 MDList:
                     id: my_runes
                     padding: [5, 0]
+            
+    AnchorLayout: 
+        anchor_x: 'right'
+        anchor_y: 'top'
+        padding: 15
+        
+        MDRoundFlatIconButton:
+            id: account_btn
+            icon: 'account-circle'
+            text: root.profile_name()
+            on_release: 
+                root.drop_menu.caller = self
+                root.drop_menu.open()
 
+                     
     AnchorLayout:
         anchor_x: 'right'
         anchor_y: 'bottom'
