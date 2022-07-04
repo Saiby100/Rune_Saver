@@ -44,11 +44,13 @@ class RuneSaver(MDApp):
         sm.add_widget(Library(name='library'))
         sm.add_widget(BuildRune(name='rune_page'))
         sm.add_widget(PlayerProfile(name='profile'))
-        sm.add_widget(MatchHistory(name='match history'))
+        sm.add_widget(MatchHistory(name='match_history'))
         sm.current = 'library'
         sm.remove_widget(sm.get_screen('splash'))
     
     def change_screen(self, screen_name):
+         if sm.current == screen_name: 
+            return
          sm.current = screen_name
 
 
@@ -56,7 +58,7 @@ class SplashScreen(Screen):
     '''Displays on app launch.'''
     pass 
 
-class PlayerProfile(Screen): 
+class PlayerProfile(Screen):
     pass
 
 class MatchHistory(Screen): 
@@ -78,7 +80,7 @@ class Library(Screen):
                                         width_mult=2.7)
 
         rune_menu_items = [{'text': title[0],
-                            'viewclass': 'IconListItem',
+                            'viewclass': 'CustomIconListItem',
                             'on_release': lambda x=title[0]: self.select_drop_menu_option(x),
                             'height': dp(45),
                             'icon': title[1]
@@ -91,8 +93,8 @@ class Library(Screen):
         for rune in saved_runes.runes:
             self.ids.my_runes.add_widget(rune)
 
-    '''TODO: implement edit and delete rune feature'''
     def select_drop_menu_option(self, title):
+        '''Called by 'dots-vertical' icon that appears on-hover for a rune'''
         rune = self.rune_drop_menu.caller.rune
         self.rune_drop_menu.dismiss()
         if title == 'edit': 
@@ -117,11 +119,6 @@ class Library(Screen):
             rune.bind_back(on_release=partial(self.delete_rune, rune))
             rune.bind_font(on_release=partial(self.view_rune, rune))
             add_rune(rune)
-
-    '''TODO: Implement feature to switch to match history and profile'''
-    def change_page(self, text):
-        sm.add_widget(Screen(name=text))
-        sm.current = text
         
     def profile_name(self): 
         return profile.name
@@ -180,7 +177,6 @@ class Library(Screen):
 
     def champ_select(self):
         '''Goes to champ select page'''
-        print(Window.size)
         if not sm.has_screen('champ_select'):
             sm.add_widget(ChampSelect(name='champ_select'))
 
@@ -194,14 +190,14 @@ class Library(Screen):
         '''Opens the box for switching accounts'''
         items = []
         for account in profile.profiles():
-            item = IconListItem(text=account.strip('.csv'), 
-                                icon='account-circle')
+            item = CustomIconListItem(text=account.strip('.csv'), 
+                                      icon='account-circle')
 
             item.bind(on_release=partial(self.switch_profile, account.strip('.csv')))
             items.append(item)
 
-        add_account_item = IconListItem(text='Add Profile', 
-                                        icon='account-plus')
+        add_account_item = CustomIconListItem(text='Add Profile', 
+                                              icon='account-plus')
         add_account_item.bind(on_release=self.get_profile_name)
         items.append(add_account_item)
 
@@ -280,7 +276,6 @@ class ViewRune(Screen):
 
         for attribute in self.rune.attributes():
             rune_card = RuneCard(source=f'icons/runes/{attribute}.png', txt=attribute.title())
-            # rune_card.bind(on_release=partial(self.view_rune_attribute, attribute))
             self.ids.rune_grid.add_widget(rune_card)
 
     def go_back(self, event=None):
@@ -428,9 +423,7 @@ class BuildRune(Screen):
 
             screen = sm.get_screen('library')
 
-            rune = Rune(rune_info)
-            rune.bind_front(on_release=partial(screen.view_rune, rune))
-            rune.bind_back(on_release=partial(screen.delete_rune, rune))
+            rune = Rune(row=rune_info)
 
             saved_runes.add_new_rune(rune)
             screen.ids.my_runes.add_widget(rune, saved_runes.rune_index(rune))

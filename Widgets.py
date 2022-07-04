@@ -1,4 +1,4 @@
-from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.button import MDFloatingActionButton, MDRoundFlatIconButton
 from kivymd.uix.card import MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivy.uix.image import Image
@@ -91,47 +91,31 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
-class DrawerList(ThemableBehavior, MDList): 
-    def set_color_item(self, instance_item):
-        app = MDApp.get_running_app()
-        for item in self.children: 
-            if item.text_color == app.theme_cls.primary_color:
-                item.text_color = app.theme_cls.text_color
-                break
-        instance_item.text_color = app.theme_cls.primary_color
-
-class ItemDrawer(OneLineIconListItem, HoverBehavior):
+class CustomIconListItem(OneLineIconListItem, HoverBehavior):
+    '''A OneLineIconListItem with hoverbehaviour'''
     icon = StringProperty()
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.app = MDApp.get_running_app()
-        self.theme_text_color = 'Custom'
-        self.divider = None
 
     def on_enter(self):
-        if self.text_color != self.app.theme_cls.primary_color: 
+        self.app = MDApp.get_running_app()
+        self.text_color = self.app.theme_cls.primary_color
+
+    def on_leave(self): 
+        self.text_color = self.app.theme_cls.text_color
+
+class NavItem(CustomIconListItem):
+    '''Navigation items in navigation barused on Home pages (Profile Rune Library, Match History)'''
+    def on_enter(self):
+        self.app = MDApp.get_running_app()
+        if self.text_color != self.app.theme_cls.primary_color:
             self.text_color = self.app.theme_cls.accent_color
 
     def on_leave(self):
-        if self.text_color != self.app.theme_cls.primary_color: 
+        if self.text_color != self.app.theme_cls.primary_color:
             self.text_color = self.app.theme_cls.text_color
 
-class OneLineHoverListItem(OneLineAvatarListItem, HoverBehavior):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-    
-    def on_enter(self): 
-        self.app = MDApp.get_running_app()
-        self.bg_color = self.app.theme_cls.bg_dark
-    def on_leave(self): 
-        self.bg_color = self.app.theme_cls.bg_normal
-
-
-
-class IconListItem(OneLineIconListItem):
-    icon = StringProperty()
 
 class Card(MDCard):
+    '''Card used on champ select page'''
     def __init__(self, src, txt):
         super().__init__()
         self.orientation = 'vertical'
@@ -148,6 +132,7 @@ class Card(MDCard):
                                 halign='center'))
 
 class RuneCard(MDCard):
+    '''Card used on view Rune Page'''
     source = StringProperty()
     txt = StringProperty()
     def view_attribute(self): 
@@ -155,6 +140,7 @@ class RuneCard(MDCard):
         screen.view_attribute(self.txt.lower())
 
 class ItemCard(RuneCard):
+    '''Card that will be used for creating builds (TODO)'''
     def __init__(self, src, text=None):
         super().__init__(src, text)
         self.size_hint = (None, None)

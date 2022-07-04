@@ -26,12 +26,16 @@
         halign: 'center'
         #font_style: 'Caption'
 
-<IconListItem>:
+<CustomIconListItem>:
     #Widget used in dropdown menus and account switching
+    theme_text_color: 'Custom'
+    text_color: app.theme_cls.text_color
     divider: None
 
     IconLeftWidget:
         icon: root.icon
+        theme_text_color: 'Custom'
+        text_color: root.text_color
 
 <CustomIconAvatarListItem>:
     #Rune on Library page
@@ -42,33 +46,8 @@
     ImageLeftWidget:
         id: img
         source: root.source
-  
-<ItemDrawer>:
-    #Navigation item on home screen
-    text_color: app.theme_cls.text_color
-
-    on_release:
-        self.parent.set_color_item(self)
-
-    IconLeftWidget:
-        icon: root.icon
-        theme_text_color: 'Custom'
-        text_color: root.text_color
-
     
 #SCREENS
-
-<PlayerProfile>:
-    MDLabel: 
-        halign: 'center'
-        text: 'This is the player profile details.'
-
-
-<MatchHistory>:
-    MDLabel: 
-        halign: 'center'
-        text: 'This is the player match history.'
-
 <SplashScreen>:
     RelativeLayout: 
         orientation: 'vertical'
@@ -78,6 +57,77 @@
             size_hint: None, None
             size: 100, 100
             pos_hint: {'center_x': .5, 'center_y': .5}
+
+<PlayerProfile>:
+    MDGridLayout:
+        cols: 2
+
+        ScrollView:
+            size_hint_x: .3
+            padding: [10, 0]
+            scroll_type: ['bars']
+            scroll_wheel_distance: 50
+            effect_cls: 'ScrollEffect'
+
+            MDList:
+
+                NavItem:
+                    text: 'Profile'
+                    icon: 'account'
+                    text_color: app.theme_cls.primary_color
+                    on_release: 
+                        app.change_screen('profile')
+
+                NavItem: 
+                    text: 'Rune Library'
+                    icon: 'library'
+                    on_release: 
+                        app.change_screen('library')
+                
+                NavItem: 
+                    text: 'Match History'
+                    icon: 'history'
+                    on_release: 
+                        app.change_screen('match_history')
+        MDLabel:
+            halign: 'center'
+            text: 'This is the player profile details.'
+
+
+<MatchHistory>:
+    MDGridLayout:
+        cols: 2
+
+        ScrollView:
+            size_hint_x: .3
+            padding: [10, 0]
+            scroll_type: ['bars']
+            scroll_wheel_distance: 50
+            effect_cls: 'ScrollEffect'
+
+            MDList:
+
+                NavItem:
+                    text: 'Profile'
+                    icon: 'account'
+                    on_release: 
+                        app.change_screen('profile')
+
+                NavItem: 
+                    text: 'Rune Library'
+                    icon: 'library'
+                    on_release: 
+                        app.change_screen('library')
+                
+                NavItem: 
+                    text: 'Match History'
+                    icon: 'history'
+                    text_color: app.theme_cls.primary_color
+                    on_release: 
+                        app.change_screen('match_history')
+        MDLabel:
+            halign: 'center'
+            text: 'This is the player match history'
 
 <Library>: 
     MDGridLayout:
@@ -90,27 +140,26 @@
             scroll_wheel_distance: 50
             effect_cls: 'ScrollEffect'
 
-            DrawerList:
-                id: nav_drawer
+            MDList:
 
-                ItemDrawer:
+                NavItem:
                     text: 'Profile'
                     icon: 'account'
-                    on_release: 
-                        app.change_screen(self.text.lower())
+                    on_release:
+                        app.change_screen('profile')
 
-                ItemDrawer: 
+                NavItem:
                     text: 'Rune Library'
                     icon: 'library'
                     text_color: app.theme_cls.primary_color
-                    on_release: 
+                    on_release:
                         app.change_screen('library')
                 
-                ItemDrawer: 
+                NavItem:
                     text: 'Match History'
                     icon: 'history'
                     on_release: 
-                        app.change_screen(self.text.lower())
+                        app.change_screen('match_history')
         
         MDGridLayout: 
             cols: 1
@@ -183,10 +232,10 @@
                     anchor_y: 'bottom'
                     padding: 30
 
-                    MDFloatingActionButton:
-                        id: edit_btn
-                        icon: 'pencil'
-                        on_release: root.edit_rune(root.rune)
+                    #MDFloatingActionButton:
+                        #id: edit_btn
+                        #icon: 'pencil'
+                        #on_release: root.edit_rune(root.rune)
 
             Tab: 
                 title: 'Builds'
