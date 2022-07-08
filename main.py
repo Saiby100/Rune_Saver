@@ -1,6 +1,6 @@
 from kivy.properties import Clock
 from Widgets import *
-from kivy.uix.screenmanager import ScreenManager, Screen, ScreenManagerException, NoTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.core.window import Window
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
@@ -12,7 +12,7 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from Profile import Profile
-from kivymd.uix.spinner import MDSpinner
+from kivy.properties import StringProperty, BooleanProperty
 
 Window.minimum_width, Window.minimum_height = (705, 500)
 Window.size = (995, 670)
@@ -22,13 +22,15 @@ profile = Profile()
 class RuneSaver(MDApp):
     '''App manager.'''
     def build(self):
-        # Red, Pink, Purple, DeepPurple, Indigo, Blue, LightBlue, Cyan, Teal, Green, LightGreen, Lime,
-        # Yellow, Amber, Orange, DeepOrange, Brown, Gray, BlueGray
+        # 
         global sm, saved_runes
 
         saved_runes = SavedRunes(profile.data())
-
+        '''Valid themes: 'Light' or 'Dark'.'''
         self.theme_cls.theme_style = "Dark"
+        '''Valid Themes: Red, Pink, Purple, DeepPurple, Indigo, Blue, 
+           LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow,
+           Amber, Orange, DeepOrange, Brown, Gray, BlueGray'''
         self.theme_cls.primary_palette = "Orange"
         
         sm = ScreenManager(transition=NoTransition())
@@ -251,17 +253,14 @@ class Library(Screen):
 
     def edit_rune(self, rune):
         screen = sm.get_screen('rune_page')
-        screen.ids.toolbar.title = rune.name
-        screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{rune.champ}.png']]
+        screen.ids.primary.preset(rune.attributes()[:5])
+        screen.ids.secondary.preset(rune.attributes()[5:])
 
-        for i, attr in enumerate(rune.attributes()):
-            if i < 5:
-                screen.panel_manager.primary_panels[i].change_title(attr)
-            else:
-                screen.panel_manager.secondary_panels[i-5].change_title(attr)
-
-        screen.previous = self.name
+        screen.champion = rune.champ
+        screen.title = rune.name
         screen.rune = rune
+        screen.edit = True
+        screen.previous = self.name
         sm.current = 'rune_page'
 
 class ViewRune(Screen):
@@ -336,18 +335,16 @@ class ChampSelect(Screen):
             for champ in file.readlines():
                 champ = champ.strip('\n')
                 source = f'icons/champ_images/{champ}.png'
-                card = Card(source, champ.title())
-                card.bind(on_release=partial(self.build_rune, champ))
 
-                self.ids.champ_grid.add_widget(card)
+                self.ids.champ_grid.add_widget(Card(source=source, 
+                                                    text=champ.title()))
 
     #Build a rune for the champion chosen
-    def build_rune(self, champ, event):
+    def build_rune(self, champ):
         screen = sm.get_screen('rune_page')
 
+        screen.title = champ.title()
         screen.champion = champ
-        screen.ids.toolbar.title = champ.title()
-        screen.ids.toolbar.right_action_items = [[f'icons/champ_icons/{champ}.png']]
         screen.previous = self.name
 
         sm.current = 'rune_page'
@@ -356,26 +353,43 @@ class ChampSelect(Screen):
         sm.current = 'library'
 
 class BuildRune(Screen):
-    '''Page to build a rune.'''
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.previous = None
-        self.champion = None
-        self.rune = None
-
-        self.panel_manager = PanelManager(['Primary', 'Keystone', 'Slot 1', 'Slot 2', 'Slot 3'],
-                                          ['Secondary', 'Slot 1', 'Slot 2'])
-        for panel in self.panel_manager.primary_panels:
-            self.ids.panel_grid.add_widget(panel)
-        for panel in self.panel_manager.secondary_panels:
-            self.ids.panel_grid.add_widget(panel)
-
+    title = StringProperty('Place Holder')
+    previous = ObjectProperty(None)
+    rune = ObjectProperty(None)
+    champion = StringProperty(None)
+    edit = BooleanProperty(False)
+    
     def go_back(self, event):
         sm.current = self.previous
-        if self.previous == 'view_page':
-            self.panel_manager.reset_panels()
+        
+    def on_leave(self, *args):
+        self.edit = False
+        self.ids.primary.reset()
+        self.ids.secondary.reset()
 
-    #Displays the dialog box
+    def save_rune(self, event):
+        '''Saves the Rune'''
+        try:
+            rune_info = [self.champion, self.dialog_btn.content_cls.text]
+            primary_attrs = self.ids.primary.drawer_titles()
+            secondary_attrs = self.ids.secondary.drawer_titles()
+            rune_info+=primary_attrs+secondary_attrs
+
+        
+            if not self.edit:
+                rune = Rune(row=rune_info)
+                saved_runes.add_new_rune(rune)
+                sm.get_screen('library').ids.my_runes.add_widget(rune)
+            else:
+                self.rune.edit(rune_info)
+        except (ValueError, AttributeError): 
+            Snackbar(text='Rune Incomplete', duration=1).open()
+            return
+
+        self.close_box()
+        Snackbar(text='Rune Saved Successfully!', duration=1).open()
+        sm.current = 'library'
+
     def show_save_box(self):
         save_btn = MDFlatButton(text='SAVE', on_release=self.save_rune)
         back_btn = MDFlatButton(text='CANCEL', on_release=self.close_box)
@@ -386,54 +400,6 @@ class BuildRune(Screen):
                                    buttons=[back_btn, save_btn])
         self.dialog_btn.open()
 
-    #Saves the rune
-    def save_rune(self, event=None):
-        '''Saves the rune'''
-        if self.previous == 'view_page' or self.previous == 'library':
-            rune = self.rune
-            rune_info = [rune.champ, self.dialog_btn.content_cls.text]
-
-            for panel in self.panel_manager.primary_panels:
-                rune_info.append(panel.text().lower())
-
-            for panel in self.panel_manager.secondary_panels:
-                rune_info.append(panel.text().lower())
-
-            rune.edit(rune_info)
-
-            screen = sm.get_screen('library')
-            index = screen.ids.my_runes.children.index(rune)
-            screen.ids.my_runes.remove_widget(rune)
-            screen.ids.my_runes.add_widget(rune, index)
-            
-            try:
-                sm.remove_widget(sm.get_screen('view_page'))
-            except: 
-                '''Screen doesn't exist (Rune was edited from library page)'''
-                pass
-
-        else: #If the viewpage doesn't exist (Rune must be added)
-            rune_info = [self.champion, self.dialog_btn.content_cls.text]
-
-            for panel in self.panel_manager.primary_panels:
-                rune_info.append(panel.text().lower())
-
-            for panel in self.panel_manager.secondary_panels:
-                rune_info.append(panel.text().lower())
-
-            screen = sm.get_screen('library')
-
-            rune = Rune(row=rune_info)
-
-            saved_runes.add_new_rune(rune)
-            screen.ids.my_runes.add_widget(rune, saved_runes.rune_index(rune))
-
-        self.close_box()
-
-        Snackbar(text='Rune Saved Successfully!', duration=1).open()
-        sm.current = 'library'
-
-    #Closes the dialog box
     def close_box(self, event=None):
         self.dialog_btn.dismiss()
 

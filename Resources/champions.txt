@@ -11,6 +11,7 @@ ashe
 aurelion-sol
 azir
 bard
+bel'veth
 blitzcrank
 brand
 braum
@@ -81,6 +82,7 @@ nasus
 nautilus
 neeko
 nidalee
+nilah
 nocturne
 nunu-and-willump
 olaf

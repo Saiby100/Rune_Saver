@@ -1,6 +1,30 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import IconDrawerManager IconDrawer.IconDrawerManager
 
-#CUSTOM WIDGETS    
+#CUSTOM WIDGETS
+<Card>:
+    #Card used on the champ select page
+    orientation: 'vertical'
+    size_hint: None, None
+    radius: '25dp'
+    on_release: root.build_rune()
+
+    Image: 
+        source: root.source
+        allow_stretch: True
+        keep_ratio: False
+        size_hint: None, None
+        size: root.width, root.height-20
+    
+    MDLabel:
+        text: root.text
+        font_style: 'Caption'
+        halign: 'center'
+
+<ImageButton>:
+    #Buttons used in IconDrawer
+    size_hint: .15, 1
+    allow_stretch: True
 
 <ListItem>:
     #Used in Content object on the BuildRune page
@@ -89,6 +113,8 @@
                     icon: 'history'
                     on_release: 
                         app.change_screen('match_history')
+        
+
         MDLabel:
             halign: 'center'
             text: 'This is the player profile details.'
@@ -129,7 +155,7 @@
             halign: 'center'
             text: 'This is the player match history'
 
-<Library>: 
+<Library>:
     MDGridLayout:
         cols: 2
 
@@ -194,7 +220,7 @@
             id: account_btn
             icon: 'account-circle'
             text: root.profile_name()
-            on_release: 
+            on_release:
                 root.drop_menu.caller = self
                 root.drop_menu.open()
 
@@ -239,6 +265,9 @@
 
             Tab: 
                 title: 'Builds'
+                MDLabel:
+                    halign: 'center'
+                    text: 'Page for viewing item builds'
 
 <InfoPage>: 
 
@@ -312,26 +341,31 @@
 
         MDToolbar:
             id: toolbar
+            title: root.title
             left_action_items: [['arrow-left', root.go_back]]
+            right_action_items: [[f'icons/champ_icons/{root.champion}.png']]
 
         MDTabs: 
             Tab: 
                 title: 'Rune'
+                MDGridLayout:
+                    id: panel_grid
+                    cols: 2
+                    padding: 10
+                    spacing: [50, 0]
+                    IconDrawerManager:
+                        id: primary
 
-                ScrollView:
-                    effect_cls: 'ScrollEffect'
-                    scroll_type: ['bars']
-                    scroll_wheel_distance: 50
-                    MDGridLayout:
-                        id: panel_grid
-                        cols: 1
-                        padding: [10, 0]
-                        size_hint_y: None
-                        height: self.minimum_height
-
+                    IconDrawerManager:
+                        id: secondary
+                        is_primary: False
+                        
             Tab:
                 title: 'Build'
-                
+                MDLabel:
+                    halign: 'center'
+                    text: 'Page for adding item builds'
+            
     AnchorLayout: 
         anchor_x: 'right'
         anchor_y: 'bottom'

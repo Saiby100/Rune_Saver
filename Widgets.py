@@ -10,8 +10,7 @@ from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
 from kivy.properties import StringProperty, ObjectProperty
 from kivymd.app import MDApp
-from kivymd.uix.list import MDList
-from kivymd.theming import ThemableBehavior
+from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.behaviors import HoverBehavior
 from kivy.utils import get_color_from_hex
 from kivymd.uix.list import OneLineAvatarIconListItem
@@ -91,6 +90,11 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
+class ContentNavigationDrawer(BoxLayout):
+    nav_drawer = ObjectProperty()
+    pass
+
+
 class CustomIconListItem(OneLineIconListItem, HoverBehavior):
     '''A OneLineIconListItem with hoverbehaviour'''
     icon = StringProperty()
@@ -107,7 +111,7 @@ class NavItem(CustomIconListItem):
     def on_enter(self):
         self.app = MDApp.get_running_app()
         if self.text_color != self.app.theme_cls.primary_color:
-            self.text_color = self.app.theme_cls.accent_color
+            self.text_color = self.app.theme_cls.primary_light
 
     def on_leave(self):
         if self.text_color != self.app.theme_cls.primary_color:
@@ -115,21 +119,12 @@ class NavItem(CustomIconListItem):
 
 
 class Card(MDCard):
+    text = StringProperty()
+    source = StringProperty()
     '''Card used on champ select page'''
-    def __init__(self, src, txt):
-        super().__init__()
-        self.orientation = 'vertical'
-        self.size_hint = (None, None)
-        self.radius = '25dp'
-
-        self.add_widget(Image(source=src,
-                              allow_stretch=True,
-                              keep_ratio=False,
-                              size_hint=(None,None),
-                              size=(self.size[0], self.size[1]-20)))
-        self.add_widget(MDLabel(text=txt,
-                                font_style='Caption',
-                                halign='center'))
+    def build_rune(self):
+        screen = self.parent.parent.parent.parent #Refereces champ-select page
+        screen.build_rune(self.text)
 
 class RuneCard(MDCard):
     '''Card used on view Rune Page'''
@@ -188,6 +183,7 @@ class Rune(CustomIconAvatarListItem):
     def edit(self, row):
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
         self.slot3, self.secondary, self.slot_1, self.slot_2 = row
+
         self.text = self.name
 
     def open_drop_menu(self, instance):
@@ -213,12 +209,14 @@ class SavedRunes:
             self.runes.append(Rune(row=line))
 
     def add_new_rune(self, new_rune):
-        '''Adds a new rune in alphabetical order by champion name'''
+        '''Adds a new rune in alphabetical order by champion name.
+           Returns the index of the rune in the saved runes array'''
         for i, rune in enumerate(self.runes):
             if new_rune.champ <= rune.champ:
                 self.runes.insert(i, new_rune)
-                return
+                return i
         self.runes.append(new_rune)
+        return len(self.runes) -1
 
     def delete_rune(self, rune):
         '''Removes a rune from the stored runes'''
@@ -245,110 +243,3 @@ class SavedRunes:
 
 class Tab(MDFloatLayout, MDTabsBase):
     pass
-
-
-class PanelManager():
-    def __init__(self, primary_titles, secondary_titles):
-        self.primary_panels = []
-        self.secondary_panels = []
-        array = []
-        array.extend(runes.keys())
-        '''Adds primary panels with no contents except for primary and secondary header panel.'''
-        for i, title in enumerate(primary_titles):
-            if i == 0:
-                self.primary_panels.append(ExpansionPanel(title, self, Content(array)))
-            else:
-                self.primary_panels.append(ExpansionPanel(title, self, Content()))
-
-        '''Adds secondary panels with no contents except for primary and secondary header panel.'''
-        for i, title in enumerate(secondary_titles):
-            if i == 0:
-                self.secondary_panels.append(ExpansionPanel(title, self, Content(array)))
-            else:
-                self.secondary_panels.append(ExpansionPanel(title, self, Content()))
-
-    def primary_panels(self):
-        return self.primary_panels
-
-    def secondary_panels(self):
-        return self.secondary_panels
-
-    def update_panels(self, title, panel):
-        '''Updates the title for a panel.
-           If a Primary or Secondary panel is changed, all panels below it's contents change as well.'''
-        panel_titles = []
-        panel_titles.extend(runes[title.lower()].keys())
-
-        if panel in self.primary_panels:
-            for i in range(1, len(self.primary_panels)):
-                current_panel = self.primary_panels[i]
-                current_panel.change(runes[title.lower()][panel_titles[i-1]])
-                current_panel.change_title(panel_titles[i-1].title())
-
-        else:
-            for i in range(1, len(self.secondary_panels)):
-                current_panel = self.secondary_panels[i]
-                current_panel.change(secondary_runes[title.lower()])
-                current_panel.change_title(f'Slot {i}')
-
-    def reset_panels(self):
-        array = ['Primary', 'Keystones', 'Slot 1', 'Slot 2', 'Slot 3', 'Secondary', 'Slot 1', 'Slot 2']
-        for i, panel in enumerate(self.primary_panels):
-            panel.reset(array[i])
-
-        for i, panel in enumerate(self.secondary_panels):
-            panel.reset(array[i+5])
-
-class ExpansionPanel(MDExpansionPanel):
-    def __init__(self, title, panel_box, content=None):
-        self.panel_cls = MDExpansionPanelOneLine(text=title)
-        self.panel_cls.font_style = 'Body2'
-        self.panel_box = panel_box
-        if content is not None:
-            self.content = content
-        super().__init__()
-
-    def text(self):
-        return self.panel_cls.text
-
-    def change_title(self, new_title):
-        array = []
-        array.extend(runes.keys())
-        #If its a header title, then all panel contents below it changes
-        if new_title.lower() in array:
-            self.panel_box.update_panels(new_title, self)
-        self.panel_cls.text = new_title
-
-    def reset(self, title):
-        if self.panel_cls.text not in runes.keys():
-            self.content = Content()
-        self.panel_cls.text = title
-
-    def change(self, array):
-        if self.content is not None:
-            self.content.change_content(array)
-            return
-        self.content = Content(array)
-
-class Content(MDBoxLayout):
-    def __init__(self, rune_headers=None):
-        super().__init__()
-        self.adaptive_height = True
-        self.orientation = 'vertical'
-
-        if rune_headers is not None:
-            for rh in rune_headers:
-                self.add_widget(ListItem(text=rh.title(), 
-                                         source=f'icons/runes/{rh}.png'))
-
-    def change_content(self, rune_headers):
-        self.clear_widgets()
-        for rh in rune_headers:
-            self.add_widget(ListItem(text=rh.title(),
-                                     source=f'icons/runes/{rh}.png'))
-
-class ListItem(OneLineAvatarListItem):
-    source = StringProperty()
-
-    def update_panel_title(self):
-        self.parent.parent.change_title(self.text)
