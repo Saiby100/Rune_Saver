@@ -6,7 +6,7 @@ Rune saver is a desktop app that allows league of legends players to easily acce
 - Player runes can be selected for any league champion and customized.
 - User can view rune information.
 
-# In Progress
+# Working on
 - Profile tab that displays player champion win-rate, player rank, player profile icon.
 - Match History tab that displays player match history and game information.
 - Item builds that can correspond to a champion and rune.
