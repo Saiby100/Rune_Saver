@@ -13,3 +13,7 @@ Rune saver is a desktop app that allows league of legends players to easily acce
 
 # Screenshots
 ![s1](https://user-images.githubusercontent.com/80051168/178216274-7866e313-5654-4268-b84a-475312b254a0.PNG)
+
+![s2](https://user-images.githubusercontent.com/80051168/178333925-0202939a-df64-44d0-8c11-f803ae04f118.PNG)
+
+![s3](https://user-images.githubusercontent.com/80051168/178333953-e8617cc7-27fb-4e55-92f3-72174ebf8cb8.PNG)
