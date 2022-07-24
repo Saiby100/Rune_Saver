@@ -1,21 +1,18 @@
-from kivymd.uix.button import MDFloatingActionButton, MDRoundFlatIconButton
+from kivymd.uix.button import MDFloatingActionButton, MDIconButton
 from kivymd.uix.card import MDCard
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
-from kivy.uix.image import Image
-from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.list import OneLineAvatarListItem, OneLineIconListItem, IconLeftWidget, IconRightWidget
-from kivymd.uix.label import MDLabel
+from kivymd.uix.list import OneLineIconListItem, IconRightWidget
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
-from kivy.properties import StringProperty, ObjectProperty
+from kivy.properties import StringProperty, ObjectProperty, ListProperty
 from kivymd.app import MDApp
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.behaviors import HoverBehavior
 from kivy.utils import get_color_from_hex
-from kivymd.uix.list import OneLineAvatarIconListItem
-from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.list import OneLineAvatarIconListItem, OneLineListItem
 from kivy.metrics import dp
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
 items = ['Abyssal Mask', 'Anathema\'s Chains', 'Archangel\'s Staff',
          'Ardent Censer', 'Axiom Arc', "Banshee's Veil", 'Berserker\'s Greaves',
@@ -90,10 +87,18 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                                'absolute-focus', 'scorch', 'waterwalking', 'gathering-storm']
                    }
 
-class ContentNavigationDrawer(BoxLayout):
-    nav_drawer = ObjectProperty()
+class ToolTipIconButton(MDIconButton, MDTooltip): 
+    '''Icon Button with tooltip'''
     pass
 
+class CustomOneLineListItem(OneLineListItem, HoverBehavior):
+    '''OneLineListItem with hover feature'''
+    def on_enter(self):
+        self.app = MDApp.get_running_app()
+        self.text_color = self.app.theme_cls.primary_color
+
+    def on_leave(self):
+        self.text_color = self.app.theme_cls.text_color
 
 class CustomIconListItem(OneLineIconListItem, HoverBehavior):
     '''A OneLineIconListItem with hoverbehaviour'''
@@ -107,7 +112,7 @@ class CustomIconListItem(OneLineIconListItem, HoverBehavior):
         self.text_color = self.app.theme_cls.text_color
 
 class NavItem(CustomIconListItem):
-    '''Navigation items in navigation barused on Home pages (Profile Rune Library, Match History)'''
+    '''Navigation items in navigation bar used on Home pages (Profile Rune Library, Match History)'''
     def on_enter(self):
         self.app = MDApp.get_running_app()
         if self.text_color != self.app.theme_cls.primary_color:
@@ -118,7 +123,7 @@ class NavItem(CustomIconListItem):
             self.text_color = self.app.theme_cls.text_color
 
 
-class Card(MDCard):
+class Card(MDCard, HoverBehavior):
     text = StringProperty()
     source = StringProperty()
     '''Card used on champ select page'''
@@ -126,11 +131,19 @@ class Card(MDCard):
         screen = self.parent.parent.parent.parent #Refereces champ-select page
         screen.build_rune(self.text)
 
+    def on_enter(self):
+        self.app = MDApp.get_running_app()
+        self.md_bg_color = self.app.theme_cls.primary_dark
+    
+    def on_leave(self):
+        self.md_bg_color = self.app.theme_cls.bg_light
+
 class RuneCard(MDCard):
     '''Card used on view Rune Page'''
     source = StringProperty()
     txt = StringProperty()
-    def view_attribute(self): 
+
+    def view_attribute(self):
         screen = self.parent.parent.parent.parent.parent.parent.parent.parent #References the ViewRune page
         screen.view_attribute(self.txt.lower())
 
@@ -153,7 +166,7 @@ class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
     text = StringProperty()
     source = StringProperty()
 
-    def on_enter(self): 
+    def on_enter(self):
         self.app = MDApp.get_running_app()
         self.bg_color = self.app.theme_cls.bg_light
 
@@ -165,9 +178,7 @@ class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
     
     def on_leave(self):
         self.bg_color = self.app.theme_cls.bg_normal
-
         self.children[0].remove_widget(self.right_icon)
-    
 
 class Rune(CustomIconAvatarListItem):
     def __init__(self, **kwargs):

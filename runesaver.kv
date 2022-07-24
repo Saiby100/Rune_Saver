@@ -6,7 +6,8 @@
     #Card used on the champ select page
     orientation: 'vertical'
     size_hint: None, None
-    radius: '25dp'
+    radius: '40dp'
+    size: 150, 150
     on_release: root.build_rune()
 
     Image: 
@@ -18,7 +19,7 @@
     
     MDLabel:
         text: root.text
-        font_style: 'Caption'
+        font_style: 'Body2'
         halign: 'center'
 
 <ImageButton>:
@@ -55,6 +56,7 @@
     theme_text_color: 'Custom'
     text_color: app.theme_cls.text_color
     divider: None
+    ripple_scale: 0
 
     IconLeftWidget:
         icon: root.icon
@@ -65,6 +67,7 @@
     #Rune on Library page
     text: root.text
     ripple_scale: 0
+    divider: None
     on_release: root.select_rune()
     
     ImageLeftWidget:
@@ -114,10 +117,23 @@
                     on_release: 
                         app.change_screen('match_history')
         
+        MDBoxLayout:
+            orientation: 'vertical'
+            id: box
+            MDLabel: 
+                id: default
+                halign: 'center'
+                text: 'No Local Data Found'
 
-        MDLabel:
-            halign: 'center'
-            text: 'This is the player profile details.'
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'top'
+        padding: 15
+
+        ToolTipIconButton:
+            icon: 'refresh'
+            tooltip_text: 'Load Player Data'
+            on_release: root.check_local_api_key()
 
 
 <MatchHistory>:
@@ -192,15 +208,19 @@
             spacing: 5
             padding: [5, 10]
 
-            MDTextField:
-                hint_text: 'search'
-                icon_right: 'magnify'
-                icon_right_color: app.theme_cls.primary_color
-                size_hint_x: None
-                width: 500
-
-                on_text: 
-                    root.make_rune_list(self.text, True)
+            MDBoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 50
+                MDTextField:
+                    size_hint_y: None
+                    hint_text: 'search'
+                    icon_right: 'magnify'
+                    icon_right_color: app.theme_cls.primary_color
+                
+                    #on_text: 
+                        #root.make_rune_list(self.text, True)
 
 
             ScrollView:
@@ -210,12 +230,13 @@
                 MDList:
                     id: my_runes
                     padding: [5, 0]
-            
-    AnchorLayout: 
-        anchor_x: 'right'
-        anchor_y: 'top'
-        padding: 15
-        
+    
+    AnchorLayout:
+        id: button_layout
+        anchor_x: 'left'
+        anchor_y: 'bottom'
+        padding: [50, 20]
+
         MDRoundFlatIconButton:
             id: account_btn
             icon: 'account-circle'
@@ -224,13 +245,12 @@
                 root.drop_menu.caller = self
                 root.drop_menu.open()
 
-                     
     AnchorLayout:
         anchor_x: 'right'
         anchor_y: 'bottom'
-        padding: 20
-
-        MDFloatingActionButton: 
+        padding: 10
+        
+        MDIconButton: 
             icon: 'plus'
             on_release: root.champ_select()
 
@@ -314,25 +334,41 @@
             on_release: root.go_back()
 
 
-<ChampSelect>: 
-    MDBoxLayout: 
+<ChampSelect>:
+    MDBoxLayout:
         orientation: 'vertical'
+        MDGridLayout:
+            cols: 1
+            padding: [70, 5]
+            size_hint_y: None
+            height: self.minimum_height
 
-        MDToolbar:
-            title: 'Select Champion'
-            left_action_items: [['arrow-left', root.go_back]]
+            MDTextField:
+                hint_text: 'search'
+                icon_right: 'magnify'
+                icon_right_color: app.theme_cls.primary_color
+                mode: 'fill'
         
         ScrollView:
-            scroll_wheel_distance: 50
+            scroll_wheel_distance: 70
             effect_cls: 'ScrollEffect'
             scroll_type: ['bars']
             MDStackLayout:
                 id: champ_grid 
                 size_hint_y: None
                 spacing: 10
-                padding: 5
+                padding: [15, 5]
                 height: self.minimum_height
 
+    AnchorLayout:
+        padding: 10
+        anchor_x: 'left'
+        anchor_y: 'top'
+
+        MDIconButton:
+            icon: 'arrow-left'
+            icon_size: '64sp'
+            on_release: root.go_back()
 
 
 <BuildRune>:
@@ -371,7 +407,7 @@
         anchor_y: 'bottom'
         padding: 30
 
-        FloatingButton: 
+        MDIconButton: 
             icon: 'check'
             tooltip_text: 'Done'
             on_release: root.show_save_box()

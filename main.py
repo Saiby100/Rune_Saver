@@ -13,9 +13,12 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from Profile import Profile
 from kivy.properties import StringProperty, BooleanProperty
+from kivy.uix.recycleview import RecycleView
+from kivymd.uix.label import MDLabel
+from kivymd.uix.boxlayout import MDBoxLayout
 
 Window.minimum_width, Window.minimum_height = (705, 500)
-Window.size = (995, 670)
+Window.size = (980, 670)
 
 profile = Profile()
 
@@ -28,17 +31,17 @@ class RuneSaver(MDApp):
         saved_runes = SavedRunes(profile.data())
         '''Valid themes: 'Light' or 'Dark'.'''
         self.theme_cls.theme_style = "Dark"
-        '''Valid Themes: Red, Pink, Purple, DeepPurple, Indigo, Blue, 
+        '''Valid Themes: Red, Pink, Purple, DeepPurple, Indigo, Blue,
            LightBlue, Cyan, Teal, Green, LightGreen, Lime, Yellow,
            Amber, Orange, DeepOrange, Brown, Gray, BlueGray'''
-        self.theme_cls.primary_palette = "Orange"
+        self.theme_cls.primary_palette = "BlueGray"
         
         sm = ScreenManager(transition=NoTransition())
         sm.add_widget(SplashScreen(name='splash'))
 
         return sm
 
-    def on_start(self): 
+    def on_start(self):
         # Clock.schedule_once(self.add_screens, 2)
         self.add_screens(None)
 
@@ -61,7 +64,49 @@ class SplashScreen(Screen):
     pass 
 
 class PlayerProfile(Screen):
-    pass
+    '''TODO: Work on profile screen design'''
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.api_key_box = MDDialog(title='Add Api Key:',
+                                    type='custom',
+                                    content_cls=MDTextField(hint_text='Api-Key'),
+                                    buttons=[MDFlatButton(text='Add',
+                                    on_release=self.validate_api_key)])
+
+        if profile.player['level'] is not None: 
+            self.refresh_player_info()
+
+    def refresh_player_info(self):
+        '''Refreshes the profile page'''
+        self.ids.box.clear_widgets()
+            
+            # self.box = MDBoxLayout(orientation='vertical')
+        for key in profile.player.keys():
+            self.ids.box.add_widget(MDLabel(text=f'{key.title()}: {str(profile.player[key])}',
+                                            halign='center'))
+
+    def validate_api_key(self, event):
+        '''Checks if the api key is valid'''
+        if len(self.api_key_box.content_cls.text.strip()) == 0:
+            return
+
+        if not profile.add_key(self.api_key_box.content_cls.text):
+            Snackbar(text='Invalid Api Key', duration=1).open()
+            return
+        
+        else:
+            self.refresh_player_info()
+            self.api_key_box.dismiss()
+    
+    def check_local_api_key(self):
+        '''Checks if the local api key is valid'''
+        if not profile.add_key(None):
+            self.api_key_box.open()
+        else: 
+            self.refresh_player_info()
+        
 
 class MatchHistory(Screen): 
     pass
@@ -72,7 +117,7 @@ class Library(Screen):
         super().__init__(**kwargs)
         # # Initializing Layouts
         menu_items = [{'text': title,
-                       'viewclass': 'OneLineListItem',
+                       'viewclass': 'CustomOneLineListItem',
                        'on_release': lambda x=title: self.drop_menu_button(x),
                        'height': dp(56),
                        'divider': None
@@ -91,7 +136,6 @@ class Library(Screen):
         self.rune_drop_menu = MDDropdownMenu(items=rune_menu_items,
                                              width_mult=2.6)
 
-        # Adding widgets to layouts
         for rune in saved_runes.runes:
             self.ids.my_runes.add_widget(rune)
 
@@ -107,21 +151,23 @@ class Library(Screen):
     '''TODO: Implement search bar'''
     def make_rune_list(self, text='', search=False):
         '''Searching for a rune'''
-        def add_rune(rune):
+        def add_rune(row):
 
             self.ids.my_runes.data.append(
                 {
                     'viewclass': 'Rune',
-                    'row': rune
+                    'row': row
                 }
             )
         
-        self.ids.rv.data = []
+        self.ids.my_runes.data = []
         for rune in saved_runes.to_array():
-            rune.bind_back(on_release=partial(self.delete_rune, rune))
-            rune.bind_font(on_release=partial(self.view_rune, rune))
-            add_rune(rune)
-        
+            if search:
+                if text in rune[1]:
+                    add_rune(rune)
+            else:
+                add_rune(rune)
+
     def profile_name(self): 
         return profile.name
 
@@ -143,7 +189,7 @@ class Library(Screen):
                                                                  on_release=self.rename_profile)])
             self.profile_box.open()
 
-        else: 
+        else:
             self.open_dialog_box()
 
         self.drop_menu.dismiss()
@@ -153,7 +199,7 @@ class Library(Screen):
 
         if not profile.rename(name):
             #Rename unsuccessful
-            Snackbar(text='Profile already exists with that name', duration=1).open()
+            Snackbar(text='A profile already exists with that name', duration=1).open()
             return
 
         self.ids.account_btn.text = self.profile_name()
@@ -170,6 +216,8 @@ class Library(Screen):
                 self.ids.my_runes.add_widget(rune)
 
         self.ids.account_btn.text = self.profile_name()
+        sm.remove_widget(sm.get_screen('profile'))
+        sm.add_widget(PlayerProfile(name='profile'))
         self.profile_box.dismiss()
 
     def view_rune(self, rune):
@@ -222,6 +270,8 @@ class Library(Screen):
             self.ids.my_runes.add_widget(rune)
 
         self.ids.account_btn.text = self.profile_name()
+        sm.remove_widget(sm.get_screen('profile'))
+        sm.add_widget(PlayerProfile(name='profile'))
 
         try:
             self.dialog_box.dismiss()
@@ -349,7 +399,7 @@ class ChampSelect(Screen):
 
         sm.current = 'rune_page'
 
-    def go_back(self, event):
+    def go_back(self):
         sm.current = 'library'
 
 class BuildRune(Screen):
@@ -370,7 +420,7 @@ class BuildRune(Screen):
     def save_rune(self, event):
         '''Saves the Rune'''
         try:
-            rune_info = [self.champion, self.dialog_btn.content_cls.text]
+            rune_info = [self.champion.lower(), self.dialog_btn.content_cls.text]
             primary_attrs = self.ids.primary.drawer_titles()
             secondary_attrs = self.ids.secondary.drawer_titles()
             rune_info+=primary_attrs+secondary_attrs
