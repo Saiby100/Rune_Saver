@@ -150,6 +150,8 @@ class Profile:
 
         except ApiError:
             return False
+        except ValueError: 
+            return False
     
     def reset_player(self):
         '''Sets player dictionary to defaults (None)'''

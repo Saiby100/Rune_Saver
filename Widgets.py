@@ -112,7 +112,7 @@ class CustomIconListItem(OneLineIconListItem, HoverBehavior):
         self.text_color = self.app.theme_cls.text_color
 
 class NavItem(CustomIconListItem):
-    '''Navigation items in navigation bar used on Home pages (Profile Rune Library, Match History)'''
+    '''Navigation items in navigation barused on Home pages (Profile Rune Library, Match History)'''
     def on_enter(self):
         self.app = MDApp.get_running_app()
         if self.text_color != self.app.theme_cls.primary_color:
