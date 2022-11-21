@@ -23,16 +23,10 @@ class Profile:
         with open('resources/config.txt', 'r') as file:
             self.name = file.readline().strip('\n')
             self.api_key = file.readline().strip('\n')
-        self.path = f'accounts/runes/{self.name}.csv'    
+        self.rune_data_path = f'accounts/runes/{self.name}.csv'    
+        self.player_data_path = f'accounts/data/{self.name}.csv'    
 
-        if self.key_is_valid(self.api_key):
-            self.fetch_api_data(None)
-
-        elif f'{self.name}.txt' in self.files('txt'):
-            self.get_local_player_data()
-        
-        else:
-            self.set_player_data_to_none()
+        self.refresh_player_data()
 
     def key_is_valid(self, api_key):
         '''
@@ -67,16 +61,18 @@ class Profile:
             Returns all the existing profiles' rune data by default.
             If data is True, this returns all data files for all profiles.
         '''
-
         if data:
             return self.files('txt')
 
         return self.files('csv')
 
     def get_rune_data(self):
-        '''Gets the rune data of the current profile and returns it in a 2d array'''
+        '''
+            Gets the rune data of the current profile and returns it in a 
+            2d array.
+        '''
         array = []
-        with open(self.path, 'r') as file:
+        with open(self.rune_data_path, 'r') as file:
             reader = csv.reader(file)
             for line in reader:
                 array.append(line)
@@ -93,10 +89,18 @@ class Profile:
 
         if name is None:
             #Delete current profile
-            os.remove(self.path)
+            os.remove(self.rune_data_path)
+
+            try:
+                os.remove(self.player_data_path)
+            except FileNotFoundError:
+                #No local data on player exists.
+                pass
+
             accounts = self.files('csv')
 
             self.set_current(accounts[0].strip('.csv'))
+
         else: 
             #Delete specified profile
             os.remove(f'accounts/runes/{name}.csv')
@@ -106,7 +110,7 @@ class Profile:
 
     def save(self, runes):
         '''Saves all the data to the profile's file.'''
-        with open(self.path, 'w', newline='') as file:
+        with open(self.rune_data_path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(runes)
 
@@ -128,10 +132,11 @@ class Profile:
             Returns true if renaming successful, false otherwise.
         '''
 
-        path = f'accounts/runes/{new_name}.csv'
+        runes_path = f'accounts/runes/{new_name}.csv'
+        data_path = f'accounts/data/{new_name}.txt'
         try:
-            os.rename(self.path, path)
-            os.rename(f'accounts/data/{self.name}.txt', f'accounts/data/{new_name}.txt')
+            os.rename(self.rune_data_path, runes_path)
+            os.rename(self.player_data_path, data_path)
             self.set_current(new_name)
             return True
 
@@ -139,12 +144,14 @@ class Profile:
             return False
 
     def set_current(self, account_name):
-        '''Sets the profile object to the specified name.'''
-
-        if f'{self.name}.csv' in self.files('csv'):
+        '''
+            Sets the profile object to the specified name.
+        '''
+        if f'{account_name}.csv' in self.files('csv'):
             #Alter config file here
             self.name = account_name
-            self.path = f'accounts/runes/{account_name}.csv'
+            self.rune_data_path = f'accounts/runes/{account_name}.csv'
+            self.player_data_path = f'accounts/data/{account_name}.txt'
             self.refresh_player_data()
 
             with open('resources/config.txt', 'w') as file:
@@ -156,20 +163,21 @@ class Profile:
             Refreshes current player data to new player data.
             Used to set current profile to a different one.
         '''
+        if self.key_is_valid(self.api_key):
+            self.fetch_player_api_data(None)
 
-        if f'{self.name}.txt' in self.files('txt'): 
-            '''Previous data has been recorded on player'''
+        elif f'{self.name}.txt' in self.files('txt'):
             self.get_local_player_data()
+        
         else:
-            '''No data on player exists'''
-            self.reset_player()
+            self.set_player_data_to_none()
 
     def create_new_profile(self, name):
         '''
             Creates new account by the specified name. 
             Returns true if creation successful, false otherwise.
         '''
-        if len(self.profiles()) >= 4:
+        if len(self.get_all_profiles()) >= 4:
             #Too many accounts
             return False
         try:
@@ -191,7 +199,7 @@ class Profile:
 
         return files
     
-    def fetch_api_data(self, api_key):
+    def fetch_player_api_data(self, api_key):
         '''
             Collects player info. 
             Returns true if successful, false otherwise.
@@ -223,13 +231,17 @@ class Profile:
                 return False
     
     def set_player_data_to_none(self):
-        '''Sets player dictionary to defaults (None)'''
+        '''
+            Sets player dictionary to defaults (None).
+        '''
         attributes = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
         for attribute in attributes:
             self.player_data[attribute] = None
 
     def get_match_history(self, max=5):
-        '''Returns last five matches played'''
+        '''
+            Returns last five matches played
+        '''
         my_region = self.region
         player_puuid = self.watcher.summoner.by_name(my_region, self.name)["puuid"]
 
@@ -276,4 +288,7 @@ class Profile:
     
 if __name__ == '__main__':
     profile = Profile()
-    print(profile.key_is_valid('RGAPI-a369ea82-2bf7-40af-bb0f-cc544ec76043'))
+    with open('accounts/runes/Predator122.csv', 'r') as file:
+        reader = csv.reader(file)
+        for line in reader:
+            print(line)

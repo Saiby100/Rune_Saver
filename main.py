@@ -1,4 +1,3 @@
-from kivy.properties import Clock
 from Widgets import *
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.core.window import Window
@@ -13,9 +12,7 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from Profile import Profile
 from kivy.properties import StringProperty, BooleanProperty
-from kivy.uix.recycleview import RecycleView
 from kivymd.uix.label import MDLabel
-from kivymd.uix.boxlayout import MDBoxLayout
 
 Window.minimum_width, Window.minimum_height = (705, 500)
 Window.size = (980, 670)
@@ -226,7 +223,7 @@ class Library(Screen):
         '''
             This deletes the current profile.
         '''
-        if profile.delete():
+        if profile.delete_profile():
             #Deletion successful
             saved_runes.change_account(profile.get_rune_data())
 

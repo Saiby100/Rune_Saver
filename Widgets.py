@@ -1,18 +1,13 @@
 from kivymd.uix.button import MDFloatingActionButton, MDIconButton
 from kivymd.uix.card import MDCard
-from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.list import OneLineIconListItem, IconRightWidget
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
-from kivy.properties import StringProperty, ObjectProperty, ListProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivymd.app import MDApp
-from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.behaviors import HoverBehavior
-from kivy.utils import get_color_from_hex
 from kivymd.uix.list import OneLineAvatarIconListItem, OneLineListItem
-from kivy.metrics import dp
-from kivy.uix.recycleview.views import RecycleDataViewBehavior
 
 items = ['Abyssal Mask', 'Anathema\'s Chains', 'Archangel\'s Staff',
          'Ardent Censer', 'Axiom Arc', "Banshee's Veil", 'Berserker\'s Greaves',
