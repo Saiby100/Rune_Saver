@@ -88,11 +88,15 @@ secondary_runes = {'domination': ['cheap-shot', 'taste-of-blood', 'sudden-impact
                    }
 
 class ToolTipIconButton(MDIconButton, MDTooltip): 
-    '''Icon Button with tooltip'''
+    '''
+        Icon Button with tooltip
+    '''
     pass
 
 class CustomOneLineListItem(OneLineListItem, HoverBehavior):
-    '''OneLineListItem with hover feature'''
+    '''
+        OneLineListItem with hover feature
+    '''
     def on_enter(self):
         self.app = MDApp.get_running_app()
         self.text_color = self.app.theme_cls.primary_color
@@ -101,7 +105,9 @@ class CustomOneLineListItem(OneLineListItem, HoverBehavior):
         self.text_color = self.app.theme_cls.text_color
 
 class CustomIconListItem(OneLineIconListItem, HoverBehavior):
-    '''A OneLineIconListItem with hoverbehaviour'''
+    '''
+        A OneLineIconListItem with hoverbehaviour.
+    '''
     icon = StringProperty()
 
     def on_enter(self):
@@ -112,7 +118,10 @@ class CustomIconListItem(OneLineIconListItem, HoverBehavior):
         self.text_color = self.app.theme_cls.text_color
 
 class NavItem(CustomIconListItem):
-    '''Navigation items in navigation barused on Home pages (Profile Rune Library, Match History)'''
+    '''
+        Navigation items in navigation bar used on Home pages 
+        (Profile Rune Library, Match History).
+    '''
     def on_enter(self):
         self.app = MDApp.get_running_app()
         if self.text_color != self.app.theme_cls.primary_color:
@@ -126,9 +135,12 @@ class NavItem(CustomIconListItem):
 class Card(MDCard, HoverBehavior):
     text = StringProperty()
     source = StringProperty()
-    '''Card used on champ select page'''
+    '''
+        Card used on champ select page
+    '''
     def build_rune(self):
-        screen = self.parent.parent.parent.parent #Refereces champ-select page
+        #Refereces champ-select page
+        screen = self.parent.parent.parent.parent 
         screen.build_rune(self.text)
 
     def on_enter(self):
@@ -139,12 +151,15 @@ class Card(MDCard, HoverBehavior):
         self.md_bg_color = self.app.theme_cls.bg_light
 
 class RuneCard(MDCard):
-    '''Card used on view Rune Page'''
+    '''
+        Card used on view Rune Page
+    '''
     source = StringProperty()
     txt = StringProperty()
 
     def view_attribute(self):
-        screen = self.parent.parent.parent.parent.parent.parent.parent.parent #References the ViewRune page
+        #References the ViewRune page
+        screen = self.parent.parent.parent.parent.parent.parent.parent.parent
         screen.view_attribute(self.txt.lower())
 
 class ItemCard(RuneCard):
@@ -159,7 +174,9 @@ class FloatingButton(MDFloatingActionButton, MDTooltip):
     pass
 
 class CustomIconRightWidget(IconRightWidget):
-    '''Icon that contains an instance variable pointing to the rune that it is on'''
+    '''
+        Icon that contains an instance variable pointing to the rune that it is on.
+    '''
     rune = ObjectProperty()
 
 class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
@@ -181,6 +198,9 @@ class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
         self.children[0].remove_widget(self.right_icon)
 
 class Rune(CustomIconAvatarListItem):
+    '''
+        This is a class for the Rune widgets on library page.
+    '''
     def __init__(self, **kwargs):
         self.build = []
         self.champ, self.name, self.main, self.key, self.slot1, self.slot2, \
@@ -198,13 +218,17 @@ class Rune(CustomIconAvatarListItem):
         self.text = self.name
 
     def open_drop_menu(self, instance):
-        '''Opens the drop menu on the library page'''
+        '''
+            Opens the drop menu on the library page.
+        '''
         screen = self.parent.parent.parent.parent.parent #References library screen
         screen.rune_drop_menu.caller = instance
         screen.rune_drop_menu.open()
 
     def select_rune(self):
-        '''Called when Rune list item is pressed'''
+        '''
+            Called when Rune list item is pressed
+        '''
         self.screen = self.parent.parent.parent.parent.parent #References library screen
         self.screen.view_rune(self)
 
@@ -213,28 +237,56 @@ class Rune(CustomIconAvatarListItem):
         pass
 
 class SavedRunes: 
-    '''Manages all the saved runes in an account'''
+    '''
+        Manages all the saved runes in an account.
+    '''
     def __init__(self, account_file):
         self.runes = []
         for line in account_file:
             self.runes.append(Rune(row=line))
 
-    def add_new_rune(self, new_rune):
-        '''Adds a new rune in alphabetical order by champion name.
-           Returns the index of the rune in the saved runes array'''
-        for i, rune in enumerate(self.runes):
-            if new_rune.champ <= rune.champ:
-                self.runes.insert(i, new_rune)
+        self.size = len(self.runes)
+
+    def add_new_rune(self, new_rune, low, high):
+        '''
+            Adds a new rune in alphabetical order by champion name.
+            Returns the index of the rune in the saved runes array.
+        '''
+        while high - low >= 4: 
+            mid = low + (high - 1) // 2
+
+            if self.runes[mid].champ == new_rune.champ:
+                self.runes.insert(mid, new_rune)
+                self.size += 1
+                return mid
+
+            if self.runes[mid].champ > new_rune.champ: 
+                high = mid - 1
+
+            else: 
+                low = mid + 1
+
+        for i in range(low, high+1):
+            if new_rune.champ <= self.runes[i].champ:
+                self.runes.insert(i, new_rune) 
+                self.size += 1
                 return i
-        self.runes.append(new_rune)
-        return len(self.runes) -1
+        
+        self.runes.insert(self.size - 1, new_rune)
+        return self.size - 1
 
     def delete_rune(self, rune):
-        '''Removes a rune from the stored runes'''
+        '''
+            Removes a rune from the stored runes.
+            size is reduced by 1.
+        '''
         self.runes.remove(rune)
+        self.size -= 1
 
     def to_array(self):
-        '''Returns all runes in a 2D array format'''
+        '''
+            Returns all runes in a 2D array format.
+        '''
         array = []
         for rune in self.runes:
             temp_arr = [rune.champ, rune.name]
@@ -243,13 +295,21 @@ class SavedRunes:
         return array
 
     def change_account(self, account_file):
-        '''Clears the current stored runes and reads in a new file with stored runes'''
+        '''
+            Clears the current stored runes and reads in a new 
+            file with stored runes.
+            Size is set to the length of self.runes array.
+        '''
         self.runes.clear()
         for line in account_file:
             self.runes.append(Rune(row=line))
 
+        self.size = len(self.runes)
+
     def rune_index(self, rune):
-        '''Returns the index of a rune in the stored runes array'''
+        '''
+            Returns the index of a rune in the stored runes array.
+        '''
         return self.runes.index(rune)
 
 class Tab(MDFloatLayout, MDTabsBase):

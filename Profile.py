@@ -14,33 +14,66 @@ class Player:
 class Profile:
     '''Class for managing profiles.'''
     def __init__(self):
+        '''
+            This initializes the player region, data, name, api_key and path.        
+        '''
         self.region = 'euw1'
-        self.player = {}
-        self.has_local_data = False
+        self.player_data = {}
 
         with open('resources/config.txt', 'r') as file:
             self.name = file.readline().strip('\n')
             self.api_key = file.readline().strip('\n')
-        self.path = f'accounts/{self.name}.csv'    
+        self.path = f'accounts/runes/{self.name}.csv'    
+
+        if self.key_is_valid(self.api_key):
+            self.fetch_api_data(None)
+
+        elif f'{self.name}.txt' in self.files('txt'):
+            self.get_local_player_data()
         
-        self.refresh_player_info()
+        else:
+            self.set_player_data_to_none()
+
+    def key_is_valid(self, api_key):
+        '''
+            Returns True if the api_key is valid, False otherwise.
+            If api_key is None, saved api_key is checked.
+        '''
+        if api_key is None: 
+            api_key = self.api_key
+
+        try:
+            self.watcher = LolWatcher(api_key)
+            self.profile = self.watcher.summoner.by_name(self.region, self.name)
+            self.api_key = api_key
+
+            return True
+
+        except ApiError:
+            return False
     
-    def get_player_info_from_file(self):
-        '''Fetches last data saved on the player'''
-        with open(f'accounts/{self.name}.txt', 'r') as file:
+    def get_local_player_data(self):
+        '''Fetches locally saved data on the player'''
+
+        with open(f'accounts/data/{self.name}.txt', 'r') as file:
             array = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
+
             for i, line in enumerate(file):
-                self.player[array[i]] = line.strip('\n')
+                self.player_data[array[i]] = line.strip('\n')
+    
                     
-    def profiles(self):
-        '''Returns all the existing profiles.'''
+    def get_all_profiles(self, data=False):
+        '''
+            Returns all the existing profiles' rune data by default.
+            If data is True, this returns all data files for all profiles.
+        '''
+
+        if data:
+            return self.files('txt')
+
         return self.files('csv')
 
-    def name(self):
-        '''Gets the name of the current profile.'''
-        return self.name
-
-    def data(self):
+    def get_rune_data(self):
         '''Gets the rune data of the current profile and returns it in a 2d array'''
         array = []
         with open(self.path, 'r') as file:
@@ -49,16 +82,26 @@ class Profile:
                 array.append(line)
             return array
 
-    def delete(self):
-        '''Deletes the current profile. Returns true if deletion successful, false otherwise.'''
+    def delete_profile(self, name=None):
+        '''
+            Deletes the specified/current profile. 
+            Returns true if deletion successful, false otherwise.
+        '''
         accounts = self.files('csv')
         if len(accounts) <= 1:
             return False
 
-        os.remove(self.path)
-        accounts = self.files('csv')
+        if name is None:
+            #Delete current profile
+            os.remove(self.path)
+            accounts = self.files('csv')
 
-        self.set_current(accounts[0].strip('.csv'))
+            self.set_current(accounts[0].strip('.csv'))
+        else: 
+            #Delete specified profile
+            os.remove(f'accounts/runes/{name}.csv')
+            os.remove(f'accounts/data/{name}.txt')
+
         return True
 
     def save(self, runes):
@@ -66,24 +109,29 @@ class Profile:
         with open(self.path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(runes)
-        
-        if self.player['level'] is None: #Player data doesn't need to save.
-            return
-
-        player_keys = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
-        
-        with open(f'accounts/{self.name}.txt', 'w') as file:
-            for key in player_keys:
-                file.write(str(self.player[key])+'\n')
 
         with open('resources/config.txt', 'w') as file:
             file.write(self.name+'\n'+self.api_key)
         
+        if self.player_data['level'] is None: #Player data doesn't need to save.
+            return
+
+        player_keys = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
+        
+        with open(f'accounts/data/{self.name}.txt', 'w') as file:
+            for key in player_keys:
+                file.write(str(self.player_data[key])+'\n')
+        
     def rename(self, new_name):
-        '''Renames the current profile. Returns true if renaming successful, false otherwise.'''
-        path = f'accounts/{new_name}.csv'
+        '''
+            Renames the current profile. 
+            Returns true if renaming successful, false otherwise.
+        '''
+
+        path = f'accounts/runes/{new_name}.csv'
         try:
             os.rename(self.path, path)
+            os.rename(f'accounts/data/{self.name}.txt', f'accounts/data/{new_name}.txt')
             self.set_current(new_name)
             return True
 
@@ -92,28 +140,40 @@ class Profile:
 
     def set_current(self, account_name):
         '''Sets the profile object to the specified name.'''
-        self.name = account_name
-        self.path = f'accounts/{account_name}.csv'
-        self.refresh_player_info()
 
-        with open('resources/config.txt', 'w') as file:
-            file.write(self.name+'\n')
-            file.write(self.api_key+'\n')
+        if f'{self.name}.csv' in self.files('csv'):
+            #Alter config file here
+            self.name = account_name
+            self.path = f'accounts/runes/{account_name}.csv'
+            self.refresh_player_data()
 
-    def refresh_player_info(self):
+            with open('resources/config.txt', 'w') as file:
+                file.write(self.name+'\n')
+                file.write(self.api_key+'\n')
+
+    def refresh_player_data(self):
+        '''
+            Refreshes current player data to new player data.
+            Used to set current profile to a different one.
+        '''
+
         if f'{self.name}.txt' in self.files('txt'): 
             '''Previous data has been recorded on player'''
-            self.get_player_info_from_file()
+            self.get_local_player_data()
         else:
             '''No data on player exists'''
             self.reset_player()
 
-    def add_new(self, name):
-        '''Creates new account by the specified name. Returns true if creation successful, false otherwise.'''
+    def create_new_profile(self, name):
+        '''
+            Creates new account by the specified name. 
+            Returns true if creation successful, false otherwise.
+        '''
         if len(self.profiles()) >= 4:
+            #Too many accounts
             return False
         try:
-            open(f'accounts/{name}.csv', 'x')
+            open(f'accounts/runes/{name}.csv', 'x')
             return True
 
         except FileExistsError:
@@ -121,43 +181,52 @@ class Profile:
 
     def files(self, extension):
         '''Returns all files with the specified extension in the accounts directory as an array'''
-        files = [file for file in os.listdir('accounts')
-                 if file.endswith('.'+extension)]
+        if extension == 'txt':
+            files = [file for file in os.listdir('accounts/data')
+                    if file.endswith('.'+extension)]
+
+        else:
+            files = [file for file in os.listdir('accounts/runes')
+                    if file.endswith('.'+extension)]
 
         return files
     
-    def add_key(self, api_key):
-        '''Collects player info. Returns true if successful, false otherwise.'''
+    def fetch_api_data(self, api_key):
+        '''
+            Collects player info. 
+            Returns true if successful, false otherwise.
+            If api key is none, this uses the saved api key.
+            '''
         if api_key is None: 
             api_key = self.api_key
-        try: 
-            self.watcher = LolWatcher(api_key)
-            self.profile = self.watcher.summoner.by_name(self.region, self.name)
-            self.player['level'] = self.profile['summonerLevel']
-            self.player['icon'] = self.profile['profileIconId']
-        
-            if self.player['level'] < 30:
+
+        if self.key_is_valid(api_key):
+            try: 
+                self.watcher = LolWatcher(api_key)
+                self.profile = self.watcher.summoner.by_name(self.region, self.name)
+                self.player_data['level'] = self.profile['summonerLevel']
+                self.player_data['icon'] = self.profile['profileIconId']
+            
+                if self.player_data['level'] < 30:
+                    return False
+
+                self.stats = self.watcher.league.by_summoner(self.region, self.profile['id'])[0]
+                self.player_data['wins'] = self.stats['wins']
+                self.player_data['losses'] = self.stats['losses']
+                self.player_data['tier'] = self.stats['tier']
+                self.player_data['rank'] = self.stats['rank']
+                self.player_data['points'] = self.stats['leaguePoints']
+                self.api_key = api_key
+                return True
+
+            except ValueError: 
                 return False
-
-            self.stats = self.watcher.league.by_summoner(self.region, self.profile['id'])[0]
-            self.player['wins'] = self.stats['wins']
-            self.player['losses'] = self.stats['losses']
-            self.player['tier'] = self.stats['tier']
-            self.player['rank'] = self.stats['rank']
-            self.player['points'] = self.stats['leaguePoints']
-            self.api_key = api_key
-            return True
-
-        except ApiError:
-            return False
-        except ValueError: 
-            return False
     
-    def reset_player(self):
+    def set_player_data_to_none(self):
         '''Sets player dictionary to defaults (None)'''
         attributes = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
         for attribute in attributes:
-            self.player[attribute] = None
+            self.player_data[attribute] = None
 
     def get_match_history(self, max=5):
         '''Returns last five matches played'''
@@ -205,5 +274,6 @@ class Profile:
         return matches
         
     
-    
-
+if __name__ == '__main__':
+    profile = Profile()
+    print(profile.key_is_valid('RGAPI-a369ea82-2bf7-40af-bb0f-cc544ec76043'))
