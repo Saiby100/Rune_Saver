@@ -1,4 +1,4 @@
-from Widgets import titles, RuneCard
+from  widgets.cards import RuneCard
 from .infopage import InfoPage
 from utils import config
 from kivy.uix.screenmanager import Screen
@@ -35,7 +35,7 @@ class ViewRune(Screen):
         '''
             This initializes an InfoPage to view the rune description.
         '''
-        if attribute in titles.keys():
+        if attribute in config.titles.keys():
             return
 
         screen = InfoPage(attribute, name='rune_info')

@@ -1,6 +1,6 @@
-from Widgets import Card
 from kivy.uix.screenmanager import Screen
 from utils import config
+from widgets.cards import ChampCard
 
 class ChampSelect(Screen):
     '''
@@ -19,9 +19,8 @@ class ChampSelect(Screen):
                 champ = champ.strip('\n')
                 source = f'icons/champ_images/{champ}.png'
 
-                self.ids.champ_grid.add_widget(Card(source=source, 
-                                                    text=champ.title()))
-
+                self.ids.champ_grid.add_widget(ChampCard(source=source, 
+                                                         text=champ.title()))
     def build_rune(self, champ):
         '''
             This sets up the BuildRune page and moves to it.

@@ -1,4 +1,4 @@
-from Widgets import Rune
+from widgets.runemanager import Rune
 from kivy.uix.screenmanager import Screen
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
@@ -50,6 +50,7 @@ class BuildRune(Screen):
                 rune = Rune(row=rune_info)
                 i = config.saved_runes.add_new_rune(rune, 0, config.saved_runes.size-1)
                 config.sm.get_screen('library').add_new_rune(rune, i)
+
             else:
                 self.rune.edit(rune_info)
 

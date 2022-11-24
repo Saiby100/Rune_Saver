@@ -1,8 +1,9 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import IconDrawerManager IconDrawer.IconDrawerManager
+#:import IconDrawerManager widgets.icondrawermanager.IconDrawerManager
+#:import ToolTipIconButton widgets.buttons.ToolTipIconButton
 
 #CUSTOM WIDGETS
-<Card>:
+<ChampCard>:
     #Card used on the champ select page
     orientation: 'vertical'
     size_hint: None, None
@@ -73,18 +74,10 @@
     ImageLeftWidget:
         id: img
         source: root.source
+
+<Tab@MDFloatLayout+MDTabsBase>
     
 #SCREENS
-<SplashScreen>:
-    RelativeLayout: 
-        orientation: 'vertical'
-
-        Image: 
-            source: 'icons/splash-icon.png'
-            size_hint: None, None
-            size: 100, 100
-            pos_hint: {'center_x': .5, 'center_y': .5}
-
 <PlayerProfile>:
     MDGridLayout:
         cols: 2
@@ -132,7 +125,7 @@
 
         ToolTipIconButton:
             icon: 'refresh'
-            tooltip_text: 'Load Player Data'
+            tooltip_text: 'Update Player Data'
             on_release: root.check_local_api_key()
 
 
@@ -205,22 +198,42 @@
         
         MDGridLayout: 
             cols: 1
-            spacing: 5
+            spacing: 10
             padding: [5, 10]
 
-            MDBoxLayout:
-                orientation: 'horizontal'
+            MDGridLayout:
+                cols: 2
+                spacing: 25
+                padding: [10, 5]
                 size_hint_y: None
-                height: self.minimum_height
-                spacing: 50
+                size: 1, 50
+                #md_bg_color: get_color_from_hex('#eb4034')
+
                 MDTextField:
-                    size_hint_y: None
                     hint_text: 'search'
                     icon_right: 'magnify'
                     icon_right_color: app.theme_cls.primary_color
                 
                     #on_text: 
                         #root.make_rune_list(self.text, True)
+
+                AnchorLayout:
+                    anchor_x: 'right'
+                    anchor_y: 'top'
+                    padding: 5
+                    size_hint_x: None
+                    size: 200, 1
+
+                    MDRoundFlatIconButton:
+                        id: account_btn
+                        icon: 'account-circle'
+                        text: root.profile_name()
+                        size_hint_y: None
+                        pos_hint: {'center_y': .5}
+
+                        on_release:
+                            root.drop_menu.caller = self
+                            root.drop_menu.open()
 
 
             ScrollView:
@@ -231,24 +244,11 @@
                     id: my_runes
                     padding: [5, 0]
     
+
     AnchorLayout:
-        id: button_layout
         anchor_x: 'left'
         anchor_y: 'bottom'
-        padding: [50, 20]
-
-        MDRoundFlatIconButton:
-            id: account_btn
-            icon: 'account-circle'
-            text: root.profile_name()
-            on_release:
-                root.drop_menu.caller = self
-                root.drop_menu.open()
-
-    AnchorLayout:
-        anchor_x: 'right'
-        anchor_y: 'bottom'
-        padding: 10
+        padding: 20
         
         MDIconButton: 
             icon: 'plus'
@@ -329,7 +329,7 @@
         anchor_y: 'top'
         padding: 15
 
-        FloatingButton: 
+        MDFloatingActionButton: 
             icon: 'arrow-left'
             on_release: root.go_back()
 
