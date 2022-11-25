@@ -1,4 +1,4 @@
-from Profile import Profile
+from .profile import Profile
 from widgets.runemanager import RuneManager
 from kivy.uix.screenmanager import ScreenManager, NoTransition
 
