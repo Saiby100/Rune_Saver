@@ -36,11 +36,12 @@
         source: root.source
 
 <RuneCard>:
-    #Cards on view rune page
+    #Cards on ViewRune page
     orientation: 'vertical'
     padding: '5dp'
     spacing: '5dp'
     radius: '25dp'
+    md_bg_color: app.theme_cls.bg_normal
     on_release: root.view_attribute()
 
     Image:
@@ -50,7 +51,7 @@
     MDLabel: 
         text: root.txt
         halign: 'center'
-        #font_style: 'Caption'
+
 
 <CustomIconListItem>:
     #Widget used in dropdown menus and account switching
@@ -110,13 +111,28 @@
                     on_release: 
                         app.change_screen('match_history')
         
-        MDBoxLayout:
-            orientation: 'vertical'
-            id: box
-            MDLabel: 
-                id: default
-                halign: 'center'
-                text: 'No Local Data Found'
+        MDGridLayout:
+            cols: 1
+            padding: 50
+            spacing: 20
+
+            MDGridLayout: 
+                id: profile_details_grid
+                cols: 2
+                size_hint_y: .3
+                adaptive_height: True
+                #md_bg_color: get_color_from_hex('#3f3c6b')
+
+            MDGridLayout: 
+                id: rank_details_grid
+                cols: 2
+                size_hint_y: .3
+                adaptive_height: True
+
+            MDGridLayout: 
+                id: champ_details_grid
+                cols: 2
+                size_hint_y: .3
 
     AnchorLayout:
         anchor_x: 'right'
@@ -261,8 +277,11 @@
             id: toolbar
             left_action_items:
                 [['arrow-left', root.go_back]]
+            md_bg_color: app.theme_cls.bg_normal
                 
         MDTabs: 
+            background_color: app.theme_cls.bg_normal
+            indicator_color: app.theme_cls.primary_color
             Tab: 
                 title: 'Rune'
 
@@ -301,6 +320,7 @@
             padding: [20, 5]
             radius: '25dp'
             spacing: '10dp'
+            md_bg_color: app.theme_cls.bg_normal
 
             RelativeLayout:
                 Image:
@@ -328,7 +348,7 @@
         anchor_y: 'top'
         padding: 15
 
-        MDFloatingActionButton: 
+        MDIconButton: 
             icon: 'arrow-left'
             on_release: root.go_back()
 
@@ -379,8 +399,11 @@
             title: root.title
             left_action_items: [['arrow-left', root.go_back]]
             right_action_items: [[f'icons/champ_icons/{root.champion}.png']]
+            md_bg_color: app.theme_cls.bg_normal
 
         MDTabs: 
+            background_color: app.theme_cls.bg_normal
+            indicator_color: app.theme_cls.primary_color
             Tab: 
                 title: 'Rune'
                 MDGridLayout:

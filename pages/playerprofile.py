@@ -3,7 +3,9 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.snackbar import Snackbar
+from kivy.uix.image import Image
 from kivymd.uix.label import MDLabel
+from kivymd.uix.boxlayout import MDBoxLayout
 from utils import config
 
 class PlayerProfile(Screen):
@@ -25,11 +27,56 @@ class PlayerProfile(Screen):
         '''
             This refreshes the profile page.
         '''
-        self.ids.box.clear_widgets()
-            
-        for key in config.profile.player_data.keys():
-            self.ids.box.add_widget(MDLabel(text=f'{key.title()}: {str(config.profile.player_data[key])}',
-                                            halign='center'))
+        self.ids.profile_details_grid.clear_widgets()
+
+        self.icon = config.profile.player_data['icon']
+        self.icon_src = f'icons/profileicon/{self.icon}.png'
+        self.level = config.profile.player_data['level']
+        self.tier = config.profile.player_data['tier']
+        self.rank = config.profile.player_data['rank']
+        self.wins = config.profile.player_data['wins']
+        self.losses = config.profile.player_data['losses']
+
+        self.details_box = MDBoxLayout(orientation='vertical',
+                                       size_hint_y=None)
+
+        self.details_box.add_widget(MDLabel(text=config.profile.name,
+                                            font_style='H5'))
+        self.details_box.add_widget(MDLabel(text=f'Level: {self.level}',
+                                            font_style='H5'))
+
+        self.ids.profile_details_grid.add_widget(Image(source=self.icon_src))
+        self.ids.profile_details_grid.add_widget(self.details_box)
+
+        self.rank_details_box = MDBoxLayout(orientation='vertical',
+                                            size_hint_y=None)
+
+        self.rank_details_box.add_widget(MDLabel(text=self.tier,
+                                                 font_style='H5'))
+        self.rank_details_box.add_widget(MDLabel(text=f'Wins: {self.wins} / Losses: {self.losses}',
+                                                 font_style='H5'))
+
+        self.ids.rank_details_grid.add_widget(Image(source=f'icons/tiers/Emblem_{self.tier.upper()}.png'))
+        self.ids.rank_details_grid.add_widget(self.rank_details_box)
+
+        # self.name = config.profile.name
+        # self.level = config.profile.player_data['level']
+        # self.icon = config.profile.player_data['icon']
+        # self.icon_src = f'icons/profileicon/{self.icon}.png'
+
+        # self.tier = config.profile.player_data['tier']
+        # self.rank = config.profile.player_data['rank']
+
+        # self.wins = config.profile.player_data['wins']
+        # self.losses = config.profile.player_data['losses']
+
+        # self.ids.details_grid.add_widget(Image(source=self.icon_src))
+        # self.ids.details_box.add_widget(MDLabel(text=self.name))
+        # self.ids.details_box.add_widget(MDLabel(text=self.level))
+
+        # for key in config.profile.player_data.keys():
+        #     self.ids.box.add_widget(MDLabel(text=f'{key.title()}: {str(config.profile.player_data[key])}',
+        #                                     halign='center'))
 
     def validate_api_key(self, event):
         '''
