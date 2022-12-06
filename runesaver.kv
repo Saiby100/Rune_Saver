@@ -203,7 +203,7 @@
 
             MDGridLayout:
                 cols: 2
-                spacing: 25
+                spacing: 20
                 padding: [10, 5]
                 size_hint_y: None
                 size: 1, 50
@@ -218,18 +218,17 @@
                         #root.make_rune_list(self.text, True)
 
                 AnchorLayout:
+                    id: account_btn_layout
                     anchor_x: 'right'
                     anchor_y: 'top'
-                    padding: 5
+                    padding: 2
                     size_hint_x: None
-                    size: 200, 1
+                    width: 250
 
                     MDRoundFlatIconButton:
                         id: account_btn
                         icon: 'account-circle'
                         text: root.profile_name()
-                        size_hint_y: None
-                        pos_hint: {'center_y': .5}
 
                         on_release:
                             root.drop_menu.caller = self

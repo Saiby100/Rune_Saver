@@ -11,6 +11,7 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.metrics import dp
 from utils import config
+from kivymd.uix.button import MDRoundFlatIconButton
 
 class Library(Screen):
     '''Page with user's saved runes.'''
@@ -119,7 +120,7 @@ class Library(Screen):
             Snackbar(text='A profile already exists with that name', duration=1).open()
             return
 
-        self.ids.account_btn.text = config.profile.name
+        self.update_account_btn(config.profile.name)
         self.profile_box.dismiss()
 
     def delete_profile(self):
@@ -135,7 +136,7 @@ class Library(Screen):
             for rune in config.saved_runes.runes:
                 self.ids.my_runes.add_widget(rune)
 
-        self.ids.account_btn.text = config.profile.name
+        self.update_account_btn(config.profile.name)
         config.sm.remove_widget(config.sm.get_screen('profile'))
         config.sm.add_widget(PlayerProfile(name='profile'))
         self.profile_box.dismiss()
@@ -210,7 +211,7 @@ class Library(Screen):
         for rune in config.saved_runes.runes:
             self.ids.my_runes.add_widget(rune)
 
-        self.ids.account_btn.text = self.profile_name()
+        self.update_account_btn(self.profile_name())
         config.sm.remove_widget(config.sm.get_screen('profile'))
         config.sm.add_widget(PlayerProfile(name='profile'))
 
@@ -221,6 +222,21 @@ class Library(Screen):
         except AttributeError:
             #Called after selecting a profile.
             return
+    
+    def update_account_btn(self, name): 
+        self.ids.account_btn_layout.clear_widgets()
+
+        new_button = MDRoundFlatIconButton(
+                                            icon='account-circle',
+                                            text=name
+                                          )
+        new_button.bind(on_release=self.open_account_options)
+
+        self.ids.account_btn_layout.add_widget(new_button)
+
+    def open_account_options(self, event): 
+        self.drop_menu.caller = event
+        self.drop_menu.open()
 
     def get_profile_name(self, event):
         '''
