@@ -2,6 +2,7 @@ from riotwatcher import LolWatcher, ApiError
 import csv
 import os
 
+
 class Player:
     def __init__(self, dict):
         '''Defines each player in the match history array'''
@@ -11,8 +12,10 @@ class Player:
         self.farm = dict["Farm"]
         self.won = dict["Win"]
 
+
 class Profile:
     '''Class for managing profiles.'''
+
     def __init__(self):
         '''
             This initializes the player region, data, name, api_key and path.        
@@ -23,8 +26,8 @@ class Profile:
         with open('resources/config.txt', 'r') as file:
             self.name = file.readline().strip('\n')
             self.api_key = file.readline().strip('\n')
-        self.rune_data_path = f'accounts/runes/{self.name}.csv'    
-        self.player_data_path = f'accounts/data/{self.name}.csv'    
+        self.rune_data_path = f'accounts/runes/{self.name}.csv'
+        self.player_data_path = f'accounts/data/{self.name}.csv'
 
         self.refresh_player_data()
 
@@ -33,29 +36,30 @@ class Profile:
             Returns True if the api_key is valid, False otherwise.
             If api_key is None, saved api_key is checked.
         '''
-        if api_key is None: 
+        if api_key is None:
             api_key = self.api_key
 
         try:
             self.watcher = LolWatcher(api_key)
-            self.profile = self.watcher.summoner.by_name(self.region, self.name)
+            self.profile = self.watcher.summoner.by_name(
+                self.region, self.name)
             self.api_key = api_key
 
             return True
 
         except ApiError:
             return False
-    
+
     def get_local_player_data(self):
         '''Fetches locally saved data on the player'''
 
         with open(f'accounts/data/{self.name}.txt', 'r') as file:
-            array = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
+            array = ['level', 'icon', 'tier',
+                     'rank', 'wins', 'losses', 'points']
 
             for i, line in enumerate(file):
                 self.player_data[array[i]] = line.strip('\n')
-    
-                    
+
     def get_all_profiles(self, data=False):
         '''
             Returns all the existing profiles' rune data by default.
@@ -88,21 +92,21 @@ class Profile:
             return False
 
         if name is None:
-            #Delete current profile
+            # Delete current profile
             os.remove(self.rune_data_path)
 
             try:
                 os.remove(self.player_data_path)
             except FileNotFoundError:
-                #No local data on player exists.
+                # No local data on player exists.
                 pass
 
             accounts = self.files('csv')
 
             self.set_current(accounts[0].strip('.csv'))
 
-        else: 
-            #Delete specified profile
+        else:
+            # Delete specified profile
             os.remove(f'accounts/runes/{name}.csv')
             os.remove(f'accounts/data/{name}.txt')
 
@@ -116,16 +120,18 @@ class Profile:
 
         with open('resources/config.txt', 'w') as file:
             file.write(self.name+'\n'+self.api_key)
-        
-        if self.player_data['level'] is None: #Player data doesn't need to save.
+
+        # Player data doesn't need to save.
+        if self.player_data['level'] is None:
             return
 
-        player_keys = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
-        
+        player_keys = ['level', 'icon', 'tier',
+                       'rank', 'wins', 'losses', 'points']
+
         with open(f'accounts/data/{self.name}.txt', 'w') as file:
             for key in player_keys:
                 file.write(str(self.player_data[key])+'\n')
-        
+
     def rename(self, new_name):
         '''
             Renames the current profile. 
@@ -148,7 +154,7 @@ class Profile:
             Sets the profile object to the specified name.
         '''
         if f'{account_name}.csv' in self.files('csv'):
-            #Alter config file here
+            # Alter config file here
             self.name = account_name
             self.rune_data_path = f'accounts/runes/{account_name}.csv'
             self.player_data_path = f'accounts/data/{account_name}.txt'
@@ -168,7 +174,7 @@ class Profile:
 
         elif f'{self.name}.txt' in self.files('txt'):
             self.get_local_player_data()
-        
+
         else:
             self.set_player_data_to_none()
 
@@ -178,7 +184,7 @@ class Profile:
             Returns true if creation successful, false otherwise.
         '''
         if len(self.get_all_profiles()) >= 4:
-            #Too many accounts
+            # Too many accounts
             return False
         try:
             open(f'accounts/runes/{name}.csv', 'x')
@@ -191,34 +197,36 @@ class Profile:
         '''Returns all files with the specified extension in the accounts directory as an array'''
         if extension == 'txt':
             files = [file for file in os.listdir('accounts/data')
-                    if file.endswith('.'+extension)]
+                     if file.endswith('.'+extension)]
 
         else:
             files = [file for file in os.listdir('accounts/runes')
-                    if file.endswith('.'+extension)]
+                     if file.endswith('.'+extension)]
 
         return files
-    
+
     def fetch_player_api_data(self, api_key):
         '''
             Collects player info. 
             Returns true if successful, false otherwise.
             If api key is none, this uses the saved api key.
             '''
-        if api_key is None: 
+        if api_key is None:
             api_key = self.api_key
 
         if self.key_is_valid(api_key):
-            try: 
+            try:
                 self.watcher = LolWatcher(api_key)
-                self.profile = self.watcher.summoner.by_name(self.region, self.name)
+                self.profile = self.watcher.summoner.by_name(
+                    self.region, self.name)
                 self.player_data['level'] = self.profile['summonerLevel']
                 self.player_data['icon'] = self.profile['profileIconId']
-            
+
                 if self.player_data['level'] < 30:
                     return False
 
-                self.stats = self.watcher.league.by_summoner(self.region, self.profile['id'])[0]
+                self.stats = self.watcher.league.by_summoner(
+                    self.region, self.profile['id'])[0]
                 self.player_data['wins'] = self.stats['wins']
                 self.player_data['losses'] = self.stats['losses']
                 self.player_data['tier'] = self.stats['tier']
@@ -227,25 +235,53 @@ class Profile:
                 self.api_key = api_key
                 return True
 
-            except ValueError: 
+            except ValueError:
                 return False
-    
+
     def set_player_data_to_none(self):
         '''
             Sets player dictionary to defaults (None).
         '''
-        attributes = ['level', 'icon', 'tier', 'rank', 'wins', 'losses', 'points']
+        attributes = ['level', 'icon', 'tier',
+                      'rank', 'wins', 'losses', 'points']
         for attribute in attributes:
             self.player_data[attribute] = None
+
+    def champ_masteries(self):
+        '''
+            Gets the top 3 champ masteries for the current player.
+            Returns an array of tuples with the champ and its corresponding
+            mastery level.
+        '''
+        id_arr = self.watcher.champion_mastery.by_summoner(
+            self.region, self.profile['id'])
+        latest = self.watcher.data_dragon.versions_for_region(self.region)[
+            'n']['champion']
+        static_champ_list = self.watcher.data_dragon.champions(
+            latest, False, 'en_US')
+
+        champ_dict = {}
+        for key in static_champ_list['data']:
+            row = static_champ_list['data'][key]
+            champ_dict[row['key']] = row['id']
+
+        champs = []
+        for i in range(3):
+            champs.append(
+                (champ_dict[str(id_arr[i]['championId'])], id_arr[i]['championLevel']))
+
+        return champs
 
     def get_match_history(self, max=5):
         '''
             Returns last five matches played
         '''
         my_region = self.region
-        player_puuid = self.watcher.summoner.by_name(my_region, self.name)["puuid"]
+        player_puuid = self.watcher.summoner.by_name(
+            my_region, self.name)["puuid"]
 
-        my_matches = self.watcher.match.matchlist_by_puuid(my_region, player_puuid)
+        my_matches = self.watcher.match.matchlist_by_puuid(
+            my_region, player_puuid)
 
         history = []
         MAX = max
@@ -269,13 +305,14 @@ class Profile:
                     match_row["items"].append(str(details["item"+str(i)]))
 
                 try:
-                    kills = details["challenges"]["takedowns"] - details["assists"]
+                    kills = details["challenges"]["takedowns"] - \
+                        details["assists"]
                 except KeyError:
-                    kills = details["kills"] 
+                    kills = details["kills"]
 
                 deaths = details["deaths"]
                 assists = details["assists"]
-                
+
                 match_row["KDA"] = f"{kills}/{deaths}/{assists}"
                 match_row["Farm"] = details["totalMinionsKilled"]
                 match_row["Win"] = details["win"]
@@ -284,7 +321,7 @@ class Profile:
 
             matches.append(match_data)
         return matches
-        
-    
+
+
 if __name__ == '__main__':
     profile = Profile()
