@@ -288,7 +288,3 @@ class Profile:
     
 if __name__ == '__main__':
     profile = Profile()
-    with open('accounts/runes/Predator122.csv', 'r') as file:
-        reader = csv.reader(file)
-        for line in reader:
-            print(line)
