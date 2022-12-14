@@ -36,7 +36,6 @@ class RuneSaver(MDApp):
         '''
             This is called when the application is launched.
         '''
-
         config.sm.add_widget(Library(name='library'))
         config.sm.add_widget(BuildRune(name='rune_page'))
         config.sm.add_widget(PlayerProfile(name='profile'))

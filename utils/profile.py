@@ -14,8 +14,9 @@ class Player:
 
 
 class Profile:
-    '''Class for managing profiles.'''
-
+    '''
+        Class for managing profiles.
+    '''
     def __init__(self):
         '''
             This initializes the player region, data, name, api_key and path.        
@@ -51,10 +52,11 @@ class Profile:
             return False
 
     def get_local_player_data(self):
-        '''Fetches locally saved data on the player'''
-
+        '''
+            Fetches locally saved data on the player.
+        '''
         if f'{self.name}.txt' not in self.files('txt'):
-            self.set_player_data_to_none()
+            return self.set_player_data_to_none()
 
         with open(f'accounts/data/{self.name}.txt', 'r') as file:
             array = ['level', 'icon', 'tier',
@@ -68,6 +70,7 @@ class Profile:
             for a, i in enumerate(range(6, 12, 2)):
                 self.player_data[f'champ{a+1}'] = (lines[i].strip('\n'),
                                                    lines[i+1].strip('\n'))
+        return True
 
     def get_all_profiles(self, data=False):
         '''
@@ -106,6 +109,7 @@ class Profile:
 
             try:
                 os.remove(self.player_data_path)
+
             except FileNotFoundError:
                 # No local data on player exists.
                 pass
@@ -122,7 +126,9 @@ class Profile:
         return True
 
     def save(self, runes):
-        '''Saves all the data to the profile's file.'''
+        '''
+            Saves all the data to the profile's file.
+        '''
         with open(self.rune_data_path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(runes)
@@ -150,7 +156,6 @@ class Profile:
             Renames the current profile. 
             Returns true if renaming successful, false otherwise.
         '''
-
         runes_path = f'accounts/runes/{new_name}.csv'
         data_path = f'accounts/data/{new_name}.txt'
         try:
@@ -183,13 +188,13 @@ class Profile:
             Used to set current profile to a different one.
         '''
         if self.key_is_valid(self.api_key):
-            self.fetch_player_api_data(None)
+            return self.fetch_player_api_data(None)
 
         elif f'{self.name}.txt' in self.files('txt'):
-            self.get_local_player_data()
+            return self.get_local_player_data()
 
         else:
-            self.set_player_data_to_none()
+            return self.set_player_data_to_none()
 
     def create_new_profile(self, name):
         '''
@@ -224,19 +229,17 @@ class Profile:
             Returns true if successful, false otherwise.
             If api key is none, this uses the saved api key.
             '''
+        
         if api_key is None:
             api_key = self.api_key
 
         if self.key_is_valid(api_key):
             try:
-                self.watcher = LolWatcher(api_key)
-                self.profile = self.watcher.summoner.by_name(
-                    self.region, self.name)
+                if self.profile['summonerLevel'] < 30:
+                    return False
+
                 self.player_data['level'] = self.profile['summonerLevel']
                 self.player_data['icon'] = self.profile['profileIconId']
-
-                if self.player_data['level'] < 30:
-                    return False
 
                 self.stats = self.watcher.league.by_summoner(
                     self.region, self.profile['id'])[0]
@@ -263,6 +266,8 @@ class Profile:
 
         for i in range(1, 4):
             self.player_data[f'champ{i}'] = None
+        
+        return False
 
     def get_champ_masteries(self):
         '''

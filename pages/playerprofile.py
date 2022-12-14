@@ -35,7 +35,8 @@ class PlayerProfile(Screen):
         '''
             This refreshes the profile page.
         '''
-        config.profile.refresh_player_data()
+        if not config.profile.refresh_player_data():
+            return
 
         self.icon = config.profile.player_data['icon']
         self.level = config.profile.player_data['level']
@@ -50,7 +51,7 @@ class PlayerProfile(Screen):
         self.player_details = f'{config.profile.name}\nLevel: {self.level}'
         self.player_rank_details = f'{self.tier.capitalize()} {self.rank}\n{self.wins} Wins / {self.losses} Losses'
         self.icon_src = f'icons/profileicon/{self.icon}.png'
-        self.player_rank_img = f'icons/tiers/Emblem_{self.tier.upper()}.png'
+        self.player_rank_img = f'icons/tiers/Emblem_{self.tier.capitalize()}.png'
         self.champ1 = f'icons/champ_images/{champ1.lower()}.png'
         self.champ2 = f'icons/champ_images/{champ2.lower()}.png'
         self.champ3 = f'icons/champ_images/{champ3.lower()}.png'
