@@ -1,7 +1,12 @@
-92
+98
 665
 BRONZE
-IV
-8
-19
-63
+II
+17
+24
+Quinn
+7
+Xerath
+7
+Teemo
+6

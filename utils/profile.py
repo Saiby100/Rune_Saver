@@ -29,7 +29,7 @@ class Profile:
         self.rune_data_path = f'accounts/runes/{self.name}.csv'
         self.player_data_path = f'accounts/data/{self.name}.csv'
 
-        self.refresh_player_data()
+        self.get_local_player_data()
 
     def key_is_valid(self, api_key):
         '''
@@ -53,12 +53,21 @@ class Profile:
     def get_local_player_data(self):
         '''Fetches locally saved data on the player'''
 
+        if f'{self.name}.txt' not in self.files('txt'):
+            self.set_player_data_to_none()
+
         with open(f'accounts/data/{self.name}.txt', 'r') as file:
             array = ['level', 'icon', 'tier',
-                     'rank', 'wins', 'losses', 'points']
+                     'rank', 'wins', 'losses']
 
-            for i, line in enumerate(file):
-                self.player_data[array[i]] = line.strip('\n')
+            lines = file.readlines()
+
+            for i in range(6):
+                self.player_data[array[i]] = lines[i].strip('\n')
+
+            for a, i in enumerate(range(6, 12, 2)):
+                self.player_data[f'champ{a+1}'] = (lines[i].strip('\n'),
+                                                   lines[i+1].strip('\n'))
 
     def get_all_profiles(self, data=False):
         '''
@@ -126,11 +135,15 @@ class Profile:
             return
 
         player_keys = ['level', 'icon', 'tier',
-                       'rank', 'wins', 'losses', 'points']
+                       'rank', 'wins', 'losses']
 
         with open(f'accounts/data/{self.name}.txt', 'w') as file:
             for key in player_keys:
                 file.write(str(self.player_data[key])+'\n')
+
+            for i in range(1, 4):
+                file.write(str(self.player_data[f'champ{i}'][0])+'\n')
+                file.write(str(self.player_data[f'champ{i}'][1])+'\n')
 
     def rename(self, new_name):
         '''
@@ -158,7 +171,7 @@ class Profile:
             self.name = account_name
             self.rune_data_path = f'accounts/runes/{account_name}.csv'
             self.player_data_path = f'accounts/data/{account_name}.txt'
-            self.refresh_player_data()
+            self.get_local_player_data()
 
             with open('resources/config.txt', 'w') as file:
                 file.write(self.name+'\n')
@@ -232,6 +245,7 @@ class Profile:
                 self.player_data['tier'] = self.stats['tier']
                 self.player_data['rank'] = self.stats['rank']
                 self.player_data['points'] = self.stats['leaguePoints']
+                self.get_champ_masteries()
                 self.api_key = api_key
                 return True
 
@@ -243,11 +257,14 @@ class Profile:
             Sets player dictionary to defaults (None).
         '''
         attributes = ['level', 'icon', 'tier',
-                      'rank', 'wins', 'losses', 'points']
+                      'rank', 'wins', 'losses']
         for attribute in attributes:
             self.player_data[attribute] = None
 
-    def champ_masteries(self):
+        for i in range(1, 4):
+            self.player_data[f'champ{i}'] = None
+
+    def get_champ_masteries(self):
         '''
             Gets the top 3 champ masteries for the current player.
             Returns an array of tuples with the champ and its corresponding
@@ -265,12 +282,9 @@ class Profile:
             row = static_champ_list['data'][key]
             champ_dict[row['key']] = row['id']
 
-        champs = []
         for i in range(3):
-            champs.append(
-                (champ_dict[str(id_arr[i]['championId'])], id_arr[i]['championLevel']))
-
-        return champs
+            self.player_data[f'champ{i+1}'] = (
+                champ_dict[str(id_arr[i]['championId'])], id_arr[i]['championLevel'])
 
     def get_match_history(self, max=5):
         '''

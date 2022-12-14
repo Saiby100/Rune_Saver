@@ -76,8 +76,23 @@
         id: img
         source: root.source
 
-<Tab@MDFloatLayout+MDTabsBase>
+<DetailsCard>:
+    size_hint_x: None
+    size_hint_y: None
+    radius: '30dp'
+    width: 300
+    padding: 5
+    spacing: 50
+    md_bg_color: app.theme_cls.bg_normal
+
+    Image:
+        source: root.source
+        size_hint_x: .3
     
+    MDLabel:
+        text: root.text
+        size_hint_x: .7
+
 #SCREENS
 <PlayerProfile>:
     MDGridLayout:
@@ -113,26 +128,42 @@
         
         MDGridLayout:
             cols: 1
-            padding: 50
-            spacing: 20
+            spacing: 40
+            Image:
+                source: root.banner_src
+                allow_stretch: True
+                keep_ratio: False
+                size_hint_y: .5
 
-            MDGridLayout: 
-                id: profile_details_grid
+            MDGridLayout:
                 cols: 2
-                size_hint_y: .3
-                adaptive_height: True
-                #md_bg_color: get_color_from_hex('#3f3c6b')
+                spacing: 50
+                padding: [15, 0]
 
-            MDGridLayout: 
-                id: rank_details_grid
-                cols: 2
-                size_hint_y: .3
-                adaptive_height: True
+                MDGridLayout: 
+                    cols: 1
+                    spacing: 5
 
-            MDGridLayout: 
-                id: champ_details_grid
-                cols: 2
-                size_hint_y: .3
+                    DetailsCard:
+                        text: root.player_details
+                        source: root.icon_src
+                    DetailsCard:
+                        text: root.player_rank_details
+                        source: root.player_rank_img
+
+                MDRelativeLayout: 
+                    MDGridLayout: 
+                        pos_hint: {'top': 1}
+                        cols: 3
+                        size_hint_y: .3
+                        spacing: 10
+
+                        Image: 
+                            source: root.champ2
+                        Image: 
+                            source: root.champ1
+                        Image: 
+                            source: root.champ3
 
     AnchorLayout:
         anchor_x: 'left'
@@ -270,42 +301,20 @@
             on_release: root.champ_select()
 
 <ViewRune>:
-    BoxLayout:
-        orientation: 'vertical'
+    MDGridLayout:
+        cols: 1
 
-        MDToolbar:
+        MDTopAppBar:
             id: toolbar
             left_action_items:
                 [['arrow-left', root.go_back]]
             md_bg_color: app.theme_cls.bg_normal
                 
-        MDTabs: 
-            background_color: app.theme_cls.bg_normal
-            indicator_color: app.theme_cls.primary_color
-            Tab: 
-                title: 'Rune'
-
-                GridLayout: 
-                    id: rune_grid
-                    cols: 2
-                    spacing: 5
-                    padding: 10
-
-                AnchorLayout:
-                    anchor_x: 'right'
-                    anchor_y: 'bottom'
-                    padding: 30
-
-                    #MDFloatingActionButton:
-                        #id: edit_btn
-                        #icon: 'pencil'
-                        #on_release: root.edit_rune(root.rune)
-
-            Tab: 
-                title: 'Builds'
-                MDLabel:
-                    halign: 'center'
-                    text: 'Page for viewing item builds'
+        MDGridLayout: 
+            id: rune_grid
+            cols: 2
+            spacing: 5
+            padding: 10
 
 <InfoPage>: 
 
@@ -366,7 +375,6 @@
                 hint_text: 'search'
                 icon_right: 'magnify'
                 icon_right_color: app.theme_cls.primary_color
-                mode: 'fill'
         
         ScrollView:
             scroll_wheel_distance: 70
@@ -386,43 +394,31 @@
 
         MDIconButton:
             icon: 'arrow-left'
-            icon_size: '64sp'
             on_release: root.go_back()
 
 
 <BuildRune>:
-    MDBoxLayout: 
-        orientation: 'vertical'
+    MDGridLayout: 
+        cols: 1
 
-        MDToolbar:
+        MDTopAppBar:
             id: toolbar
             title: root.title
             left_action_items: [['arrow-left', root.go_back]]
             right_action_items: [[f'icons/champ_icons/{root.champion}.png']]
             md_bg_color: app.theme_cls.bg_normal
 
-        MDTabs: 
-            background_color: app.theme_cls.bg_normal
-            indicator_color: app.theme_cls.primary_color
-            Tab: 
-                title: 'Rune'
-                MDGridLayout:
-                    id: panel_grid
-                    cols: 2
-                    padding: 10
-                    spacing: [50, 0]
-                    IconDrawerManager:
-                        id: primary
+        MDGridLayout:
+            id: panel_grid
+            cols: 2
+            padding: 10
+            spacing: [50, 0]
+            IconDrawerManager:
+                id: primary
 
-                    IconDrawerManager:
-                        id: secondary
-                        is_primary: False
-                        
-            Tab:
-                title: 'Build'
-                MDLabel:
-                    halign: 'center'
-                    text: 'Page for adding item builds'
+            IconDrawerManager:
+                id: secondary
+                is_primary: False
             
     AnchorLayout: 
         anchor_x: 'right'

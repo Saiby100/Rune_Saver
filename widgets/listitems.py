@@ -22,6 +22,10 @@ class CustomOneLineListItem(OneLineListItem, HoverBehavior):
         self.text_color = self.app.theme_cls.text_color
 
 class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
+    '''
+        This class represents the widgets used for the runes on
+        the library page.
+    '''
     text = StringProperty()
     source = StringProperty()
 

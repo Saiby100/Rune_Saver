@@ -10,13 +10,14 @@ from utils import config
 Window.minimum_width, Window.minimum_height = (705, 500)
 Window.size = (980, 670)
 
+
 class RuneSaver(MDApp):
     '''
         This class initializes the screen manager and manages the app.
     '''
+
     def build(self):
-        
-        #Initialize global variables.
+        # Initialize global variables.
         config.init()
         '''
             Valid themes: 'Light' or 'Dark'.
@@ -41,16 +42,17 @@ class RuneSaver(MDApp):
         config.sm.add_widget(PlayerProfile(name='profile'))
         config.sm.add_widget(MatchHistory(name='match_history'))
         config.sm.current = 'library'
-    
+
     def change_screen(self, screen_name):
         '''
             This is used for moving between library, profile, 
             and match history pages.
             Called from kv file.
         '''
-        if config.sm.current == screen_name: 
+        if config.sm.current == screen_name:
             return
         config.sm.current = screen_name
+
 
 if __name__ == '__main__':
 
