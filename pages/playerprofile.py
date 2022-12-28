@@ -31,12 +31,13 @@ class PlayerProfile(Screen):
         if config.profile.player_data['level'] is not None:
             self.refresh_profile_page()
 
-    def refresh_profile_page(self):
+    def refresh_profile_page(self, local=True):
         '''
             This refreshes the profile page.
         '''
-        if not config.profile.refresh_player_data():
-            return
+        if not local:
+            if not config.profile.refresh_player_data():
+                return
 
         self.icon = config.profile.player_data['icon']
         self.level = config.profile.player_data['level']
@@ -78,7 +79,7 @@ class PlayerProfile(Screen):
             return
 
         else:
-            self.refresh_profile_page()
+            self.refresh_profile_page(False)
             self.api_key_box.content_cls.text = ''
             self.api_key_box.dismiss()
 
@@ -90,4 +91,4 @@ class PlayerProfile(Screen):
         if not config.profile.key_is_valid(None):
             self.api_key_box.open()
         else:
-            self.refresh_profile_page()
+            self.refresh_profile_page(False)

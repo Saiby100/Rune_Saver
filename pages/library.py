@@ -214,6 +214,8 @@ class Library(Screen):
         self.update_account_btn(self.profile_name())
         config.sm.remove_widget(config.sm.get_screen('profile'))
         config.sm.add_widget(PlayerProfile(name='profile'))
+        config.sm.remove_widget(config.sm.get_screen('match_history'))
+        config.sm.add_widget(PlayerProfile(name='match_history'))
 
         try:
             #Called after creating a new profile.

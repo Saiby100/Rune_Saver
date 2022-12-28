@@ -3,6 +3,82 @@
 #:import ToolTipIconButton widgets.buttons.ToolTipIconButton
 
 #CUSTOM WIDGETS
+<ItemHolder>:
+    orientation: 'horizontal'
+    size_hint: None, None
+    height: 40
+    width: self.minimum_width
+
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[0]}.png'
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[1]}.png'
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[2]}.png'
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[3]}.png'
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[4]}.png'
+    Image: 
+        size_hint_x: None
+        width: 40
+        source: f'icons/items/{root.items[5]}.png'
+
+<MatchListItem>:
+    md_bg_color: app.theme_cls.bg_light
+    size_hint_y: None
+    height: 50
+    
+    Image: 
+        size_hint: None, None
+        size: 40, 40
+        pos_hint: {'center_x': .04, 'center_y': .5}
+        source: f'icons/champ_icons/{root.champ}.png'
+
+    ItemHolder:
+        pos_hint: {'center_x': .34, 'center_y': .5}
+        items: root.items
+
+    MDLabel: 
+        text: root.kda
+        adaptive_width: True
+        pos_hint: {'center_x': .65, 'center_y': .5}
+        theme_text_color: 'Custom'
+        text_color: get_color_from_hex('#a3a9ad')
+    
+    MDLabel: 
+        text: root.farm
+        adaptive_width: True
+        pos_hint: {'center_x': .85, 'center_y': .5}
+        theme_text_color: 'Custom'
+        text_color: get_color_from_hex('BBB488')
+
+    Image: 
+        size_hint: None, None
+        size: 13, 20
+        pos_hint: {'center_x': .84, 'center_y': .5}
+        source: 'icons/farm.png'
+
+    Widget:
+        pos_hint: {'x': .982} 
+        canvas:
+            Color: 
+                rgba: get_color_from_hex('327A8F') if root.won else get_color_from_hex('932B26')
+            Rectangle:
+                size: 15, 50
+                pos: self.pos
+
+                
 <ChampCard>:
     #Card used on the champ select page
     orientation: 'vertical'
@@ -207,9 +283,22 @@
                     text_color: app.theme_cls.primary_color
                     on_release: 
                         app.change_screen('match_history')
-        MDLabel:
-            halign: 'center'
-            text: 'This is the player match history'
+
+        MDGridLayout:
+            cols: 1
+            spacing: 5
+            padding: [0, 15]
+            id: layout
+
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'bottom'
+        padding: 20
+
+        ToolTipIconButton:
+            icon: 'refresh'
+            tooltip_text: 'Refresh'
+            on_release: root.refresh_player_matches()
 
 <Library>:
     MDGridLayout:

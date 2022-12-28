@@ -3,6 +3,22 @@ from kivymd.uix.behaviors import HoverBehavior
 from kivy.properties import StringProperty, ObjectProperty
 from kivymd.uix.list import IconRightWidget, OneLineIconListItem
 from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivy.properties import StringProperty, ListProperty, BooleanProperty
+from kivymd.uix.relativelayout import MDRelativeLayout
+
+
+class ItemHolder(MDBoxLayout):
+    items = ListProperty(['0', '0', '0', '0', '0', '0'])
+
+
+class MatchListItem(MDRelativeLayout):
+    champ = StringProperty('none')
+    items = ListProperty(['0', '0', '0', '0', '0', '0'])
+    kda = StringProperty('none')
+    farm = StringProperty('none')
+    won = BooleanProperty(False)
+
 
 class _CustomIconRightWidget(IconRightWidget):
     '''
@@ -10,16 +26,19 @@ class _CustomIconRightWidget(IconRightWidget):
     '''
     rune = ObjectProperty()
 
+
 class CustomOneLineListItem(OneLineListItem, HoverBehavior):
     '''
         These are the list items that appear when selecting account button.
     '''
+
     def on_enter(self):
         self.app = MDApp.get_running_app()
         self.text_color = self.app.theme_cls.primary_color
 
     def on_leave(self):
         self.text_color = self.app.theme_cls.text_color
+
 
 class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
     '''
@@ -34,14 +53,15 @@ class CustomIconAvatarListItem(OneLineAvatarIconListItem, HoverBehavior):
         self.bg_color = self.app.theme_cls.bg_light
 
         self.right_icon = _CustomIconRightWidget(icon='dots-vertical',
-                                                rune=self)
+                                                 rune=self)
         self.right_icon.bind(on_release=self.open_drop_menu)
 
         self.add_widget(self.right_icon)
-    
+
     def on_leave(self):
         self.bg_color = self.app.theme_cls.bg_normal
         self.children[0].remove_widget(self.right_icon)
+
 
 class CustomIconListItem(OneLineIconListItem, HoverBehavior):
     '''
@@ -53,14 +73,16 @@ class CustomIconListItem(OneLineIconListItem, HoverBehavior):
         self.app = MDApp.get_running_app()
         self.text_color = self.app.theme_cls.primary_color
 
-    def on_leave(self): 
+    def on_leave(self):
         self.text_color = self.app.theme_cls.text_color
+
 
 class NavItem(CustomIconListItem):
     '''
         Navigation items in navigation bar used on Home pages 
         (Profile, Rune Library, Match History).
     '''
+
     def on_enter(self):
         self.app = MDApp.get_running_app()
         if self.text_color != self.app.theme_cls.primary_color:
