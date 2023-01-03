@@ -1,4 +1,3 @@
-import os
 from kivy.uix.screenmanager import Screen
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
@@ -9,7 +8,7 @@ from utils import config
 
 
 class PlayerProfile(Screen):
-    icon_src = StringProperty('icons/profileicon/none.png')
+    icon = StringProperty('icons/profileicon/none.png')
     player_rank_img = StringProperty('icons/profileicon/none.png')
     player_details = StringProperty('None Found')
     player_rank_details = StringProperty('None Found')
@@ -28,7 +27,7 @@ class PlayerProfile(Screen):
                                     buttons=[MDFlatButton(text='Add',
                                                           on_release=self.validate_api_key)])
 
-        if config.profile.player_data['level'] is not None:
+        if config.profile.player.hasdata:
             self.refresh_profile_page()
 
     def refresh_profile_page(self, local=True):
@@ -36,36 +35,25 @@ class PlayerProfile(Screen):
             This refreshes the profile page.
         '''
         if not local:
-            if not config.profile.refresh_player_data():
+            if not config.profile.fetch_player_api_data(None):
                 return
 
-        self.icon = config.profile.player_data['icon']
-        self.level = config.profile.player_data['level']
-        self.tier = config.profile.player_data['tier']
-        self.rank = config.profile.player_data['rank']
-        self.wins = config.profile.player_data['wins']
-        self.losses = config.profile.player_data['losses']
-        champ1 = config.profile.player_data['champ1'][0]
-        champ2 = config.profile.player_data['champ2'][0]
-        champ3 = config.profile.player_data['champ3'][0]
+        self.icon = config.profile.player.icon_src()
+        self.level = config.profile.player.level
+        self.tier = config.profile.player.tier
+        self.rank = config.profile.player.rank
+        self.wins = config.profile.player.wins
+        self.losses = config.profile.player.losses
+        champ1 = config.profile.player.champ1[0]
 
         self.player_details = f'{config.profile.name}\nLevel: {self.level}'
         self.player_rank_details = f'{self.tier.capitalize()} {self.rank}\n{self.wins} Wins / {self.losses} Losses'
-        self.icon_src = f'icons/profileicon/{self.icon}.png'
-        self.player_rank_img = f'icons/tiers/Emblem_{self.tier.capitalize()}.png'
-        self.champ1 = f'icons/champ_images/{champ1.lower()}.png'
-        self.champ2 = f'icons/champ_images/{champ2.lower()}.png'
-        self.champ3 = f'icons/champ_images/{champ3.lower()}.png'
-        self.banner_src = f'icons/banners/{champ1.capitalize()}_0.jpg'
+        self.player_rank_img = config.profile.player.rank_emblem()
+        self.champ1 = config.profile.player.champ1_img()
+        self.champ2 = config.profile.player.champ2_img()
+        self.champ3 = config.profile.player.champ3_img()
 
-        if not os.path.isfile(self.icon_src):
-            self.icon_src = 'icons/profileicon/none.png'
-        if not os.path.isfile(self.champ1):
-            self.champ1 = 'icons/profileicon/none.png'
-        if not os.path.isfile(self.champ2):
-            self.champ2 = 'icons/profileicon/none.png'
-        if not os.path.isfile(self.champ3):
-            self.champ3 = 'icons/profileicon/none.png'
+        self.banner_src = f'icons/banners/{champ1.capitalize()}_0.jpg'
 
     def validate_api_key(self, event):
         '''

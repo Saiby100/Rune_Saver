@@ -7,8 +7,8 @@ from pages.buildrune import BuildRune
 from pages.matchhistory import MatchHistory
 from utils import config
 
-Window.minimum_width, Window.minimum_height = (705, 500)
-Window.size = (980, 670)
+Window.minimum_width, Window.minimum_height = (850, 500)
+Window.size = (850, 500)
 
 
 class RuneSaver(MDApp):

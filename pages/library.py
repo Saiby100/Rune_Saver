@@ -1,6 +1,7 @@
 from .playerprofile import PlayerProfile
 from .champselect import ChampSelect
 from .viewrune import ViewRune
+from .matchhistory import MatchHistory
 from widgets.listitems import CustomIconListItem
 from kivy.uix.screenmanager import Screen
 from kivymd.uix.button import MDFlatButton
@@ -13,44 +14,54 @@ from kivy.metrics import dp
 from utils import config
 from kivymd.uix.button import MDRoundFlatIconButton
 
+
 class Library(Screen):
     '''Page with user's saved runes.'''
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         '''
             Initializing Layouts
         '''
-        menu_items = [{'text': title,
-                       'viewclass': 'CustomOneLineListItem',
-                       'on_release': lambda x=title: self.drop_menu_button(x),
-                       'height': dp(56),
-                       'divider': None
-                       } for title in ['Switch profile', 'Rename profile', 'Delete profile']
-                      ]
-        self.drop_menu = MDDropdownMenu(items=menu_items,
-                                        width_mult=2.7)
+        menu_items = [
+            {
+                'text': title,
+                'viewclass': 'CustomOneLineListItem',
+                'on_release': lambda x=title: self.drop_menu_button(x),
+                'height': dp(56),
+                'divider': None
+            } for title in ['Switch profile', 'Rename profile', 'Delete profile']
+        ]
+        self.drop_menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=2.7
+        )
 
-        rune_menu_items = [{'text': title[0],
-                            'viewclass': 'CustomIconListItem',
-                            'on_release': lambda x=title[0]: self.select_drop_menu_option(x),
-                            'height': dp(45),
-                            'icon': title[1]
-                            } for title in [['edit', 'pencil'], ['delete', 'trash-can']]
-                          ]
-        self.rune_drop_menu = MDDropdownMenu(items=rune_menu_items,
-                                             width_mult=2.6)
+        rune_menu_items = [
+            {
+                'text': title[0],
+                'viewclass': 'CustomIconListItem',
+                'on_release': lambda x=title[0]: self.select_drop_menu_option(x),
+                'height': dp(45),
+                'icon': title[1]
+            } for title in [['edit', 'pencil'], ['delete', 'trash-can']]
+        ]
+        self.rune_drop_menu = MDDropdownMenu(
+            items=rune_menu_items,
+            width_mult=2.6
+        )
 
         for rune in config.saved_runes.runes:
             self.ids.my_runes.add_widget(rune)
 
     def select_drop_menu_option(self, title):
         '''
-            This is opens the menu for selecting rune actions.
+            This opens the menu for selecting rune actions.
             This is called by 'dots-vertical' icon that appears on-hover for a rune
         '''
         rune = self.rune_drop_menu.caller.rune
         self.rune_drop_menu.dismiss()
-        if title == 'edit': 
+        if title == 'edit':
             self.edit_rune(rune)
         else:
             self.delete_rune(rune)
@@ -66,7 +77,7 @@ class Library(Screen):
                     'row': row
                 }
             )
-        
+
         self.ids.my_runes.data = []
         for rune in config.saved_runes.to_array():
             if search:
@@ -75,7 +86,7 @@ class Library(Screen):
             else:
                 add_rune(rune)
 
-    def profile_name(self): 
+    def profile_name(self):
         '''
             Returns the current profile name.
             This is called from the kv file.
@@ -89,19 +100,27 @@ class Library(Screen):
         self.profile_box = None
 
         if title == 'Delete profile':
-            buttons = [MDFlatButton(text='No', on_release=lambda x: self.profile_box.dismiss()),
-                       MDFlatButton(text='Yes', on_release=lambda x: self.delete_profile())]
-            self.profile_box = MDDialog(text=f'Are you sure you want to delete \'{config.profile.name}\'?',
-                                        buttons=buttons,
-                                        padding=5)
+            buttons = [
+                MDFlatButton(
+                    text='No', on_release=lambda x: self.profile_box.dismiss()),
+                MDFlatButton(
+                    text='Yes', on_release=lambda x: self.delete_profile())
+            ]
+            self.profile_box = MDDialog(
+                text=f'Are you sure you want to delete \'{config.profile.name}\'?',
+                buttons=buttons,
+                padding=5
+            )
             self.profile_box.open()
 
         elif title == 'Rename profile':
-            self.profile_box = MDDialog(title='Profile name:',
-                                        type='custom',
-                                        content_cls=MDTextField(text=config.profile.name),
-                                        buttons=[MDFlatButton(text='Rename',
-                                                                 on_release=self.rename_profile)])
+            self.profile_box = MDDialog(
+                title='Profile name:',
+                type='custom',
+                content_cls=MDTextField(text=config.profile.name),
+                buttons=[MDFlatButton(
+                    text='Rename', on_release=self.rename_profile)]
+            )
             self.profile_box.open()
 
         else:
@@ -116,8 +135,11 @@ class Library(Screen):
         name = self.profile_box.content_cls.text
 
         if not config.profile.rename(name):
-            #Rename unsuccessful
-            Snackbar(text='A profile already exists with that name', duration=1).open()
+            # Rename unsuccessful
+            Snackbar(
+                text='A profile already exists with that name',
+                duration=1
+            ).open()
             return
 
         self.update_account_btn(config.profile.name)
@@ -128,7 +150,7 @@ class Library(Screen):
             This deletes the current profile.
         '''
         if config.profile.delete_profile():
-            #Deletion successful
+            # Deletion successful
             config.saved_runes.change_account(config.profile.get_rune_data())
 
             self.ids.my_runes.clear_widgets()
@@ -175,20 +197,28 @@ class Library(Screen):
         '''
         items = []
         for account in config.profile.get_all_profiles():
-            item = CustomIconListItem(text=account.strip('.csv'), 
-                                      icon='account-circle')
+            item = CustomIconListItem(
+                text=account.strip('.csv'),
+                icon='account-circle'
+            )
 
-            item.bind(on_release=partial(self.switch_profile, account.strip('.csv')))
+            item.bind(
+                on_release=partial(self.switch_profile, account.strip('.csv'))
+            )
             items.append(item)
 
-        add_account_item = CustomIconListItem(text='Add Profile', 
-                                              icon='account-plus')
+        add_account_item = CustomIconListItem(
+            text='Add Profile',
+            icon='account-plus'
+        )
         add_account_item.bind(on_release=self.get_profile_name)
         items.append(add_account_item)
 
-        self.dialog_box = MDDialog(title='Choose Profile:',
-                                   type='simple',
-                                   items=items)
+        self.dialog_box = MDDialog(
+            title='Choose Profile:',
+            type='simple',
+            items=items
+        )
         self.dialog_box.open()
 
     def switch_profile(self, account, event):
@@ -213,30 +243,31 @@ class Library(Screen):
 
         self.update_account_btn(self.profile_name())
         config.sm.remove_widget(config.sm.get_screen('profile'))
-        config.sm.add_widget(PlayerProfile(name='profile'))
         config.sm.remove_widget(config.sm.get_screen('match_history'))
-        config.sm.add_widget(PlayerProfile(name='match_history'))
+
+        config.sm.add_widget(PlayerProfile(name='profile'))
+        config.sm.add_widget(MatchHistory(name='match_history'))
 
         try:
-            #Called after creating a new profile.
+            # Called after creating a new profile.
             self.dialog_box.dismiss()
 
         except AttributeError:
-            #Called after selecting a profile.
+            # Called after selecting a profile.
             return
-    
-    def update_account_btn(self, name): 
+
+    def update_account_btn(self, name):
         self.ids.account_btn_layout.clear_widgets()
 
         new_button = MDRoundFlatIconButton(
-                                            icon='account-circle',
-                                            text=name
-                                          )
+            icon='account-circle',
+            text=name
+        )
         new_button.bind(on_release=self.open_account_options)
 
         self.ids.account_btn_layout.add_widget(new_button)
 
-    def open_account_options(self, event): 
+    def open_account_options(self, event):
         self.drop_menu.caller = event
         self.drop_menu.open()
 
@@ -246,13 +277,18 @@ class Library(Screen):
             This is called by create new account button.
         '''
         if len(config.profile.get_all_profiles()) >= 4:
-            Snackbar(text='Max Accounts Reached',
-                     duration=1).open()
+            Snackbar(
+                text='Max Accounts Reached',
+                duration=1
+            ).open()
             return
-        self.create_account_box = MDDialog(title='Profile name:',
-                                           type='custom',
-                                           content_cls=MDTextField(),
-                                           buttons=[MDFlatButton(text='Create', on_release=self.create_profile)])
+        self.create_account_box = MDDialog(
+            title='Profile name:',
+            type='custom',
+            content_cls=MDTextField(),
+            buttons=[MDFlatButton(
+                text='Create', on_release=self.create_profile)]
+        )
         self.create_account_box.open()
 
     def create_profile(self, event):
@@ -262,7 +298,10 @@ class Library(Screen):
         '''
         profile_name = self.create_account_box.content_cls.text
         if not config.profile.create_new_profile(profile_name):
-            Snackbar(text=f'\'{profile_name}\' already exists', duration=1).open()
+            Snackbar(
+                text=f'\'{profile_name}\' already exists',
+                duration=1
+            ).open()
             return
 
         self.switch_profile(profile_name, None)
@@ -285,7 +324,7 @@ class Library(Screen):
         screen.edit = True
         screen.previous = self.name
         config.sm.current = 'rune_page'
-    
+
     def add_new_rune(self, rune, index):
         '''
             This adds the specified rune to the layout.

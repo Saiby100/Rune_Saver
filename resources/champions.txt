@@ -8,22 +8,22 @@ anivia
 annie
 aphelios
 ashe
-aurelion-sol
+aurelion sol
 azir
 bard
-bel'veth
+belveth
 blitzcrank
 brand
 braum
 caitlyn
 camille
 cassiopeia
-cho'gath
+chogath
 corki
 darius
 diana
-dr.-mundo
 draven
+dr. mundo
 ekko
 elise
 evelynn
@@ -44,12 +44,12 @@ illaoi
 irelia
 ivern
 janna
-jarvan-iv
+jarvan iv
 jax
 jayce
 jhin
 jinx
-kai'sa
+kaisa
 kalista
 karma
 karthus
@@ -58,12 +58,13 @@ katarina
 kayle
 kayn
 kennen
-kha'zix
+khazix
 kindred
 kled
-kog'maw
+kogmaw
+ksante
 leblanc
-lee-sin
+lee sin
 leona
 lillia
 lissandra
@@ -73,8 +74,9 @@ lux
 malphite
 malzahar
 maokai
-master-yi
-miss-fortune
+master yi
+miss fortune
+wukong
 mordekaiser
 morgana
 nami
@@ -84,7 +86,7 @@ neeko
 nidalee
 nilah
 nocturne
-nunu-and-willump
+nunu
 olaf
 orianna
 ornn
@@ -95,9 +97,9 @@ qiyana
 quinn
 rakan
 rammus
-rek'sai
+reksai
 rell
-renata-glasc
+renata
 renekton
 rengar
 riven
@@ -120,7 +122,7 @@ soraka
 swain
 sylas
 syndra
-tahm-kench
+tahm kench
 taliyah
 talon
 taric
@@ -129,14 +131,14 @@ thresh
 tristana
 trundle
 tryndamere
-twisted-fate
+twisted fate
 twitch
 udyr
 urgot
 varus
 vayne
 veigar
-vel'koz
+velkoz
 vex
 vi
 viego
@@ -144,10 +146,9 @@ viktor
 vladimir
 volibear
 warwick
-wukong
 xayah
 xerath
-xin-zhao
+xin zhao
 yasuo
 yone
 yorick

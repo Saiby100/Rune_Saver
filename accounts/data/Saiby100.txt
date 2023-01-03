@@ -1,9 +1,9 @@
-102
+104
 665
 BRONZE
-II
+III
 17
-24
+25
 Quinn
 7
 Xerath

@@ -84,6 +84,8 @@
     orientation: 'vertical'
     size_hint: None, None
     radius: '40dp'
+    padding: 7
+    spacing: 5
     size: 150, 150
     on_release: root.build_rune()
 
@@ -91,11 +93,11 @@
         source: root.source
         allow_stretch: True
         keep_ratio: False
-        size_hint: None, None
-        size: root.width, root.height-20
     
     MDLabel:
         text: root.text
+        size_hint_y: None
+        adaptive_height: True
         font_style: 'Body2'
         halign: 'center'
 
@@ -222,7 +224,7 @@
 
                     DetailsCard:
                         text: root.player_details
-                        source: root.icon_src
+                        source: root.icon
                     DetailsCard:
                         text: root.player_rank_details
                         source: root.player_rank_img
@@ -284,11 +286,14 @@
                     on_release: 
                         app.change_screen('match_history')
 
-        MDGridLayout:
-            cols: 1
-            spacing: 5
-            padding: [0, 15]
-            id: layout
+        ScrollView:
+            scroll_type: ['bars']
+            scroll_wheel_distance: 50
+            effect_cls: 'ScrollEffect'
+            MDList:
+                spacing: 5
+                padding: [0, 15]
+                id: layout
 
     AnchorLayout:
         anchor_x: 'left'
