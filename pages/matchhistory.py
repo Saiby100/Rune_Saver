@@ -13,7 +13,7 @@ class MatchHistory(Screen):
                 list_item = MatchListItem(
                     champ=player['Champion'],
                     kda=player['KDA'],
-                    won=player['Won']=='True',
+                    won=player['Won'] == 'True',
                     farm=player['Farm'],
                     items=player['Items']
                 )
@@ -33,7 +33,7 @@ class MatchHistory(Screen):
             list_item = MatchListItem(
                 champ=player['Champion'],
                 kda=player['KDA'],
-                won=player['Won']=='True',
+                won=player['Won'],
                 farm=player['Farm'],
                 items=player['Items']
             )

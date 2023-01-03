@@ -6,7 +6,7 @@ champ_def = {
     'AurelionSol': 'aurelion sol',
     'DrMundo': 'dr. mundo',
     'JarvanIV': 'jarvan iv',
-    'Leesin': 'lee sin',
+    'LeeSin': 'lee sin',
     'MasterYi': 'master yi',
     'MissFortune': 'miss fortune',
     'MonkeyKing': 'wukong',
@@ -22,6 +22,7 @@ class Player:
         self.region = region
         self.hasdata = False
         self.hashistory = False
+        self.matches = []
 
     def add_data(self, array):
         '''
@@ -44,7 +45,7 @@ class Player:
         '''
             Initializes the player match history attributes.
         '''
-        self.matches = []
+        self.matches.clear()
         for match in array:
             self.matches.append(
                 {
@@ -247,6 +248,7 @@ class Profile:
 
             try:
                 os.remove(self.player_data_path)
+                os.remove(self.match_data_path)
 
             except FileNotFoundError:
                 # No local data on player exists.
@@ -373,20 +375,32 @@ class Profile:
 
         if self.key_is_valid(api_key):
             try:
-                if self.profile['summonerLevel'] < 30:
-                    return False
+                # if self.profile['summonerLevel'] < 30:
+                #     return False
 
-                self.stats = self.watcher.league.by_summoner(
-                    self.region, self.profile['id'])[0]
+                try:
+                    self.stats = self.watcher.league.by_summoner(
+                        self.region, self.profile['id'])[0]
 
-                data = [
-                    str(self.profile['summonerLevel']),
-                    str(self.profile['profileIconId']),
-                    self.stats['tier'],
-                    self.stats['rank'],
-                    str(self.stats['wins']),
-                    str(self.stats['losses'])
-                ]
+                    data = [
+                        str(self.profile['summonerLevel']),
+                        str(self.profile['profileIconId']),
+                        self.stats['tier'],
+                        self.stats['rank'],
+                        str(self.stats['wins']),
+                        str(self.stats['losses'])
+                    ]
+                except IndexError:
+                    #Player is unranked
+                    data = [
+                        str(self.profile['summonerLevel']),
+                        str(self.profile['profileIconId']),
+                        'Unranked',
+                        '',
+                        '0',
+                        '0'
+                    ]
+
                 data.extend(self.get_champ_masteries())
 
                 self.player.add_data(data)
@@ -459,7 +473,7 @@ class Profile:
                             )
                     else:
                         match_row.append(details["championName"])
-                    match_row.append(details['champLevel'])
+                    match_row.append(str(details['champLevel']))
 
                     try:
                         kills = details["challenges"]["takedowns"] - \
@@ -471,15 +485,18 @@ class Profile:
                     assists = details["assists"]
 
                     match_row.append(f"{kills}/{deaths}/{assists}")
-                    match_row.append(details['totalMinionsKilled'])
+                    match_row.append(str(details['totalMinionsKilled']))
                     match_row.append(details['win'])
                     match_row.extend(items)
 
                     matches.append(match_row)
 
         self.player.add_match_history(matches)
+        return True
 
 
 if __name__ == '__main__':
-    profile = Profile('Saiby100', 'RGAPI-4d6ed83a-199d-461a-aa36-697685146214')
+    profile = Profile('Predator122', '12345678')
+    profile.fetch_player_api_data(None)
+    profile.get_match_history()
     profile.player.show()
